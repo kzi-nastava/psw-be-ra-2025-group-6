@@ -23,9 +23,7 @@ public class Tour : Entity
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Invalid Name.");
 
-        if (float.IsNaN(price))
-            throw new ArgumentException("Invalid Price.");
-        if (price < 0)
+        if (float.IsNegative(price))
             throw new ArgumentException("Invalid Price.");
         if (!Enum.IsDefined(typeof(TourDifficulty), difficulty))
             throw new ArgumentException("Invalid Difficulty.");
