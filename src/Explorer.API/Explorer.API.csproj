@@ -26,7 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\Author\" />
     <Folder Include="Controllers\Tourist\" />
   </ItemGroup>
 
