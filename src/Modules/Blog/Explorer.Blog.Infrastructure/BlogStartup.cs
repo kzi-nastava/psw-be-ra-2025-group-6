@@ -3,6 +3,7 @@ using Explorer.Blog.Infrastructure.Database;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace Explorer.Blog.Infrastructure;
 
@@ -23,9 +24,12 @@ public static class BlogStartup
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
-
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("blog"));
+        dataSourceBuilder.EnableDynamicJson();
+        var dataSource = dataSourceBuilder.Build();
+        
         services.AddDbContext<BlogContext>(opt =>
-            opt.UseNpgsql(DbConnectionStringBuilder.Build("blog"),
+            opt.UseNpgsql(dataSource,
                 x => x.MigrationsHistoryTable("__EFMigrationsHistory", "blog")));
     }
 }
