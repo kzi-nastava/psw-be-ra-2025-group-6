@@ -12,16 +12,16 @@ namespace Explorer.Stakeholders.Core.Domain
         public long UserId { get; init; }
         public int Rating { get; private set; }
         public string? Comment { get; private set; }
-        public DateTime CreateAt { get; init; }
-        public DateTime? UpdateAt { get; private set; }
+        public DateTime CreatedAt { get; init; }
+        public DateTime? UpdatedAt { get; private set; }
 
         public ReviewApp(long userId, int rating, string? comment)
         {
             UserId = userId;
             Rating = rating;
             Comment = comment;
-            CreateAt = DateTime.UtcNow;
-            UpdateAt = null;
+            CreatedAt = DateTime.UtcNow;
+            UpdatedAt = null;
             Validate();
         }
 
@@ -29,7 +29,7 @@ namespace Explorer.Stakeholders.Core.Domain
         {
             Rating = rating;
             Comment = comment;
-            UpdateAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
             Validate();
         }
         private ReviewApp() { }
