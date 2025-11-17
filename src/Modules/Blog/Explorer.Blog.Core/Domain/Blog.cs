@@ -12,7 +12,7 @@ public class Blog : Entity
 
     public Blog(long userId, string title, string description, List<string> images)
     {
-        if (userId <= 0) throw new ArgumentException("Invalid UserId.");
+        if (userId == 0) throw new ArgumentException("Invalid UserId.");
 
         if (string.IsNullOrWhiteSpace(title))
             throw new ArgumentException("Title is required.");

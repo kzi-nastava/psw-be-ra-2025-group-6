@@ -32,15 +32,14 @@ public class BlogDbRepository : IBlogRepository
 
     public DomainBlog Update(DomainBlog blog)
     {
-        try
-        {
-            DbContext.Update(blog);
-            DbContext.SaveChanges();
-        }
-        catch (DbUpdateException e)
-        {
-            throw new NotFoundException(e.Message);
-        }
+        var existingBlog = _dbSet.FirstOrDefault(b => b.Id == blog.Id);
+        if (existingBlog == null)
+            throw new NotFoundException($"Blog with Id {blog.Id} not found.");
+
+        _dbSet.Remove(existingBlog);
+        _dbSet.Add(blog);
+
+        DbContext.SaveChanges();
         return blog;
     }
 
