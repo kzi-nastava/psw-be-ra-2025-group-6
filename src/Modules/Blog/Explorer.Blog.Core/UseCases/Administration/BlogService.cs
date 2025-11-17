@@ -18,27 +18,27 @@ public class BlogService : IBlogService
         _mapper = mapper;
     }
 
-    public PagedResult<BlogDto> GetBlogs(int page, int pageSize)
+    public PagedResult<BlogDto> GetPaged(int page, int pageSize)
     {
         var result = _blogRepository.GetPaged(page, pageSize);
         var items = result.Results.Select(_mapper.Map<BlogDto>).ToList();
         return new PagedResult<BlogDto>(items, result.TotalCount);
     }
 
-    public BlogDto GetById(long id)
+    public List<BlogDto> GetByUser(long userId)
     {
-        var blog = _blogRepository.GetById(id);
-        return _mapper.Map<BlogDto>(blog);
+        var blogs = _blogRepository.GetByUser(userId);
+        return blogs.Select(blog => _mapper.Map<BlogDto>(blog)).ToList();
     }
 
-    public BlogDto CreateBlog(BlogDto blogDto)
+    public BlogDto Create(BlogDto blogDto)
     {
         var blog = _mapper.Map<Explorer.Blog.Core.Domain.Blog>(blogDto);
         var created = _blogRepository.Create(blog);
         return _mapper.Map<BlogDto>(created);
     }
 
-    public BlogDto UpdateBlog(BlogDto blogDto)
+    public BlogDto Update(BlogDto blogDto)
     {
         var blog = _mapper.Map<Explorer.Blog.Core.Domain.Blog>(blogDto);
         var updated = _blogRepository.Update(blog);

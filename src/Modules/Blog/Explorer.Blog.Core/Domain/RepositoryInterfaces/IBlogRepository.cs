@@ -6,7 +6,7 @@ namespace Explorer.Blog.Core.Domain.RepositoryInterfaces;
 public interface IBlogRepository
 {
     PagedResult<Blog> GetPaged(int page, int pageSize);
-    Blog GetById(long id);
+    List<Blog> GetByUser(long id);
     Blog Create(Blog map);
     Blog Update(Blog map);
 }
