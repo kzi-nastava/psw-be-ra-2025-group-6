@@ -23,6 +23,11 @@ public class TourController : ControllerBase
     {
         return Ok(_tourService.GetPaged(page, pageSize));
     }
+    [HttpGet("{id:long}")]
+    public ActionResult<TourDto> Get(long id)
+    {
+        return Ok(_tourService.Get(id));
+    }
 
     [HttpPost]
     public ActionResult<TourDto> Create([FromBody] TourDto tour)
