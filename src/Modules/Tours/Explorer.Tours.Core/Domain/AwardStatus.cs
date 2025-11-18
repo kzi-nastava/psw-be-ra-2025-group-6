@@ -2,5 +2,6 @@
 public enum AwardStatus
 {
     DRAFT,
-    CONFIRMED
+    ACTIVE,
+    CLOSED
 }

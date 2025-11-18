@@ -2,5 +2,6 @@
 public enum AwardStatusDto
 {
     DRAFT,
-    CONFIRMED
+    ACTIVE,
+    CLOSED
 }
