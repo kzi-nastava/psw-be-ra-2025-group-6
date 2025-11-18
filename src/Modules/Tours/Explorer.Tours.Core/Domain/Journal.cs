@@ -15,19 +15,19 @@ namespace Explorer.Tours.Core.Domain
 
     public class Journal : Entity
     {
-        public Guid TouristId { get; init; }
+        public long TouristId { get; init; }
         public string Name { get; init; }
         public string? Location { get; init; }
-        public DateTime TravelDate { get; init; }
+        public DateTime TravelDate { get; private set; }
         public JournalStatus Status { get; init; }
         public DateTime DateCreated { get; init; }
         public DateTime DateModified { get; private set; }
 
         private Journal() { }
 
-        public Journal(Guid turistId, string name, string? location, DateTime travelDate)
+        public Journal(long turistId, string name, string? location, DateTime travelDate)
         {
-            if (turistId == Guid.Empty)
+            if (turistId <=0)
                 throw new ArgumentException("Turist ID cannot be empty.", nameof(turistId));
 
             if (string.IsNullOrWhiteSpace(name) || name.Length > 100)
@@ -45,6 +45,8 @@ namespace Explorer.Tours.Core.Domain
             DateCreated = DateTime.UtcNow;
             DateModified = DateTime.UtcNow;
         }
+
+
 
     }
 }

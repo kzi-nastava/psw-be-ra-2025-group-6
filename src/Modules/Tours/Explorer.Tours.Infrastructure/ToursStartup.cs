@@ -1,7 +1,9 @@
 using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
+using Explorer.Tours.Core.UseCases;
 using Explorer.Tours.Core.UseCases.Administration;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
@@ -25,11 +27,13 @@ public static class ToursStartup
     private static void SetupCore(IServiceCollection services)
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
+        services.AddScoped<IJournalService, JournalService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
+        services.AddScoped<IJournalRepository, JournalDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();

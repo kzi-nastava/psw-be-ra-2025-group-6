@@ -11,7 +11,7 @@ namespace Explorer.Tours.API.Public
     {
         Task<JournalDto> Create(JournalDto journalDto);
         Task<JournalDto> Update(JournalDto journalDto);
-        Task<List<JournalDto>> GetAllByTouristId(Guid touristId);
+        Task<List<JournalDto>> GetAllByTouristId(long touristId);
         Task<JournalDto> GetById(long journalId);
         Task Delete(long journalId);
     }
