@@ -21,7 +21,7 @@ namespace Explorer.API.Controllers
         [HttpGet]
         public ActionResult<UserProfileDto> Get()
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue("id");
             if (string.IsNullOrEmpty(userIdClaim))
             {
                 return BadRequest("User ID not found in token.");
@@ -34,7 +34,7 @@ namespace Explorer.API.Controllers
         [HttpPut]
         public ActionResult<UserProfileDto> Update([FromBody] UserProfileDto profile)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue("id");
             if (string.IsNullOrEmpty(userIdClaim))
             {
                 return BadRequest("User ID not found in token.");

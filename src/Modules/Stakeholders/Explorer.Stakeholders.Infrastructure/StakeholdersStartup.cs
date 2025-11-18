@@ -34,6 +34,7 @@ public static class StakeholdersStartup
         services.AddScoped<IPersonRepository, PersonDbRepository>();
         services.AddScoped<IUserRepository, UserDbRepository>();
         services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
+        services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();
