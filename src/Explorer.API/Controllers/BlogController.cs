@@ -41,4 +41,18 @@ public class BlogController : ControllerBase
         var updated = _blogService.Update(dto);
         return Ok(updated);
     }
+
+    [HttpGet("{id:long}")]
+    public ActionResult<BlogDto> GetBlog(long id)
+    {
+        var userId = User.PersonId();
+        var blog = _blogService.GetById(id);
+
+        if (blog == null || blog.UserId != userId)
+        {
+            return NotFound();
+        }
+
+        return Ok(blog);
+    }
 }

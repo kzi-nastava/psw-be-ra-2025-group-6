@@ -44,4 +44,12 @@ public class BlogService : IBlogService
         var updated = _blogRepository.Update(blog);
         return _mapper.Map<BlogDto>(updated);
     }
+
+    public BlogDto GetById(long id)
+    {
+        var blog = _blogRepository.GetById(id);
+        if (blog == null) return null;
+
+        return _mapper.Map<BlogDto>(blog);
+    }
 }

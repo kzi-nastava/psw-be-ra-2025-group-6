@@ -49,4 +49,9 @@ public class BlogDbRepository : IBlogRepository
         task.Wait();
         return task.Result;
     }
+
+    public DomainBlog GetById(long id)
+    {
+        return _dbSet.FirstOrDefault(b => b.Id == id);
+    }
 }

@@ -9,4 +9,5 @@ public interface IBlogRepository
     List<Blog> GetByUser(long id);
     Blog Create(Blog map);
     Blog Update(Blog map);
+    Blog GetById(long id);
 }

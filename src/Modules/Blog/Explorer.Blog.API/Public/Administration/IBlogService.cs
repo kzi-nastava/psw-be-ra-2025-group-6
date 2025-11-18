@@ -9,4 +9,5 @@ public interface IBlogService
     List<BlogDto> GetByUser(long id);                               
     BlogDto Create(BlogDto blog);                      
     BlogDto Update(BlogDto blog);
+    BlogDto GetById(long id);
 }
