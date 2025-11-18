@@ -7,7 +7,7 @@ public interface IBlogService
 {
     PagedResult<BlogDto> GetPaged(int page, int pageSize);
     List<BlogDto> GetByUser(long id);                               
-    BlogDto Create(BlogDto blog);                      
+    BlogDto Create(BlogCreateDto blog, long id);                      
     BlogDto Update(BlogDto blog);
     BlogDto GetById(long id);
     BlogDto Delete(long id);

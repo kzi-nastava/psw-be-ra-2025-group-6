@@ -31,9 +31,14 @@ public class BlogService : IBlogService
         return blogs.Select(blog => _mapper.Map<BlogDto>(blog)).ToList();
     }
 
-    public BlogDto Create(BlogDto blogDto)
+    public BlogDto Create(BlogCreateDto dto, long userId)
     {
-        var blog = _mapper.Map<Explorer.Blog.Core.Domain.Blog>(blogDto);
+        var blog = new Explorer.Blog.Core.Domain.Blog(
+            userId,
+            dto.Title,
+            dto.Description,
+            new List<string>() 
+        );
         var created = _blogRepository.Create(blog);
         return _mapper.Map<BlogDto>(created);
     }

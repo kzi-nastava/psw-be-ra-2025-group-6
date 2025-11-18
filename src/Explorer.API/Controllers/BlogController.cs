@@ -27,10 +27,10 @@ public class BlogController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<BlogDto> CreateBlog([FromBody] BlogDto dto)
+    public ActionResult<BlogDto> CreateBlog([FromBody] BlogCreateDto dto)
     {
         var userId = User.PersonId();
-        var created = _blogService.Create(dto);
+        var created = _blogService.Create(dto, userId);
         return Ok(created);
     }
 
