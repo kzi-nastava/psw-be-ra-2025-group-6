@@ -33,7 +33,6 @@ namespace Explorer.Stakeholders.Core.Domain
             Validate();
         }
         private ReviewApp() { }
-
         private void Validate()
         {
             if (Rating < 1 || Rating > 5) throw new ArgumentException("Rating must be between 1 and 5.");
