@@ -1,4 +1,5 @@
 using AutoMapper;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
@@ -25,8 +26,19 @@ public class UserProfileService : IUserProfileService
 
     public UserProfileDto Update(UserProfileDto userProfileDto)
     {
-        var userProfile = _mapper.Map<UserProfile>(userProfileDto);
-        var updatedProfile = _userProfileRepository.Update(userProfile);
-        return _mapper.Map<UserProfileDto>(updatedProfile);
+        try
+        {
+            var existingProfile = _userProfileRepository.Get(userProfileDto.UserId);
+            existingProfile.Update(userProfileDto.Name, userProfileDto.Surname, userProfileDto.ProfilePicture, userProfileDto.Biography, userProfileDto.Quote);
+            var updatedProfile = _userProfileRepository.Update(existingProfile);
+            return _mapper.Map<UserProfileDto>(updatedProfile);
+        }
+        catch (NotFoundException)
+        {
+            // Profile does not exist, so create it
+            var newProfile = _mapper.Map<UserProfile>(userProfileDto);
+            var createdProfile = _userProfileRepository.Create(newProfile);
+            return _mapper.Map<UserProfileDto>(createdProfile);
+        }
     }
 }

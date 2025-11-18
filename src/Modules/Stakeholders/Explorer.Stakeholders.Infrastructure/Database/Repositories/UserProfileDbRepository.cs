@@ -34,4 +34,11 @@ public class UserProfileDbRepository : IUserProfileRepository
         }
         return userProfile;
     }
+
+    public UserProfile Create(UserProfile userProfile)
+    {
+        _dbContext.UserProfiles.Add(userProfile);
+        _dbContext.SaveChanges();
+        return userProfile;
+    }
 }
