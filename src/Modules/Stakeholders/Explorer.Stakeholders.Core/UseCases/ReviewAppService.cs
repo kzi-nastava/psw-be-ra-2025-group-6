@@ -23,28 +23,35 @@ namespace Explorer.Stakeholders.Core.UseCases
             _mapper = mapper;
         }
 
-        public ReviewAppDto Create(CreateReviewAppDto dto)
+        public ReviewAppDto Create(CreateReviewAppDto dto, long userId)
         {
-            var review = new ReviewApp(dto.UserId, dto.Rating, dto.Comment);
-
+            var review = new ReviewApp(userId, dto.Rating, dto.Comment);
             _reviewRepository.Add(review);
-
             return _mapper.Map<ReviewAppDto>(review);
         }
         public PagedResult<ReviewAppDto> GetPaged(int page, int pageSize)
         {
             var pagedResult = _reviewRepository.GetPaged(page, pageSize);
 
-            return _mapper.Map<PagedResult<ReviewAppDto>>(pagedResult);
+            var mappedItems = pagedResult.Results
+                .Select(r => _mapper.Map<ReviewAppDto>(r))
+                .ToList();
+
+            return new PagedResult<ReviewAppDto>(
+                mappedItems,
+                pagedResult.TotalCount
+            );
         }
-        public ReviewAppDto Update(long id, UpdateReviewAppDto dto)
+        public ReviewAppDto Update(long reviewId, UpdateReviewAppDto dto, long userId)
         {
-            var review = _reviewRepository.Get(id);
+            var review = _reviewRepository.Get(reviewId);
             if (review == null)
-                throw new KeyNotFoundException($"Review with id {id} not found.");
+                throw new KeyNotFoundException($"Review with id {reviewId} not found.");
+
+            if (review.UserId != userId)
+                throw new UnauthorizedAccessException("You cannot edit someone else's review.");
 
             review.Update(dto.Rating, dto.Comment);
-
             _reviewRepository.Update(review);
 
             return _mapper.Map<ReviewAppDto>(review);
@@ -60,6 +67,19 @@ namespace Explorer.Stakeholders.Core.UseCases
         {
             var reviews = _reviewRepository.GetByUser(userId);
             return _mapper.Map<List<ReviewAppDto>>(reviews);
+        }
+
+        public void Delete(long reviewId, long userId)
+        {
+            var review = _reviewRepository.Get(reviewId);
+
+            if (review == null)
+                throw new KeyNotFoundException($"Review with id {reviewId} not found.");
+
+            if (review.UserId != userId)
+                throw new UnauthorizedAccessException("You cannot delete someone else's review.");
+
+            _reviewRepository.Delete(review);
         }
     }
 }

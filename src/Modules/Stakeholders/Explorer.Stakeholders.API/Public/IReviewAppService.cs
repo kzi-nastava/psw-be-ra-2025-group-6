@@ -10,10 +10,12 @@ namespace Explorer.Stakeholders.API.Public
 {
     public interface IReviewAppService
     {
-        ReviewAppDto Create(CreateReviewAppDto dto);
-        ReviewAppDto Update(long id, UpdateReviewAppDto dto);
+        ReviewAppDto Create(CreateReviewAppDto dto, long userId);
+        ReviewAppDto Update(long reviewId, UpdateReviewAppDto dto, long userId);
         List<ReviewAppDto> GetAll();
         List<ReviewAppDto> GetByUser(long userId);
         PagedResult<ReviewAppDto> GetPaged(int page, int pageSize);
+
+        void Delete(long reviewId, long userId);
     }
 }

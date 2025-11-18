@@ -14,6 +14,7 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
         List<ReviewApp> GetAll();
         void Add(ReviewApp review);
         void Update(ReviewApp review);
+        void Delete(ReviewApp review);
         PagedResult<ReviewApp> GetPaged(int page, int pageSize);
     }
 }

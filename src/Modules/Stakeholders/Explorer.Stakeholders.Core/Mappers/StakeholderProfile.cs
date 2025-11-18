@@ -1,4 +1,5 @@
 using AutoMapper;
+using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Dtos.ReviewAppDtos;
 using Explorer.Stakeholders.Core.Domain;
 
@@ -9,5 +10,6 @@ public class StakeholderProfile : Profile
     public StakeholderProfile()
     {
         CreateMap<ReviewAppDto, ReviewApp>().ReverseMap();
+        CreateMap(typeof(PagedResult<>), typeof(PagedResult<>));
     }
 }

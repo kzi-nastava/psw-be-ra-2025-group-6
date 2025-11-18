@@ -32,23 +32,38 @@ namespace Explorer.API.Controllers
             return Ok(_reviewService.GetPaged(page, pageSize));
         }
         [Authorize(Policy = "reviewAuthorTouristPolicy")]
-        [HttpGet("user/{userId:long}")]
-        public ActionResult<List<ReviewAppDto>> GetByUser(long userId)
+        [HttpGet("user")]
+        public ActionResult<List<ReviewAppDto>> GetByUser()
         {
+            var userId = long.Parse(User.Claims.First(c => c.Type == "id").Value);
             return Ok(_reviewService.GetByUser(userId));
         }
+
         [Authorize(Policy = "reviewAuthorTouristPolicy")]
         [HttpPost]
         public ActionResult<ReviewAppDto> Create([FromBody] CreateReviewAppDto dto)
         {
-            return Ok(_reviewService.Create(dto));
+            var userId = long.Parse(User.Claims.First(c => c.Type == "id").Value);
+            return Ok(_reviewService.Create(dto, userId));
         }
         [Authorize(Policy = "reviewAuthorTouristPolicy")]
         [HttpPut("{id:long}")]
         public ActionResult<ReviewAppDto> Update(long id, [FromBody] UpdateReviewAppDto dto)
         {
-            return Ok(_reviewService.Update(id, dto));
+            var userId = long.Parse(User.Claims.First(c => c.Type == "id").Value);
+            return Ok(_reviewService.Update(id, dto, userId));
         }
+
+        [Authorize(Policy = "reviewAuthorTouristPolicy")]
+        [HttpDelete("{id:long}")]
+        public IActionResult Delete(long id)
+        {
+            var userId = long.Parse(User.Claims.First(c => c.Type == "id").Value);
+            _reviewService.Delete(id, userId);
+            return Ok("Review deleted successfully.");
+        }
+
+
     }
 
 }
