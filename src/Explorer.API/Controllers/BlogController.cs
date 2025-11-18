@@ -55,4 +55,18 @@ public class BlogController : ControllerBase
 
         return Ok(blog);
     }
+
+    [HttpDelete("{id:long}")]
+    public IActionResult DeleteBlog(long id)
+    {
+        var userId = User.PersonId();
+
+        var blog = _blogService.GetById(id);
+        if (blog == null || blog.UserId != userId)
+            return NotFound();
+
+        _blogService.Delete(id);
+
+        return NoContent();
+    }
 }

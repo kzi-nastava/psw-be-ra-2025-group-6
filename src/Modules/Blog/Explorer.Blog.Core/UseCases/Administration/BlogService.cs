@@ -52,4 +52,13 @@ public class BlogService : IBlogService
 
         return _mapper.Map<BlogDto>(blog);
     }
+
+    public BlogDto Delete(long id)
+    {
+        var blog = _blogRepository.GetById(id);
+        if (blog == null) return null;
+
+        _blogRepository.Delete(blog);
+        return _mapper.Map<BlogDto>(blog);
+    }
 }

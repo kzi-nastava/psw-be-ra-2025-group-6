@@ -1,5 +1,5 @@
-﻿using Explorer.Blog.API.Dtos;
-using Explorer.BuildingBlocks.Core.UseCases;
+﻿using Explorer.BuildingBlocks.Core.UseCases;
+using DomainBlog = Explorer.Blog.Core.Domain.Blog;
 
 namespace Explorer.Blog.Core.Domain.RepositoryInterfaces;
 
@@ -10,4 +10,5 @@ public interface IBlogRepository
     Blog Create(Blog map);
     Blog Update(Blog map);
     Blog GetById(long id);
+    void Delete(DomainBlog blog);
 }

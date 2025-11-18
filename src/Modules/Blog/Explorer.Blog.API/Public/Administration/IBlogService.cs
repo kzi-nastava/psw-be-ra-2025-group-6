@@ -10,4 +10,5 @@ public interface IBlogService
     BlogDto Create(BlogDto blog);                      
     BlogDto Update(BlogDto blog);
     BlogDto GetById(long id);
+    BlogDto Delete(long id);
 }

@@ -54,4 +54,10 @@ public class BlogDbRepository : IBlogRepository
     {
         return _dbSet.FirstOrDefault(b => b.Id == id);
     }
+
+    public void Delete(DomainBlog blog)
+    {
+        _dbSet.Remove(blog);
+        DbContext.SaveChanges();
+    }
 }
