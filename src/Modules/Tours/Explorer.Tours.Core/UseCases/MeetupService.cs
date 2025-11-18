@@ -21,7 +21,8 @@ public class MeetupService : IMeetupService
     public PagedResult<MeetupDto> GetPaged(int page, int pageSize)
     {
         var pagedResult = _meetupRepository.GetPaged(page, pageSize);
-        return _mapper.Map<PagedResult<MeetupDto>>(pagedResult);
+        var meetupDtos = _mapper.Map<List<MeetupDto>>(pagedResult.Results);
+        return new PagedResult<MeetupDto>(meetupDtos, pagedResult.TotalCount);
     }
 
     public MeetupDto Get(long id)
