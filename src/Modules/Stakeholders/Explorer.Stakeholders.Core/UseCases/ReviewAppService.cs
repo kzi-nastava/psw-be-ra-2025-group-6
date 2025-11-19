@@ -25,6 +25,10 @@ namespace Explorer.Stakeholders.Core.UseCases
 
         public ReviewAppDto Create(CreateReviewAppDto dto, long userId)
         {
+            var existingReviews = _reviewRepository.GetByUser(userId);
+            if (existingReviews.Any())
+                throw new InvalidOperationException("User has already reviewed the application.");
+
             var review = new ReviewApp(userId, dto.Rating, dto.Comment);
             _reviewRepository.Add(review);
             return _mapper.Map<ReviewAppDto>(review);

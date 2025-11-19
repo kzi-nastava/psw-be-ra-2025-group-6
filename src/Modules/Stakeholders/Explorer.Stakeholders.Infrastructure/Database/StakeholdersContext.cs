@@ -42,10 +42,11 @@ public class StakeholdersContext : DbContext
             builder.Property(r => r.Comment).HasMaxLength(500);
             builder.Property(r => r.CreatedAt).IsRequired();
             builder.Property(r => r.UpdatedAt);
+            builder.HasIndex(r => r.UserId).IsUnique();
             builder
                 .HasOne<User>()
-                .WithMany()
-                .HasForeignKey(r => r.UserId)
+                .WithOne()
+                .HasForeignKey<ReviewApp>(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

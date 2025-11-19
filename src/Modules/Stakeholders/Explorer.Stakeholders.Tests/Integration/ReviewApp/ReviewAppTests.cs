@@ -25,7 +25,7 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
     {
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
-        var controller = CreateController(scope, -11);
+        var controller = CreateController(scope, -13);
         var dto = new CreateReviewAppDto
         {
             Rating = 5,
@@ -35,7 +35,7 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
         var result = controller.Create(dto);
         var created = (ReviewAppDto)((OkObjectResult)result.Result!).Value!;
 
-        created.UserId.ShouldBe(-11);
+        created.UserId.ShouldBe(-13);
         created.Rating.ShouldBe(5);
         created.Comment.ShouldBe("Odlična aplikacija");
         created.CreatedAt.ShouldBeInRange(DateTime.UtcNow.AddMinutes(-1), DateTime.UtcNow.AddMinutes(1));
@@ -43,7 +43,7 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
 
         dbContext.ChangeTracker.Clear();
         var stored = dbContext.ReviewApps.Single(r => r.Id == created.Id);
-        stored.UserId.ShouldBe(-11);
+        stored.UserId.ShouldBe(-13);
         stored.Rating.ShouldBe(5);
         stored.Comment.ShouldBe("Odlična aplikacija");
     }
@@ -53,7 +53,7 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
     {
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
-        var controller = CreateController(scope, -21);
+        var controller = CreateController(scope, -23);
         var dto = new CreateReviewAppDto
         {
             Rating = 4,
@@ -63,7 +63,7 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
         var result = controller.Create(dto);
         var created = (ReviewAppDto)((OkObjectResult)result.Result!).Value!;
 
-        created.UserId.ShouldBe(-21);
+        created.UserId.ShouldBe(-23);
         created.Rating.ShouldBe(4);
         created.Comment.ShouldBeNull();
         created.CreatedAt.ShouldBeInRange(DateTime.UtcNow.AddMinutes(-1), DateTime.UtcNow.AddMinutes(1));
@@ -74,30 +74,33 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
     }
 
     [Fact]
+    public void User_cannot_create_more_than_one_review()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, -12);
+
+        controller.Create(new CreateReviewAppDto { Rating = 5, Comment = "First" });
+
+        var second = new CreateReviewAppDto { Rating = 4, Comment = "Second" };
+        Should.Throw<InvalidOperationException>(() => controller.Create(second));
+    }
+
+    [Fact]
     public void Admin_can_get_all_reviews()
     {
         using var scope = Factory.Services.CreateScope();
-        var controllerForTourist = CreateController(scope, -21);
-        controllerForTourist.Create(new CreateReviewAppDto { Rating = 5, Comment = "Super" });
-
         var controller = CreateController(scope, -1);
 
         var result = controller.GetAll();
         var allReviews = (List<ReviewAppDto>)((OkObjectResult)result.Result!).Value!;
 
-        allReviews.Count.ShouldBeGreaterThanOrEqualTo(1);
+        allReviews.Count.ShouldBeGreaterThanOrEqualTo(3);
     }
 
     [Fact]
     public void User_can_get_only_their_reviews()
     {
         using var scope = Factory.Services.CreateScope();
-        var controllerTourist1 = CreateController(scope, -21);
-        controllerTourist1.Create(new CreateReviewAppDto { Rating = 5, Comment = "T1" });
-
-        var controllerTourist2 = CreateController(scope, -22);
-        controllerTourist2.Create(new CreateReviewAppDto { Rating = 3, Comment = "T2" });
-
         var controller = CreateController(scope, -21);
 
         var result = controller.GetByUser();
@@ -112,12 +115,8 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
     {
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
-        var controller = CreateController(scope, -21);
-        var created = (ReviewAppDto)((OkObjectResult)controller.Create(new CreateReviewAppDto
-        {
-            Rating = 3,
-            Comment = "Initial"
-        }).Result!).Value!;
+        var controller = CreateController(scope, -11);
+        var createdId = -101L;
 
         var updateDto = new UpdateReviewAppDto
         {
@@ -125,7 +124,7 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
             Comment = "Updated"
         };
 
-        var result = controller.Update(created.Id, updateDto);
+        var result = controller.Update(createdId, updateDto);
         var updated = (ReviewAppDto)((OkObjectResult)result.Result!).Value!;
 
         updated.Rating.ShouldBe(4);
@@ -133,7 +132,7 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
         updated.UpdatedAt.ShouldNotBeNull();
 
         dbContext.ChangeTracker.Clear();
-        var stored = dbContext.ReviewApps.Single(r => r.Id == created.Id);
+        var stored = dbContext.ReviewApps.Single(r => r.Id == createdId);
         stored.Rating.ShouldBe(4);
         stored.Comment.ShouldBe("Updated");
         stored.UpdatedAt.ShouldNotBeNull();
@@ -143,14 +142,7 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
     public void Non_owner_cannot_update_review()
     {
         using var scope = Factory.Services.CreateScope();
-        var controllerOwner = CreateController(scope, -21);
-        var created = (ReviewAppDto)((OkObjectResult)controllerOwner.Create(new CreateReviewAppDto
-        {
-            Rating = 2,
-            Comment = "Owner review"
-        }).Result!).Value!;
-
-        var controllerOther = CreateController(scope, -22);
+        var controllerOther = CreateController(scope, -21);
         var updateDto = new UpdateReviewAppDto
         {
             Rating = 5,
@@ -159,7 +151,7 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
 
         Should.Throw<UnauthorizedAccessException>(() =>
         {
-            controllerOther.Update(created.Id, updateDto);
+            controllerOther.Update(-101, updateDto);
         });
     }
 
@@ -168,35 +160,23 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
     {
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
-        var controller = CreateController(scope, -21);
-        var created = (ReviewAppDto)((OkObjectResult)controller.Create(new CreateReviewAppDto
-        {
-            Rating = 5,
-            Comment = "To delete"
-        }).Result!).Value!;
+        var controller = CreateController(scope, -22);
 
-        controller.Delete(created.Id);
+        controller.Delete(-103);
 
         dbContext.ChangeTracker.Clear();
-        dbContext.ReviewApps.Any(r => r.Id == created.Id).ShouldBeFalse();
+        dbContext.ReviewApps.Any(r => r.Id == -103).ShouldBeFalse();
     }
 
     [Fact]
     public void Non_owner_cannot_delete_review()
     {
         using var scope = Factory.Services.CreateScope();
-        var controllerOwner = CreateController(scope, -21);
-        var created = (ReviewAppDto)((OkObjectResult)controllerOwner.Create(new CreateReviewAppDto
-        {
-            Rating = 1,
-            Comment = "Owner will keep"
-        }).Result!).Value!;
-
         var controllerOther = CreateController(scope, -22);
 
         Should.Throw<UnauthorizedAccessException>(() =>
         {
-            controllerOther.Delete(created.Id);
+            controllerOther.Delete(-102);
         });
     }
 
@@ -204,7 +184,7 @@ public class ReviewAppTests : BaseStakeholdersIntegrationTest
     public void Creating_review_with_invalid_rating_throws()
     {
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, -21);
+        var controller = CreateController(scope, -31);
 
         var dtoLow = new CreateReviewAppDto { Rating = 0, Comment = "Too low" };
         Should.Throw<ArgumentException>(() => controller.Create(dtoLow));
