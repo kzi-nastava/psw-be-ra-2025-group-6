@@ -1,1 +1,2 @@
-﻿DELETE FROM tours."Equipment";
+﻿DELETE FROM tours."TouristEquipment";
+DELETE FROM tours."Equipment";

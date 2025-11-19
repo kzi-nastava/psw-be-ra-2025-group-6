@@ -10,6 +10,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="TestData\a-delete.sql" />
+    <None Remove="TestData\b-equipment.sql" />
+    <None Remove="TestData\c-tourist-equipment.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestData\a-delete.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\b-equipment.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\c-tourist-equipment.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
 	<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.20" />
 	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
 	<PackageReference Include="Shouldly" Version="4.3.0" />
