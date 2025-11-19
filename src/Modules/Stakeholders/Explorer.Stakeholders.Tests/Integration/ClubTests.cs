@@ -2,11 +2,13 @@
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Infrastructure.Database;
+using Microsoft.AspNetCore.Http; 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims; 
 
 namespace Explorer.Stakeholders.Tests.Integration
 {
@@ -18,6 +20,7 @@ namespace Explorer.Stakeholders.Tests.Integration
         [Fact]
         public void Creates_club()
         {
+            // Arrange
             using var scope = Factory.Services.CreateScope();
             var controller = CreateController(scope);
             var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
@@ -29,15 +32,19 @@ namespace Explorer.Stakeholders.Tests.Integration
                 OwnerId = -21
             };
 
+            // Act
             var result = ((ObjectResult)controller.Create(newClub).Result)?.Value as ClubDto;
 
+            // Assert
             result.ShouldNotBeNull();
             result.Id.ShouldNotBe(0);
             result.Name.ShouldBe(newClub.Name);
+            result.OwnerId.ShouldBe(-21);
 
             var storedClub = dbContext.Clubs.FirstOrDefault(c => c.Name == newClub.Name);
             storedClub.ShouldNotBeNull();
             storedClub.Id.ShouldBe(result.Id);
+            storedClub.OwnerId.ShouldBe(-21);
         }
 
         [Fact]
@@ -49,8 +56,7 @@ namespace Explorer.Stakeholders.Tests.Integration
             {
                 Name = "",
                 Description = "Opis.",
-                ImageUris = new List<string> { "slika.png" },
-                OwnerId = -21
+                ImageUris = new List<string> { "slika.png" }
             };
 
             Should.Throw<ArgumentException>(() => controller.Create(invalidClub));
@@ -79,8 +85,7 @@ namespace Explorer.Stakeholders.Tests.Integration
             {
                 Name = "Klub za azuriranje",
                 Description = "Originalni opis.",
-                ImageUris = new List<string> { "orig.png" },
-                OwnerId = -21
+                ImageUris = new List<string> { "orig.png" }
             };
 
             var createdClub = ((ObjectResult)controller.Create(clubToCreate).Result)?.Value as ClubDto;
@@ -116,8 +121,7 @@ namespace Explorer.Stakeholders.Tests.Integration
             {
                 Name = "Klub za brisanje",
                 Description = "Opis.",
-                ImageUris = new List<string> { "del.png" },
-                OwnerId = -21
+                ImageUris = new List<string> { "del.png" }
             };
 
             var createdClub = ((ObjectResult)controller.Create(clubToCreate).Result)?.Value as ClubDto;
@@ -132,10 +136,21 @@ namespace Explorer.Stakeholders.Tests.Integration
 
         private static ClubController CreateController(IServiceScope scope)
         {
-            return new ClubController(scope.ServiceProvider.GetRequiredService<IClubService>())
+            var controller = new ClubController(scope.ServiceProvider.GetRequiredService<IClubService>());
+
+
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
-                ControllerContext = BuildContext("-21")
+                new Claim("id", "-21"),       
+                new Claim("personId", "-21")  
+            }, "test"));
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = user }
             };
+
+            return controller;
         }
     }
 }

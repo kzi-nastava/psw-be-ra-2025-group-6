@@ -1,7 +1,9 @@
-﻿using Explorer.Stakeholders.API.Dtos;
+﻿using Explorer.BuildingBlocks.Core.Domain;
+using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
-using Microsoft.AspNetCore.Mvc;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers
 {
@@ -33,6 +35,9 @@ namespace Explorer.API.Controllers
         [HttpPost]
         public ActionResult<ClubDto> Create([FromBody] ClubDto club)
         {
+            var userId = long.Parse(User.FindFirst("id").Value);
+
+            club.OwnerId = userId;
             var result = _clubService.Create(club);
             return Ok(result);
         }
@@ -40,6 +45,12 @@ namespace Explorer.API.Controllers
         [HttpPut("{id:long}")]
         public ActionResult<ClubDto> Update([FromBody] ClubDto club)
         {
+            var userId = long.Parse(User.FindFirst("id").Value);
+           
+            if (club.OwnerId != userId)
+            {
+                return Forbid(); // Vraća 403 Forbidden ako niste vlasnik
+            }
             var result = _clubService.Update(club);
             return Ok(result);
         }
@@ -47,6 +58,14 @@ namespace Explorer.API.Controllers
         [HttpDelete("{id:long}")]
         public ActionResult Delete(long id)
         {
+            var clubToDelete = _clubService.Get(id);
+            if (clubToDelete == null) return NotFound();
+
+            var userId = long.Parse(User.FindFirst("id").Value);
+            if (clubToDelete.OwnerId != userId)
+            {
+                return Forbid();
+            }
             _clubService.Delete(id);
             return Ok();
         }
