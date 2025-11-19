@@ -3,6 +3,7 @@ using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
 using Explorer.Blog.Infrastructure.Database;
 using Explorer.BuildingBlocks.Core.Exceptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -16,34 +17,31 @@ public class BlogCommandTests : BaseBlogIntegrationTest
     public BlogCommandTests(BlogTestFactory factory) : base(factory) { }
 
     [Fact]
-    public void CreatesBlog()
+    public async Task CreatesBlog()
     {
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
 
-        var newBlog = new BlogDto
-        {
-            Title = "Novi test blog",
-            Description = "Opis novog test bloga",
-            UserId = -11,
-            CreatedAt = DateTime.UtcNow,
-            Images = new List<string>()
-        };
+        string title = "Novi test blog";
+        string description = "Opis novog test bloga";
+        List<IFormFile>? images = null;
 
-        var result = ((ObjectResult)controller.CreateBlog(newBlog).Result)?.Value as BlogDto;
+        var actionResult = await controller.CreateBlog(title, description, images);
+        var okResult = actionResult.Result as OkObjectResult;
+        okResult.ShouldNotBeNull();
 
+        var result = okResult.Value as BlogDto;
         result.ShouldNotBeNull();
         result.Id.ShouldBeGreaterThan(0);
-        result.Title.ShouldBe(newBlog.Title);
-        result.Description.ShouldBe(newBlog.Description);
-        result.UserId.ShouldBe(newBlog.UserId);
+        result.Title.ShouldBe(title);
+        result.Description.ShouldBe(description);
 
         var storedBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == result.Id);
         storedBlog.ShouldNotBeNull();
-        storedBlog.Title.ShouldBe(newBlog.Title);
-        storedBlog.Description.ShouldBe(newBlog.Description);
-        storedBlog.UserId.ShouldBe(newBlog.UserId);
+        storedBlog.Title.ShouldBe(title);
+        storedBlog.Description.ShouldBe(description);
+        storedBlog.UserId.ShouldBe(-11);
         storedBlog.Images.ShouldBeEmpty();
     }
 
