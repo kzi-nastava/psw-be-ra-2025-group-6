@@ -26,5 +26,15 @@ namespace Explorer.Stakeholders.Core.Domain
             if (OwnerId == 0) throw new ArgumentException("Invalid OwnerId.");
             if (ImageUris == null || !ImageUris.Any()) throw new ArgumentException("At least one image URI is required.");
         }
+        public void Update(string name, string description, List<string> imageUris)
+        {
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Invalid Name.");
+            if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
+            if (imageUris == null || !imageUris.Any()) throw new ArgumentException("At least one image URI is required.");
+
+            Name = name;
+            Description = description;
+            ImageUris = imageUris;
+        }
     }
 }

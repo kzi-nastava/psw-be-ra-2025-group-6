@@ -1,18 +1,16 @@
 ﻿using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using Microsoft.EntityFrameworkCore; 
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-
 namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
 {
     public class ClubDbRepository : IClubRepository
     {
         private readonly StakeholdersContext _dbContext;
         private readonly DbSet<Club> _dbSet;
-
-        public ClubDbRepository(StakeholdersContext dbContext)
+    public ClubDbRepository(StakeholdersContext dbContext)
         {
             _dbContext = dbContext;
             _dbSet = _dbContext.Set<Club>();
@@ -44,20 +42,18 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
         {
             return _dbSet.ToList();
         }
-
         public Club Update(Club club)
         {
-            try
+            var entityToUpdate = _dbSet.Find(club.Id);
+            if (entityToUpdate == null)
             {
-                _dbContext.Update(club);
+                throw new DbUpdateConcurrencyException("Club not found with id: " + club.Id);
+            }
+            entityToUpdate.Update(club.Name, club.Description, club.ImageUris);
 
-                _dbContext.SaveChanges();
-            }
-            catch (DbUpdateException e)
-            {
-                throw new KeyNotFoundException(e.Message);
-            }
-            return club;
+            _dbContext.SaveChanges();
+
+            return entityToUpdate;
         }
     }
 }
