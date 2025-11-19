@@ -42,6 +42,9 @@ public class AnnualAwardRepository<AnnualAward, TDbContext> : IAnnualAwardReposi
 
     public PagedResult<AnnualAward> GetPaged(int page, int pageSize)
     {
+        if (page < 1)
+            page = 1;
+
         var totalCount = _dbSet.Count();
         var items = _dbSet.OrderBy(e => e.Id).Skip((page - 1)*pageSize).Take(pageSize).ToList();
 
