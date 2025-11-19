@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
-using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.UseCases;
 
@@ -65,5 +64,14 @@ public class BlogService : IBlogService
 
         _blogRepository.Delete(blog);
         return _mapper.Map<BlogDto>(blog);
+    }
+    public void AddImages(long blogId, List<string> imagePaths)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+
+        blog.AddImages(imagePaths);
+        _blogRepository.Update(blog);
     }
 }

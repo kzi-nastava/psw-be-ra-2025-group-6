@@ -10,6 +10,8 @@ public class Blog : Entity
     public DateTime CreatedAt { get; private set; }
     public List<string> Images { get; private set; }
 
+    private Blog() { }
+
     public Blog(long userId, string title, string description, List<string> images)
     {
         if (userId == 0) throw new ArgumentException("Invalid UserId.");
@@ -25,5 +27,13 @@ public class Blog : Entity
         Description = description;
         Images = images ?? new List<string>();
         CreatedAt = DateTime.UtcNow;
+    }
+
+    public void AddImages(List<string> imagePaths)
+    {
+        if (imagePaths == null || !imagePaths.Any())
+            return;
+
+        Images = Images.Concat(imagePaths).ToList();
     }
 }

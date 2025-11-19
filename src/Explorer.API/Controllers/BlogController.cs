@@ -27,11 +27,38 @@ public class BlogController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<BlogDto> CreateBlog([FromBody] BlogCreateDto dto)
+    public async Task<ActionResult<BlogDto>> CreateBlog([FromForm] string title,
+                                                        [FromForm] string description,
+                                                        [FromForm] List<IFormFile>? images)
     {
         var userId = User.PersonId();
-        var created = _blogService.Create(dto, userId);
-        return Ok(created);
+        var blogDto = new BlogCreateDto { Title = title, Description = description };
+        var createdBlog = _blogService.Create(blogDto, userId);
+
+        if (images == null || !images.Any())
+            return Ok(createdBlog);
+
+        var root = Directory.GetCurrentDirectory();
+        var folder = Path.Combine(root, "wwwroot/images/blogs");
+        Directory.CreateDirectory(folder);
+
+        var imagePaths = new List<string>();
+
+        foreach (var image in images)
+        {
+            var fileName = $"{Guid.NewGuid()}_{image.FileName}";
+            var path = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await image.CopyToAsync(stream);
+            }
+
+            imagePaths.Add($"/images/blogs/{fileName}");
+        }
+        _blogService.AddImages(createdBlog.Id, imagePaths);
+        createdBlog.Images = imagePaths;
+        return Ok(createdBlog);
     }
 
     [HttpPut("{id:long}")]

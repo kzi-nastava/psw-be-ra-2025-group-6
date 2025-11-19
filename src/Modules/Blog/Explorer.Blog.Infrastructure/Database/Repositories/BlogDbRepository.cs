@@ -36,8 +36,9 @@ public class BlogDbRepository : IBlogRepository
         if (existingBlog == null)
             throw new NotFoundException($"Blog with Id {blog.Id} not found.");
 
-        _dbSet.Remove(existingBlog);
-        _dbSet.Add(blog);
+        DbContext.Entry(existingBlog).State = EntityState.Detached;
+
+        DbContext.Entry(blog).State = EntityState.Modified;
 
         DbContext.SaveChanges();
         return blog;
