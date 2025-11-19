@@ -10,6 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="TestData\c-tour-problems.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestData\c-tour-problems.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
 	<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.20" />
 	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
 	<PackageReference Include="Shouldly" Version="4.3.0" />

@@ -22,6 +22,7 @@ namespace Explorer.API.Controllers.Tourist
         [HttpPost]
         public async Task<ActionResult<TourProblemDto>> Create([FromBody] TourProblemDto problemDto)
         {
+            //var touristId = 1;
             var touristId = long.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
             problemDto.TouristId = touristId;
 
@@ -32,7 +33,7 @@ namespace Explorer.API.Controllers.Tourist
         [HttpGet]
         public async Task<ActionResult<List<TourProblemDto>>> GetMyProblems()
         {
-
+            //var touristId = 1;
             var touristId = long.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
 
             var result = await _tourProblemService.GetByTourist(touristId);
@@ -51,7 +52,7 @@ namespace Explorer.API.Controllers.Tourist
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(long id)
         {
-
+            //var touristId = 1;
             var touristId = long.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
 
             await _tourProblemService.Delete(id, touristId);
