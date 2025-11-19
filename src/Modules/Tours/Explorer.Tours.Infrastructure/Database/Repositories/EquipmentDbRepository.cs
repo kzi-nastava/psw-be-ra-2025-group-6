@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Explorer.Tours.Infrastructure.Database.Repositories;
 
-public class EquipmentDbRepository : IEquipmentRepository
+public class
+    DbRepository : IEquipmentRepository
 {
     protected readonly ToursContext DbContext;
     private readonly DbSet<Equipment> _dbSet;
