@@ -3,4 +3,5 @@
 public interface IPersonRepository
 {
     Person Create(Person person);
+    Person? Get(long id);
 }

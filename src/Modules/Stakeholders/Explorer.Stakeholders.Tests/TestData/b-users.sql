@@ -1,4 +1,5 @@
-﻿INSERT INTO stakeholders."Users"(
+-- Test users rely on negative IDs to avoid collisions with real data
+INSERT INTO stakeholders."Users"(
     "Id", "Username", "Password", "Role", "IsActive")
 VALUES (-1, 'admin@gmail.com', 'admin', 0, true);
 

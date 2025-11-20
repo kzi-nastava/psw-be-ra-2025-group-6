@@ -21,4 +21,9 @@ public class PersonDbRepository : IPersonRepository
         DbContext.SaveChanges();
         return entity;
     }
+
+    public Person? Get(long id)
+    {
+        return _dbSet.FirstOrDefault(person => person.Id == id);
+    }
 }
