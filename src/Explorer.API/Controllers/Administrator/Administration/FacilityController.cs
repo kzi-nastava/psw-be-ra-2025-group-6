@@ -37,7 +37,7 @@ public class FacilityController : ControllerBase
     }
 
     [HttpDelete("{id:long}")]
-    public ActionResult Delete(int id)
+    public ActionResult Delete(long id)
     {
         _facilityService.Delete(id);
         return Ok();

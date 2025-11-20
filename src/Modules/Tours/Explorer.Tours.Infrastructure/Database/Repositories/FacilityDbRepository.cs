@@ -23,10 +23,10 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             task.Wait();
             return task.Result;
         }
-        public Facility Get(int id)
+        public Facility Get(long Id)
         {
-            var entity = _dbSet.Find(id);
-            if (entity == null) throw new NotFoundException("Not found: " + id);
+            var entity = _dbSet.Find(Id);
+            if (entity == null) throw new NotFoundException("Not found: " + Id);
             return entity;
         }
         public Facility Create(Facility f)
@@ -49,9 +49,9 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             return f;
 
         }
-        public void Delete(int id)
+        public void Delete(long Id)
         {
-            var entity = Get(id);
+            var entity = Get(Id);
             _dbSet.Remove(entity);
             DbContext.SaveChanges();
         }

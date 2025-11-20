@@ -37,9 +37,9 @@ public class FacilityService : IFacilityService
         return _mapper.Map<FacilityDto>(result);
     }
 
-    public void Delete(int id)
+    public void Delete(long Id)
     {
-        _facilityRepository.Delete(id);
+        _facilityRepository.Delete(Id);
     }
 
 }

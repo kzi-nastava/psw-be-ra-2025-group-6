@@ -7,6 +7,6 @@ public interface IFacilityService
     PagedResult<FacilityDto> GetPaged(int page, int pageSize);
     FacilityDto Create(FacilityDto facility);
     FacilityDto Update(FacilityDto faciclity);
-    void Delete(int id);
+    void Delete(long Id);
 }
 

@@ -19,9 +19,10 @@ namespace Explorer.Tours.Core.Domain
                 Comment = "";
             else Comment = comment;
 
-            if (!(longitude >= 0 || longitude <= 180)) throw new ArgumentException("Invalid Longitude.");
-            if (!(latitude >= 0 || latitude <= 180)) throw new ArgumentException("Invalid Latitude.");
+            if (!(longitude >= -180 && longitude <= 180)) throw new ArgumentException("Invalid Longitude."); else Longitude = longitude;
+            if (!(latitude >= -90 && latitude <= 90)) throw new ArgumentException("Invalid Latitude."); else Latitude = latitude;
             if (!(type == FacilityType.Toilet || type == FacilityType.Other || type == FacilityType.Parking || type == FacilityType.Restaurant)) throw new ArgumentException("Invalid FacilityType.");
+            else Type = type;
         }
     }
 }

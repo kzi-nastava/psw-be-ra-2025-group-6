@@ -6,6 +6,6 @@ public interface IFacilityRepository
     PagedResult<Facility> GetPaged(int page, int pageSize);
     Facility Create(Facility map);
     Facility Update(Facility map);
-    void Delete(int id);
+    void Delete(long Id);
 }
 

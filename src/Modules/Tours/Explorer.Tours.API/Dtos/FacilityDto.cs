@@ -3,7 +3,7 @@
     public enum FacilityType { Toilet, Restaurant, Parking, Other }
     public class FacilityDto
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; }
         public string Comment { get; set; }
         public double Longitude { get; set; }
