@@ -11,4 +11,8 @@
     <ProjectReference Include="..\Explorer.Blog.Core\Explorer.Blog.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>
