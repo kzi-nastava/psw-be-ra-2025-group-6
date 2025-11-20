@@ -13,6 +13,6 @@ public class ToursProfile : Profile
         CreateMap<TourDifficulty, TourDifficultyDto>().ReverseMap();
         CreateMap<TourStatus, TourStatusDto>().ReverseMap();
         CreateMap<Tour, TourDto>().ReverseMap();
-        
+        CreateMap<MonumentDto, Monument>().ReverseMap();
     }
 }
