@@ -16,7 +16,7 @@ public class AnnualAward : Entity
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Invalid name.");
 
-        if (year < 2000 || year > DateTime.UtcNow.Year + 1)
+        if (year > DateTime.UtcNow.Year + 1)
             throw new ArgumentException("Invalid year.");
 
         if (!Enum.IsDefined(typeof(AwardStatus), status))
