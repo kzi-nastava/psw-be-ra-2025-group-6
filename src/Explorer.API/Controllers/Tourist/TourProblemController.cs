@@ -1,8 +1,8 @@
 ﻿using Explorer.Tours.API.Public.TourProblem;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Explorer.API.Controllers.Tourist
@@ -22,10 +22,7 @@ namespace Explorer.API.Controllers.Tourist
         [HttpPost]
         public async Task<ActionResult<TourProblemDto>> Create([FromBody] TourProblemDto problemDto)
         {
-            //var touristId = 1;
-            var touristId = long.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            problemDto.TouristId = touristId;
-
+            problemDto.TouristId = User.PersonId();
             var result = await _tourProblemService.Create(problemDto);
             return Ok(result);
         }
@@ -33,10 +30,7 @@ namespace Explorer.API.Controllers.Tourist
         [HttpGet]
         public async Task<ActionResult<List<TourProblemDto>>> GetMyProblems()
         {
-            //var touristId = 1;
-            var touristId = long.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-
-            var result = await _tourProblemService.GetByTourist(touristId);
+            var result = await _tourProblemService.GetByTourist(User.PersonId());
             return Ok(result);
         }
 
@@ -44,7 +38,6 @@ namespace Explorer.API.Controllers.Tourist
         public async Task<ActionResult<TourProblemDto>> Update(long id, [FromBody] TourProblemDto problemDto)
         {
             problemDto.Id = id;
-
             var result = await _tourProblemService.Update(problemDto);
             return Ok(result);
         }
@@ -52,10 +45,7 @@ namespace Explorer.API.Controllers.Tourist
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(long id)
         {
-            //var touristId = 1;
-            var touristId = long.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-
-            await _tourProblemService.Delete(id, touristId);
+            await _tourProblemService.Delete(id, User.PersonId());
             return NoContent();
         }
     }
