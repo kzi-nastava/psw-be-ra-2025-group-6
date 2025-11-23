@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Explorer.Tours.Core.Domain;
 using Npgsql;
+using Explorer.Tours.API.Public.TourProblem;
 
 namespace Explorer.Tours.Infrastructure;
 
@@ -30,12 +31,18 @@ public static class ToursStartup
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
         services.AddScoped<ITourService, TourService>();
+        services.AddScoped<IMonumentService, MonumentService>();
+        services.AddScoped<ITourProblemService, TourProblemService>();
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<ITourRepository<Tour>, TourRepository<Tour,ToursContext>>();
+        services.AddScoped<IMonumentRepository, MonumentDbRepository>();
+        services.AddScoped<ITourProblemRepository, TourProblemRepository>();
+
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();
