@@ -18,11 +18,17 @@ public class TourController : ControllerBase
         _tourService = tourService;
     }
 
-    [HttpGet]
+    [HttpGet("paged")]
     public ActionResult<PagedResult<TourDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
     {
         return Ok(_tourService.GetPaged(page, pageSize));
     }
+    [HttpGet]
+    public ActionResult<List<TourDto>> GetAll()
+    {
+        return Ok(_tourService.GetAll());
+    }
+
     [HttpGet("{id:long}")]
     public ActionResult<TourDto> Get(long id)
     {
