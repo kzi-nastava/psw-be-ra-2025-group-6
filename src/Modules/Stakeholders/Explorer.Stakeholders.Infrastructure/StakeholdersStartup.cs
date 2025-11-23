@@ -28,6 +28,7 @@ public static class StakeholdersStartup
     {
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<ITokenGenerator, JwtGenerator>();
+        services.AddScoped<IUserProfileService, UserProfileService>();
 
         services.AddScoped<IReviewAppService, ReviewAppService>();
 
@@ -39,6 +40,8 @@ public static class StakeholdersStartup
     {
         services.AddScoped<IPersonRepository, PersonDbRepository>();
         services.AddScoped<IUserRepository, UserDbRepository>();
+        services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
+        services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
         services.AddScoped<IReviewAppRepository, ReviewAppDbRepository>();
         services.AddScoped<IClubRepository, ClubDbRepository>();
 

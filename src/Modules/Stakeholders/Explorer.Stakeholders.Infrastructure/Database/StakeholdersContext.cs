@@ -7,6 +7,7 @@ public class StakeholdersContext : DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Person> People { get; set; }
+    public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<ReviewApp> ReviewApps { get; set; }
     public DbSet<Club> Clubs { get; set; }
 
@@ -20,6 +21,11 @@ public class StakeholdersContext : DbContext
         modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
 
         ConfigureStakeholder(modelBuilder);
+        
+        modelBuilder.Entity<UserProfile>()
+            .HasOne<User>()
+            .WithOne()
+            .HasForeignKey<UserProfile>(s => s.UserId);
         ConfigureReview(modelBuilder);
     }
 
