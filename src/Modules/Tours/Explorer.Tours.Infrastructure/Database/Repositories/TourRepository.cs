@@ -19,11 +19,16 @@ public class TourRepository<Tour, TDbContext> : ITourRepository<Tour>
         _dbSet = DbContext.Set<Tour>();
     }
 
+    public List<Tour> GetAll()
+    {
+        return _dbSet.ToList();
+    }
+
     public PagedResult<Tour> GetPaged(int page, int pageSize)
     {
             var totalCount = _dbSet.Count();
             var items = _dbSet
-                .OrderBy(e => e.Id) // Assuming 'Id' is the primary key
+                .OrderBy(e => e.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();

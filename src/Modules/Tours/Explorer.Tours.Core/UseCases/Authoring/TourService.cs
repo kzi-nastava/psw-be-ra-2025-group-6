@@ -18,12 +18,12 @@ public class TourService : ITourService
         _mapper = mapper;
     }
 
-    /*public List<TourDto> GetAll() {
-        var result = _crudRepository.GetAll();
+    public List<TourDto> GetAll() {
+        var result = _tourRepository.GetAll();
 
-        var items = result.Results.Select(_mapper.Map<TourDto>).ToList();
+        var items=_mapper.Map<List<TourDto>>(result);
         return new List<TourDto>(items);
-    }*/
+    }
 
     public PagedResult<TourDto> GetPaged(int page, int pageSize)
     {
