@@ -78,4 +78,12 @@ public class TouristEquipmentService : ITouristEquipmentService
     {
         _repository.Delete(personId, equipmentId);
     }
+
+    public PagedResult<EquipmentDto> GetAvailableEquipment(int page, int pageSize)
+    {
+        var assigned = _repository.GetAssignedEquipmentIds();
+        var result = _equipmentRepository.GetPagedExcluding(assigned, page, pageSize);
+        var items = result.Results.Select(_mapper.Map<EquipmentDto>).ToList();
+        return new PagedResult<EquipmentDto>(items, result.TotalCount);
+    }
 }

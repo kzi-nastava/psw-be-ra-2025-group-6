@@ -26,6 +26,13 @@ public class TouristEquipmentController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("available")]
+    public ActionResult<PagedResult<EquipmentDto>> GetAvailable([FromQuery] int page, [FromQuery] int pageSize)
+    {
+        var result = _touristEquipmentService.GetAvailableEquipment(page, pageSize);
+        return Ok(result);
+    }
+
     [HttpPost]
     public ActionResult<TouristEquipmentDto> Add([FromBody] TouristEquipmentDto dto)
     {

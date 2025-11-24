@@ -8,4 +8,5 @@ public interface ITouristEquipmentService
     PagedResult<TouristEquipmentDto> GetOwned(long personId, int page, int pageSize);
     TouristEquipmentDto Add(TouristEquipmentDto dto);
     void Remove(long personId, long equipmentId);
+    PagedResult<EquipmentDto> GetAvailableEquipment(int page, int pageSize);
 }
