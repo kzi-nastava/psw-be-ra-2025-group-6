@@ -59,4 +59,15 @@ public class EquipmentDbRepository : IEquipmentRepository
         _dbSet.Remove(entity);
         DbContext.SaveChanges();
     }
+
+    public PagedResult<Equipment> GetPagedExcluding(IEnumerable<long> excludeIds, int page, int pageSize)
+    {
+        var query = _dbSet.AsQueryable();
+        if (excludeIds != null && excludeIds.Any())
+            query = query.Where(e => !excludeIds.Contains(e.Id));
+
+        var task = query.GetPagedById(page, pageSize);
+        task.Wait();
+        return task.Result;
+    }
 }
