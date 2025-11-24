@@ -3,17 +3,18 @@ using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Tours.API.Public.Admin;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.Core.Domain;
+using Explorer.Tours.API.Public;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
 using Explorer.Tours.Core.UseCases.Admin;
 using Explorer.Tours.Core.UseCases.Administration;
+using Explorer.Tours.Core.UseCases;
 using Explorer.Tours.Core.UseCases.Authoring;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Explorer.Tours.Core.Domain;
 using Npgsql;
 using Explorer.Tours.API.Public.TourProblem;
 
@@ -34,6 +35,7 @@ public static class ToursStartup
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
         services.AddScoped<IAnnualAwardService, AnnualAwardService>();
+        services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
         services.AddScoped<ITourService, TourService>();
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<ITourProblemService, TourProblemService>();
@@ -43,6 +45,7 @@ public static class ToursStartup
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<IAnnualAwardRepository<AnnualAward>, AnnualAwardRepository<AnnualAward, ToursContext>>();
+        services.AddScoped<ITouristEquipmentRepository, TouristEquipmentDbRepository>();
         services.AddScoped<ITourRepository<Tour>, TourRepository<Tour,ToursContext>>();
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<ITourProblemRepository, TourProblemRepository>();

@@ -7,6 +7,9 @@ public class ToursContext : DbContext
 {
     public DbSet<Equipment> Equipment { get; set; }
     public DbSet<AnnualAward> AnnualAwards { get; set; }
+
+    public DbSet<TouristEquipment> TouristEquipment { get; set; }
+
     public DbSet<Tour> Tours { get; set; }
     public DbSet<Monument> Monuments { get; set; }
 
@@ -17,5 +20,17 @@ public class ToursContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("tours");
+
+        ConfigureTouristEquipment(modelBuilder);
+    }
+
+    private static void ConfigureTouristEquipment(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TouristEquipment>(b =>
+        {
+            b.HasKey(te => te.Id);
+            b.HasIndex(te => te.PersonId);
+            b.HasIndex(te => new { te.PersonId, te.EquipmentId }).IsUnique();
+        });
     }
 }
