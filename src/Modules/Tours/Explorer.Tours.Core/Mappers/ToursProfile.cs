@@ -3,12 +3,14 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.Domain;
 
 namespace Explorer.Tours.Core.Mappers;
-
 public class ToursProfile : Profile
 {
     public ToursProfile()
     {
         CreateMap<EquipmentDto, Equipment>().ReverseMap();
+        CreateMap<JournalDto, Journal>().ReverseMap();
+        CreateMap<AnnualAward, AnnualAwardDto>().ReverseMap();
+        CreateMap<AwardStatus, AwardStatusDto>().ReverseMap();
         CreateMap<TouristEquipmentDto, TouristEquipment>().ReverseMap();
         CreateMap<TourDifficulty, TourDifficultyDto>().ReverseMap();
         CreateMap<TourStatus, TourStatusDto>().ReverseMap();
