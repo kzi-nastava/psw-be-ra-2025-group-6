@@ -27,6 +27,15 @@ public class TouristEquipmentDbRepository : ITouristEquipmentRepository
 
     public TouristEquipment Create(TouristEquipment entity)
     {
+        // Prevent assigning equipment that's already owned by another person
+        var existing = _dbSet.FirstOrDefault(te => te.EquipmentId == entity.EquipmentId);
+        if (existing != null)
+        {
+            // If it's already owned by same person, return existing; otherwise throw
+            if (existing.PersonId == entity.PersonId) return existing;
+            throw new EntityValidationException("Equipment is already assigned to another person");
+        }
+
         _dbSet.Add(entity);
         DbContext.SaveChanges();
         return entity;
@@ -38,5 +47,15 @@ public class TouristEquipmentDbRepository : ITouristEquipmentRepository
         if (entity == null) throw new NotFoundException("Not found");
         _dbSet.Remove(entity);
         DbContext.SaveChanges();
+    }
+
+    public TouristEquipment? GetByEquipmentId(long equipmentId)
+    {
+        return _dbSet.FirstOrDefault(te => te.EquipmentId == equipmentId);
+    }
+
+    public IEnumerable<long> GetAssignedEquipmentIds()
+    {
+        return _dbSet.Select(te => te.EquipmentId).Distinct().ToList();
     }
 }
