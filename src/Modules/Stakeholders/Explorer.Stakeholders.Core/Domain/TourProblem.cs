@@ -1,7 +1,7 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
 using System;
 
-namespace Explorer.Tours.Core.Domain
+namespace Explorer.Stakeholders.Core.Domain
 {
     public class TourProblem : Entity
     {

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
-using Explorer.Tours.API.Public.TourProblem;
-using Explorer.Tours.Core.Domain;
+using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.API.Dtos;
 
 namespace Explorer.Tours.Core.Mappers
 {
