@@ -4,5 +4,6 @@ namespace Explorer.Stakeholders.Tests;
 
 public class BaseStakeholdersIntegrationTest : BaseWebIntegrationTest<StakeholdersTestFactory>
 {
-    public BaseStakeholdersIntegrationTest(StakeholdersTestFactory factory): base(factory) {}
+    protected HttpClient Client { get; }
+    public BaseStakeholdersIntegrationTest(StakeholdersTestFactory factory): base(factory) { Client = factory.CreateClient(); }
 }

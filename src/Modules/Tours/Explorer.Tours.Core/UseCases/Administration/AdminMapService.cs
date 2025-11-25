@@ -9,41 +9,37 @@ namespace Explorer.Tours.Core.UseCases.Administration
     public class AdminMapService : IAdminMapService
     {
         private readonly IMonumentRepository _monumentRepository;
-        // private readonly IFacilityRepository _facilityRepository;
+        private readonly IFacilityRepository _facilityRepository;
 
-        public AdminMapService(IMonumentRepository monumentRepo/*, IFacilityRepository facilityRepo*/)
+        public AdminMapService(IMonumentRepository monumentRepo, IFacilityRepository facilityRepo)
         {
             _monumentRepository = monumentRepo;
-            // _facilityRepository = facilityRepo;
+            _facilityRepository = facilityRepo;
         }
 
         public List<AdminMapDto> GetAllMapItems()
         {
             var result = new List<AdminMapDto>();
 
-            //Monuments deo
             var monuments = _monumentRepository.GetPaged(0, int.MaxValue).Results ?? new List<Monument>();
             result.AddRange(monuments.Select(m => new AdminMapDto
             {
-                Id = m.Id,
+                Id = $"monument-{m.Id}",
                 Type = "monument",
                 Name = m.Name,
                 Latitude = m.LocationLatitude,
                 Longitude = m.LocationLongitude
             }));
 
-            /* Facility deo, potencijalno potrebne minimalne izmene
             var facilities = _facilityRepository.GetPaged(0, int.MaxValue).Results;
             result.AddRange(facilities.Select(f => new AdminMapDto
             {
-                Id = f.Id,
+                Id = $"facility-{f.Id}",
                 Type = "facility",
                 Name = f.Name,
-                Latitude = f.LocationLatitude,
-                Longitude = f.LocationLongitude
+                Latitude = f.Latitude,
+                Longitude = f.Longitude
             }));
-
-            */
 
             return result;
         }
@@ -58,14 +54,29 @@ namespace Explorer.Tours.Core.UseCases.Administration
 
                 return new AdminMapDto
                 {
-                    Id = saved.Id,
+                    Id = $"monument-{saved.Id}",
                     Type = "monument",
                     Name = saved.Name,
                     Latitude = saved.LocationLatitude,
                     Longitude = saved.LocationLongitude
                 };
             }
-            //TODO: Facility deo
+            else if (type == "facility")
+            {
+                var f = _facilityRepository.GetUntracked(id);
+                var updated = CloneWithNewCoordinates(f, dto.Latitude, dto.Longitude);
+                var saved = _facilityRepository.Update(updated);
+
+                return new AdminMapDto
+                {
+                    Id = $"facility-{saved.Id}",
+                    Type = "facility",
+                    Name = saved.Name,
+                    Latitude = saved.Latitude,
+                    Longitude = saved.Longitude
+                };
+            }
+
             throw new ArgumentException("Invalid type");
         }
 
@@ -87,6 +98,22 @@ namespace Explorer.Tours.Core.UseCases.Administration
 
             return newM;
         }
-        //TODO: CloneWithNewCoordinates za Facility
+
+        private Facility CloneWithNewCoordinates(Facility f, double lat, double lon)
+        {
+            var newF = new Facility(
+                f.Name,
+                f.Comment,
+                lon,
+                lat,
+                f.Type
+            );
+
+            typeof(Entity)
+                .GetProperty("Id")!
+                .SetValue(newF, f.Id);
+
+            return newF;
+        }
     }
 }

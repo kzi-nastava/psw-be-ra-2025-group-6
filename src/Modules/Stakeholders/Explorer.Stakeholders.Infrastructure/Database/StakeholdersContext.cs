@@ -11,6 +11,8 @@ public class StakeholdersContext : DbContext
     public DbSet<ReviewApp> ReviewApps { get; set; }
     public DbSet<Club> Clubs { get; set; }
 
+    public DbSet<TourProblem> TourProblems { get; set; }
+
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
 
@@ -19,6 +21,10 @@ public class StakeholdersContext : DbContext
         modelBuilder.HasDefaultSchema("stakeholders");
 
         modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
+
+        modelBuilder.Entity<User>()
+       .Property(u => u.Role)
+       .HasConversion<string>();
 
         ConfigureStakeholder(modelBuilder);
         

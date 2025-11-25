@@ -21,4 +21,21 @@ public class PersonDbRepository : IPersonRepository
         DbContext.SaveChanges();
         return entity;
     }
+    public Person GetById(long personId)
+    {
+        var person = DbContext.People.FirstOrDefault(p => p.Id == personId);
+        if (person == null) throw new KeyNotFoundException("Person not found");
+        return person;
+    }
+
+    public IEnumerable<Person> GetAll()
+    {
+        return DbContext.People.ToList();
+    }
+
+    public void Update(Person person)
+    {
+        DbContext.People.Update(person);
+        DbContext.SaveChanges();
+    }
 }
