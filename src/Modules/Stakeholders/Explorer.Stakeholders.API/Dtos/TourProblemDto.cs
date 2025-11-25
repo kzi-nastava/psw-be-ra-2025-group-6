@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Explorer.Tours.API.Public.TourProblem
+namespace Explorer.Stakeholders.API.Dtos
 {
     public class TourProblemDto
     {

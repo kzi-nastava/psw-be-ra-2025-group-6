@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Explorer.Stakeholders.API.Dtos;
 
-namespace Explorer.Tours.API.Public.TourProblem
+namespace Explorer.Stakeholders.API.Public
 {
     public interface ITourProblemService
     {
