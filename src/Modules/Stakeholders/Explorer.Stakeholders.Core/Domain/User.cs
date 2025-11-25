@@ -28,6 +28,11 @@ public class User : Entity
     {
         return Role.ToString().ToLower();
     }
+
+    public void Block()
+    {
+        IsActive = false;
+    }
 }
 
 public enum UserRole

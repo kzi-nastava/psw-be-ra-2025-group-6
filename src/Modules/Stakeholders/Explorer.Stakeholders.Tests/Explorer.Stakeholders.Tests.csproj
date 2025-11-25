@@ -10,6 +10,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="TestData\a-delete.sql" />
+    <None Remove="TestData\a-insert-admin.sql" />
+    <None Remove="TestData\b-users.sql" />
+    <None Remove="TestData\c-people.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestData\a-delete.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\a-insert-admin.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\b-users.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\c-people.sql">
     <None Remove="TestData\c-tour-problems.sql" />
   </ItemGroup>
 
