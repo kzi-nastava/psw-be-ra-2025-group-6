@@ -139,13 +139,12 @@ public class MeetupTests : BaseToursIntegrationTest
 
     private async Task SetupAuthentication(HttpClient client)
     {
-        var token = await Login();
+        var token = await Login(client);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    private async Task<string> Login()
+    private async Task<string> Login(HttpClient client)
     {
-        var client = Factory.CreateClient();
         var credentials = new CredentialsDto { Username = "turista1@gmail.com", Password = "turista1" };
         var jsonContent = new StringContent(JsonSerializer.Serialize(credentials), Encoding.UTF8, "application/json");
         var response = await client.PostAsync("/api/users/login", jsonContent);
