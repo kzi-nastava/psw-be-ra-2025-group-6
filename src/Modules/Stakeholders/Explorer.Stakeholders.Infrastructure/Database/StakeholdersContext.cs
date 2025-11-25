@@ -7,6 +7,12 @@ public class StakeholdersContext : DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Person> People { get; set; }
+    public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<ReviewApp> ReviewApps { get; set; }
+    public DbSet<Club> Clubs { get; set; }
+
+    public DbSet<TourProblem> TourProblems { get; set; }
+
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
 
@@ -21,6 +27,12 @@ public class StakeholdersContext : DbContext
        .HasConversion<string>();
 
         ConfigureStakeholder(modelBuilder);
+        
+        modelBuilder.Entity<UserProfile>()
+            .HasOne<User>()
+            .WithOne()
+            .HasForeignKey<UserProfile>(s => s.UserId);
+        ConfigureReview(modelBuilder);
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)
@@ -29,5 +41,27 @@ public class StakeholdersContext : DbContext
             .HasOne<User>()
             .WithOne()
             .HasForeignKey<Person>(s => s.UserId);
+    }
+
+    private static void ConfigureReview(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ReviewApp>(builder =>
+        {
+            builder.ToTable("ReviewApp");
+
+            builder.HasKey(r => r.Id);
+
+            builder.Property(r => r.UserId).IsRequired();
+            builder.Property(r => r.Rating).IsRequired();
+            builder.Property(r => r.Comment).HasMaxLength(500);
+            builder.Property(r => r.CreatedAt).IsRequired();
+            builder.Property(r => r.UpdatedAt);
+            builder.HasIndex(r => r.UserId).IsUnique();
+            builder
+                .HasOne<User>()
+                .WithOne()
+                .HasForeignKey<ReviewApp>(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }
