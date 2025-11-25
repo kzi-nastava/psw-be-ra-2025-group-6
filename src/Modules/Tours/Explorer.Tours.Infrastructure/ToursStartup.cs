@@ -43,6 +43,7 @@ public static class ToursStartup
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IMeetupService, MeetupService>();
         services.AddScoped<ITourProblemService, TourProblemService>();
+        services.AddScoped<IAdminMapService, AdminMapService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)

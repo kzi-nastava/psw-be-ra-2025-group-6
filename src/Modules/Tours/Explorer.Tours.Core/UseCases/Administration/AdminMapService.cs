@@ -22,7 +22,7 @@ namespace Explorer.Tours.Core.UseCases.Administration
             var result = new List<AdminMapDto>();
 
             //Monuments deo
-            var monuments = _monumentRepository.GetPaged(0, int.MaxValue).Results;
+            var monuments = _monumentRepository.GetPaged(0, int.MaxValue).Results ?? new List<Monument>();
             result.AddRange(monuments.Select(m => new AdminMapDto
             {
                 Id = m.Id,
@@ -52,10 +52,10 @@ namespace Explorer.Tours.Core.UseCases.Administration
         {
             if (type == "monument")
             {
-                var m = _monumentRepository.Get(id);
+                var m = _monumentRepository.GetUntracked(id);
                 var updated = CloneWithNewCoordinates(m, dto.Latitude, dto.Longitude);
                 var saved = _monumentRepository.Update(updated);
-                
+
                 return new AdminMapDto
                 {
                     Id = saved.Id,
@@ -75,8 +75,8 @@ namespace Explorer.Tours.Core.UseCases.Administration
                 m.Name,
                 lat,
                 lon,
-                m.Description,
-                m.YearOfOrigin
+                m.Description ?? string.Empty,
+                m.YearOfOrigin ?? 0
             );
 
             typeof(Entity)
