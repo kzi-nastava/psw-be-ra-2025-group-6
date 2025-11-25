@@ -1,3 +1,0 @@
-INSERT INTO tours."Meetups"("Id", "Name", "Description", "EventDate", "Latitude", "Longitude", "CreatorId", "LastModified") VALUES (-1, 'Meetup 1', 'Description for meetup 1', '2025-11-20 10:00:00+01', 45.25, 19.83, -1, '2025-11-19 10:00:00+01');
-INSERT INTO tours."Meetups"("Id", "Name", "Description", "EventDate", "Latitude", "Longitude", "CreatorId", "LastModified") VALUES (-2, 'Meetup 2', 'Description for meetup 2', '2025-11-22 18:00:00+01', 44.81, 20.46, -2, '2025-11-19 11:00:00+01');
-INSERT INTO tours."Meetups"("Id", "Name", "Description", "EventDate", "Latitude", "Longitude", "CreatorId", "LastModified") VALUES (-3, 'Meetup 3', 'Description for meetup 3', '2025-12-01 15:00:00+01', 46.10, 19.66, -1, '2025-11-19 12:00:00+01');

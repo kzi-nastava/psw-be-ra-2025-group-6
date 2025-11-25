@@ -27,8 +27,7 @@
 
   <ItemGroup>
     <Folder Include="Controllers\Author\" />
-    <Folder Include="wwwroot\images\blogs\" />
-
+    <Folder Include="Controllers\Tourist\" />
   </ItemGroup>
 
 </Project>

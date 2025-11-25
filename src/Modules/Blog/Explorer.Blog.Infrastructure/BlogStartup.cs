@@ -1,9 +1,5 @@
-using Explorer.Blog.API.Public.Administration;
-using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.Blog.Core.Mappers;
-using Explorer.Blog.Core.UseCases.Administration;
 using Explorer.Blog.Infrastructure.Database;
-using Explorer.Blog.Infrastructure.Database.Repositories;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,13 +20,10 @@ public static class BlogStartup
     
     private static void SetupCore(IServiceCollection services)
     {
-        services.AddScoped<IBlogService, BlogService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
-        services.AddScoped<IBlogRepository, BlogDbRepository>();
-
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("blog"));
         dataSourceBuilder.EnableDynamicJson();
         var dataSource = dataSourceBuilder.Build();
