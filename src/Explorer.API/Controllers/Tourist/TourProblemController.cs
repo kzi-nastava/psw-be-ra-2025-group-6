@@ -1,4 +1,5 @@
-﻿using Explorer.Tours.API.Public.TourProblem;
+﻿using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -48,5 +49,7 @@ namespace Explorer.API.Controllers.Tourist
             await _tourProblemService.Delete(id, User.PersonId());
             return NoContent();
         }
+
+        
     }
 }

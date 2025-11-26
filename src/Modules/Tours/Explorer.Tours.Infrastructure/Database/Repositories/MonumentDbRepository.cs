@@ -59,4 +59,11 @@ public class MonumentDbRepository : IMonumentRepository
         _dbSet.Remove(entity);
         DbContext.SaveChanges();
     }
+
+    public Monument GetUntracked(long id)
+    {
+        var entity = _dbSet.AsNoTracking().FirstOrDefault(m => m.Id == id);
+        if (entity == null) throw new NotFoundException("Not found: " + id);
+        return entity;
+    }
 }

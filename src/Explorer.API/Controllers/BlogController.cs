@@ -1,5 +1,6 @@
 ﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
+using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +33,10 @@ public class BlogController : ControllerBase
                                                         [FromForm] List<IFormFile>? images)
     {
         var userId = User.PersonId();
+        var userRole = User.Role();
+        if (userRole != UserRole.Author && userRole != UserRole.Tourist)
+            return Forbid();
+
         var blogDto = new BlogCreateDto { Title = title, Description = description };
         var createdBlog = _blogService.Create(blogDto, userId);
 
