@@ -94,7 +94,7 @@ public class FacilityCommandTests : BaseToursIntegrationTest
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var updatedEntity = new FacilityDto
         {
-            Id = 1,
+            Id = -1,
             Name = "Updated Central Park WC",
             Latitude = 40.785091,
             Longitude = -73.968285,
@@ -107,11 +107,11 @@ public class FacilityCommandTests : BaseToursIntegrationTest
 
         // Assert - Response
         result.ShouldNotBeNull();
-        result.Id.ShouldBe(1);
+        result.Id.ShouldBe(-1);
         result.Name.ShouldBe(updatedEntity.Name);
 
         // Assert - Database
-        var storedEntity = dbContext.Facility.FirstOrDefault(i => i.Id == 1);
+        var storedEntity = dbContext.Facility.FirstOrDefault(i => i.Id == -1);
         storedEntity.ShouldNotBeNull();
         storedEntity.Name.ShouldBe(updatedEntity.Name);
     }
@@ -144,14 +144,14 @@ public class FacilityCommandTests : BaseToursIntegrationTest
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         // Act
-        var result = (OkResult)controller.Delete(3);
+        var result = (OkResult)controller.Delete(-3);
 
         // Assert - Response
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(200);
 
         // Assert - Database
-        var storedEntity = dbContext.Facility.FirstOrDefault(i => i.Id == 3);
+        var storedEntity = dbContext.Facility.FirstOrDefault(i => i.Id == -3);
         storedEntity.ShouldBeNull();
     }
 
