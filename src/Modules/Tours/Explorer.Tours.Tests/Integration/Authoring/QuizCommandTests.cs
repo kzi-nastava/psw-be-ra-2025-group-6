@@ -24,7 +24,7 @@ public class QuizCommandTests : BaseToursIntegrationTest
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var dto = BuildValidQuizDto();
 
-        var result = ((ObjectResult)controller.Create(dto).Result)?.Value as QuizDto;
+        var result = ((ObjectResult?)controller.Create(dto).Result)?.Value as QuizDto;
 
         result.ShouldNotBeNull();
         result.Id.ShouldNotBe(0);
@@ -80,7 +80,7 @@ public class QuizCommandTests : BaseToursIntegrationTest
             }
         };
 
-        var result = ((ObjectResult)controller.Update(-1, updatedDto).Result)?.Value as QuizDto;
+        var result = ((ObjectResult?)controller.Update(-1, updatedDto).Result)?.Value as QuizDto;
 
         result.ShouldNotBeNull();
         result.Title.ShouldBe(updatedDto.Title);
@@ -144,13 +144,37 @@ public class QuizCommandTests : BaseToursIntegrationTest
             }
         };
 
-        var result = ((ObjectResult)controller.Submit(-1, submission).Result)?.Value as QuizEvaluationResultDto;
+        var result = ((ObjectResult?)controller.Submit(-1, submission).Result)?.Value as QuizEvaluationResultDto;
 
         result.ShouldNotBeNull();
         result.QuizId.ShouldBe(-1);
         result.Questions.Count.ShouldBe(2);
         result.Questions.First(q => q.QuestionId == -11).IsCompletelyCorrect.ShouldBeTrue();
         result.Questions.First(q => q.QuestionId == -12).IsCompletelyCorrect.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Get_all_hides_correct_answers_for_tourists()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, "5");
+
+        var quizzes = ((ObjectResult?)controller.GetAll().Result)?.Value as List<QuizDto>;
+
+        quizzes.ShouldNotBeNull();
+        quizzes.Count.ShouldBeGreaterThan(0);
+        quizzes.SelectMany(q => q.Questions).SelectMany(q => q.Options).All(o => !o.IsCorrect).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Update_fails_for_quiz_owned_by_another_author()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, "2"); // quiz -1 is owned by authorId 1
+        var updatedDto = BuildValidQuizDto();
+        updatedDto.Id = -1;
+
+        Should.Throw<NotFoundException>(() => controller.Update(-1, updatedDto));
     }
 
     private static QuizDto BuildValidQuizDto()

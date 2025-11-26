@@ -39,7 +39,7 @@ public static class AuthConfiguration
                     {
                         if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
                         {
-                            context.Response.Headers.Add("AuthenticationTokens-Expired", "true");
+                            context.Response.Headers.Append("AuthenticationTokens-Expired", "true");
                         }
 
                         return Task.CompletedTask;

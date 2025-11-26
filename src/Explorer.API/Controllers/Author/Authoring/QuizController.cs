@@ -21,37 +21,58 @@ public class QuizController : ControllerBase
     [Authorize(Policy = "authorPolicy")]
     public ActionResult<List<QuizDto>> GetOwned()
     {
-        return Ok(_quizService.GetOwned(User.PersonId()));
+        if (!TryGetPersonId(out var personId)) return Unauthorized();
+        return Ok(_quizService.GetOwned(personId));
     }
 
     [HttpPost]
     [Authorize(Policy = "authorPolicy")]
     public ActionResult<QuizDto> Create([FromBody] QuizDto quiz)
     {
-        return Ok(_quizService.Create(quiz, User.PersonId()));
+        if (!TryGetPersonId(out var personId)) return Unauthorized();
+        return Ok(_quizService.Create(quiz, personId));
     }
 
     [HttpPut("{id:long}")]
     [Authorize(Policy = "authorPolicy")]
     public ActionResult<QuizDto> Update(long id, [FromBody] QuizDto quiz)
     {
+        if (!TryGetPersonId(out var personId)) return Unauthorized();
         quiz.Id = id;
-        return Ok(_quizService.Update(quiz, User.PersonId()));
+        return Ok(_quizService.Update(quiz, personId));
     }
 
     [HttpDelete("{id:long}")]
     [Authorize(Policy = "authorPolicy")]
     public ActionResult Delete(long id)
     {
-        _quizService.Delete(id, User.PersonId());
+        if (!TryGetPersonId(out var personId)) return Unauthorized();
+        _quizService.Delete(id, personId);
         return Ok();
     }
 
     [HttpGet]
-    [AllowAnonymous]
+    [Authorize(Policy = "touristPolicy")]
     public ActionResult<List<QuizDto>> GetAll()
     {
         var quizzes = _quizService.GetAllForTourists();
+        RemoveCorrectAnswersForTourists(quizzes);
+
+        return Ok(quizzes);
+    }
+
+    [HttpPost("{quizId:long}/submit")]
+    [Authorize(Policy = "touristPolicy")]
+    public ActionResult<QuizEvaluationResultDto> Submit(long quizId, [FromBody] SubmitQuizAnswersDto submission)
+    {
+        if (!TryGetPersonId(out var personId)) return Unauthorized();
+        submission.QuizId = quizId;
+        return Ok(_quizService.SubmitAnswers(submission, personId));
+    }
+
+    private static void RemoveCorrectAnswersForTourists(IEnumerable<QuizDto> quizzes)
+    {
+        // Prevent leaking correct answers when quizzes are listed to tourists.
         foreach (var quiz in quizzes)
         {
             foreach (var question in quiz.Questions ?? new List<QuizQuestionDto>())
@@ -62,15 +83,11 @@ public class QuizController : ControllerBase
                 }
             }
         }
-
-        return Ok(quizzes);
     }
 
-    [HttpPost("{quizId:long}/submit")]
-    [Authorize(Policy = "touristPolicy")]
-    public ActionResult<QuizEvaluationResultDto> Submit(long quizId, [FromBody] SubmitQuizAnswersDto submission)
+    private bool TryGetPersonId(out long personId)
     {
-        submission.QuizId = quizId;
-        return Ok(_quizService.SubmitAnswers(submission, User.PersonId()));
+        personId = User.PersonId();
+        return personId > 0;
     }
 }

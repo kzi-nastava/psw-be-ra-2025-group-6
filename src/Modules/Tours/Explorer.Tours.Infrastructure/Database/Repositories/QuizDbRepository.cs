@@ -45,29 +45,7 @@ public class QuizDbRepository : IQuizRepository
     {
         try
         {
-            var trackedQuizEntries = _dbContext.ChangeTracker.Entries<Quiz>()
-                .Where(entry => entry.Entity.Id == quiz.Id)
-                .ToList();
-            foreach (var entry in trackedQuizEntries)
-            {
-                entry.State = EntityState.Detached;
-            }
-
-            var trackedQuestions = _dbContext.ChangeTracker.Entries<QuizQuestion>()
-                .Where(entry => entry.Entity.QuizId == quiz.Id)
-                .ToList();
-            foreach (var entry in trackedQuestions)
-            {
-                entry.State = EntityState.Detached;
-            }
-
-            var trackedOptions = _dbContext.ChangeTracker.Entries<QuizAnswerOption>()
-                .Where(entry => entry.Entity.QuestionId != 0 && trackedQuestions.Any(q => q.Entity.Id == entry.Entity.QuestionId))
-                .ToList();
-            foreach (var entry in trackedOptions)
-            {
-                entry.State = EntityState.Detached;
-            }
+            DetachTrackedEntities(quiz.Id);
 
             _dbContext.Update(quiz);
             _dbContext.SaveChanges();
@@ -90,5 +68,33 @@ public class QuizDbRepository : IQuizRepository
     public List<Quiz> GetAllForTourists()
     {
         return _dbSet.Include(q => q.Questions).ThenInclude(q => q.Options).ToList();
+    }
+
+    private void DetachTrackedEntities(long quizId)
+    {
+        var trackedQuizEntries = _dbContext.ChangeTracker.Entries<Quiz>()
+            .Where(entry => entry.Entity.Id == quizId)
+            .ToList();
+        foreach (var entry in trackedQuizEntries)
+        {
+            entry.State = EntityState.Detached;
+        }
+
+        var trackedQuestionEntries = _dbContext.ChangeTracker.Entries<QuizQuestion>()
+            .Where(entry => entry.Entity.QuizId == quizId)
+            .ToList();
+        foreach (var entry in trackedQuestionEntries)
+        {
+            entry.State = EntityState.Detached;
+        }
+
+        var trackedQuestionIds = trackedQuestionEntries.Select(q => q.Entity.Id).ToHashSet();
+        var trackedOptions = _dbContext.ChangeTracker.Entries<QuizAnswerOption>()
+            .Where(entry => entry.Entity.QuestionId != 0 && trackedQuestionIds.Contains(entry.Entity.QuestionId))
+            .ToList();
+        foreach (var entry in trackedOptions)
+        {
+            entry.State = EntityState.Detached;
+        }
     }
 }

@@ -13,6 +13,7 @@ public class QuizService : IQuizService
 {
     private readonly IQuizRepository _repository;
     private readonly IMapper _mapper;
+    private readonly QuizEvaluator _quizEvaluator = new();
 
     public QuizService(IQuizRepository repository, IMapper mapper)
     {
@@ -72,38 +73,7 @@ public class QuizService : IQuizService
     public QuizEvaluationResultDto SubmitAnswers(SubmitQuizAnswersDto submission, long touristId)
     {
         var quiz = _repository.GetWithDetails(submission.QuizId);
-        var submittedAnswers = submission.Answers ?? new List<QuestionAnswerDto>();
-        var questionResults = new List<QuestionEvaluationResultDto>();
-
-        foreach (var question in quiz.Questions)
-        {
-            var submitted = submittedAnswers.FirstOrDefault(a => a.QuestionId == question.Id);
-            var selected = submitted?.SelectedOptionIds ?? new List<long>();
-            var correctOptions = question.Options.Where(o => o.IsCorrect).Select(o => o.Id).ToList();
-            var isCompletelyCorrect = selected.Count == correctOptions.Count && !correctOptions.Except(selected).Any() && !selected.Except(correctOptions).Any();
-
-            var optionEvaluations = question.Options.Select(option => new OptionEvaluationDto
-            {
-                OptionId = option.Id,
-                Text = option.Text,
-                IsCorrect = option.IsCorrect,
-                IsSelected = selected.Contains(option.Id),
-                Feedback = option.Feedback
-            }).ToList();
-
-            questionResults.Add(new QuestionEvaluationResultDto
-            {
-                QuestionId = question.Id,
-                IsCompletelyCorrect = isCompletelyCorrect,
-                Options = optionEvaluations
-            });
-        }
-
-        return new QuizEvaluationResultDto
-        {
-            QuizId = quiz.Id,
-            Questions = questionResults
-        };
+        return _quizEvaluator.Evaluate(quiz, submission);
     }
 
         private static void ValidateQuizDto(QuizDto quizDto)
