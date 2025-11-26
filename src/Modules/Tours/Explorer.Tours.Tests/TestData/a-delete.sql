@@ -1,4 +1,11 @@
+DELETE FROM tours."TouristEquipment"; 
 DELETE FROM tours."QuizAnswerOptions";
 DELETE FROM tours."QuizQuestions";
 DELETE FROM tours."Quizzes";
-DELETE FROM tours."Equipment";
+DELETE FROM tours."Equipment";         
+DELETE FROM tours."Facility";
+DELETE FROM tours."Journals";
+DELETE FROM tours."Meetups";
+DELETE FROM tours."AnnualAwards";
+DELETE FROM tours."Tours";
+DELETE FROM tours."Monuments";
