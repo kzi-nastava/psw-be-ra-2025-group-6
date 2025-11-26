@@ -7,5 +7,6 @@ public interface IFacilityRepository
     Facility Create(Facility map);
     Facility Update(Facility map);
     void Delete(long Id);
+    Facility GetUntracked(long id);
 }
 

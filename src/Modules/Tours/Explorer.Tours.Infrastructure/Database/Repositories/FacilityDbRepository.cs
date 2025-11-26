@@ -55,5 +55,12 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             _dbSet.Remove(entity);
             DbContext.SaveChanges();
         }
+
+        public Facility GetUntracked(long id)
+        {
+            var entity = _dbSet.AsNoTracking().FirstOrDefault(f => f.Id == id);
+            if (entity == null) throw new NotFoundException("Not found: " + id);
+            return entity;
+        }
     }
 }
