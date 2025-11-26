@@ -1,22 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
 	</PropertyGroup>
-
 	<ItemGroup>
-		<None Remove="TestData\c-tour-problems.sql" />
+	  <None Remove="TestData\d-reviewapp.sql" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="TestData\d-reviewapp.sql">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 
+	<!-- SAMO wildcard - jednostavno i radi -->
 	<ItemGroup>
-		<Content Include="TestData\c-tour-problems.sql">
+		<None Update="TestData\*.sql">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -38,5 +41,4 @@
 		<ProjectReference Include="..\..\..\BuildingBlocks\Explorer.BuildingBlocks.Tests\Explorer.BuildingBlocks.Tests.csproj" />
 		<ProjectReference Include="..\..\..\Explorer.API\Explorer.API.csproj" />
 	</ItemGroup>
-
 </Project>

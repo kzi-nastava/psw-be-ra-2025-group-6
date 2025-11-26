@@ -1,4 +1,3 @@
--- Insert user with a profile
 INSERT INTO stakeholders."Users"(
 	"Id", "Username", "Password", "Role", "IsActive")
 	VALUES (-100, 'profileuser1@gmail.com', 'test1234', 2, true);

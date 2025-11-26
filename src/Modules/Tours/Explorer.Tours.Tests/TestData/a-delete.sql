@@ -1,7 +1,6 @@
-
-DELETE FROM tours."Facility"
-DELETE FROM tours."TouristEquipment";
-DELETE FROM tours."Equipment";
+DELETE FROM tours."TouristEquipment"; 
+DELETE FROM tours."Equipment";         
+DELETE FROM tours."Facility";
 DELETE FROM tours."Journals";
 DELETE FROM tours."Meetups";
 DELETE FROM tours."AnnualAwards";
