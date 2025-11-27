@@ -1,55 +1,8 @@
-using System.IO;
-using System.Linq;
-using Explorer.BuildingBlocks.Tests;
-using Explorer.Tours.Infrastructure.Database;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.DependencyInjection;
-using Explorer.Stakeholders.Infrastructure.Database;
+﻿using Explorer.BuildingBlocks.Tests;
 
 namespace Explorer.Tours.Tests;
 
 public class BaseToursIntegrationTest : BaseWebIntegrationTest<ToursTestFactory>
 {
-    public BaseToursIntegrationTest(ToursTestFactory factory) : base(factory)
-    {
-        using var scope = Factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ToursContext>();
-        ReseedDatabase(db);
-
-        // Seed authentication-related data needed for Tours integration tests
-        var stakeholdersContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
-        ReseedStakeholders(stakeholdersContext);
-    }
-
-    private static void ReseedDatabase(ToursContext context)
-    {
-        var scriptFolder = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "TestData"));
-        var scriptFiles = Directory.GetFiles(scriptFolder);
-        Array.Sort(scriptFiles);
-        var script = string.Join('\n', scriptFiles.Select(File.ReadAllText));
-        context.Database.ExecuteSqlRaw(script);
-    }
-
-    private static void ReseedStakeholders(StakeholdersContext context)
-    {
-        context.Database.ExecuteSqlRaw("CREATE SCHEMA IF NOT EXISTS stakeholders;");
-        context.Database.EnsureCreated();
-        try
-        {
-            var databaseCreator = context.Database.GetService<IRelationalDatabaseCreator>();
-            databaseCreator.CreateTables();
-        }
-        catch
-        {
-            // Tables already exist
-        }
-
-        var scriptFolder = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "Stakeholders", "Explorer.Stakeholders.Tests", "TestData"));
-        var scriptFiles = Directory.GetFiles(scriptFolder);
-        Array.Sort(scriptFiles);
-        var script = string.Join('\n', scriptFiles.Select(File.ReadAllText));
-        context.Database.ExecuteSqlRaw(script);
-    }
+    public BaseToursIntegrationTest(ToursTestFactory factory) : base(factory) { }
 }

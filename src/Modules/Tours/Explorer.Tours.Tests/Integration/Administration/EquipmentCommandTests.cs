@@ -28,7 +28,7 @@ public class EquipmentCommandTests : BaseToursIntegrationTest
         };
 
         // Act
-        var result = ((ObjectResult?)controller.Create(newEntity).Result)?.Value as EquipmentDto;
+        var result = ((ObjectResult)controller.Create(newEntity).Result)?.Value as EquipmentDto;
 
         // Assert - Response
         result.ShouldNotBeNull();
@@ -71,7 +71,7 @@ public class EquipmentCommandTests : BaseToursIntegrationTest
         };
 
         // Act
-        var result = ((ObjectResult?)controller.Update(updatedEntity).Result)?.Value as EquipmentDto;
+        var result = ((ObjectResult)controller.Update(updatedEntity).Result)?.Value as EquipmentDto;
 
         // Assert - Response
         result.ShouldNotBeNull();
@@ -112,7 +112,7 @@ public class EquipmentCommandTests : BaseToursIntegrationTest
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         // Act
-        var result = controller.Delete(-3) as OkResult;
+        var result = (OkResult)controller.Delete(-3);
 
         // Assert - Response
         result.ShouldNotBeNull();

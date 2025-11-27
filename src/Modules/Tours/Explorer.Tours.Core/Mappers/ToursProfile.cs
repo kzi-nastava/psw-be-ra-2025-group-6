@@ -1,7 +1,6 @@
-﻿﻿using AutoMapper;
+﻿using AutoMapper;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.Domain;
-using Explorer.Tours.Core.Domain.Quiz;
 
 namespace Explorer.Tours.Core.Mappers;
 public class ToursProfile : Profile
@@ -19,8 +18,5 @@ public class ToursProfile : Profile
         CreateMap<Tour, TourDto>().ReverseMap();
         CreateMap<MonumentDto, Monument>().ReverseMap();
         CreateMap<MeetupDto, Meetup>().ReverseMap();
-        CreateMap<Quiz, QuizDto>().ReverseMap();
-        CreateMap<QuizQuestion, QuizQuestionDto>().ReverseMap();
-        CreateMap<QuizAnswerOption, QuizAnswerOptionDto>().ReverseMap();
     }
 }
