@@ -1,9 +1,9 @@
-
-DELETE FROM tours."Facility"
 DELETE FROM tours."TouristEquipment";
-DELETE FROM tours."Equipment";
 DELETE FROM tours."Journals";
 DELETE FROM tours."Meetups";
+DELETE FROM tours."Facility";
+DELETE FROM tours."Equipment";
 DELETE FROM tours."AnnualAwards";
-DELETE FROM tours."Tours";
 DELETE FROM tours."Monuments";
+DELETE FROM tours."Tours";
+ALTER SEQUENCE tours."Facility_Id_seq" RESTART WITH 100;
