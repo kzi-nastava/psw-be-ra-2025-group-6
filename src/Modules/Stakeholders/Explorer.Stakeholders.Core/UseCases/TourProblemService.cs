@@ -1,13 +1,14 @@
 ﻿using AutoMapper;
-using Explorer.Tours.API.Public.TourProblem;
-using Explorer.Tours.Core.Domain;
-using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using Explorer.Stakeholders.API.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Explorer.Tours.Core.UseCases.Administration
+namespace Explorer.Stakeholders.Core.UseCases
 {
     public class TourProblemService : ITourProblemService
     {

@@ -1,6 +1,7 @@
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.API.Services;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Core.Mappers;
@@ -18,7 +19,7 @@ public static class StakeholdersStartup
 {
     public static IServiceCollection ConfigureStakeholdersModule(this IServiceCollection services)
     {
-        services.AddAutoMapper(typeof(StakeholderProfile).Assembly);
+        services.AddAutoMapper(typeof(UserMapperProfile).Assembly);
         SetupCore(services);
         SetupInfrastructure(services);
         return services;
@@ -28,12 +29,15 @@ public static class StakeholdersStartup
     {
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<ITokenGenerator, JwtGenerator>();
+        services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserProfileService, UserProfileService>();
         services.AddScoped<ITouristPositionService, TouristPositionService>();
 
         services.AddScoped<IReviewAppService, ReviewAppService>();
 
         services.AddScoped<IClubService, ClubService>();
+
+        services.AddScoped<ITourProblemService, TourProblemService>();
 
     }
 
@@ -46,6 +50,7 @@ public static class StakeholdersStartup
         services.AddScoped<IReviewAppRepository, ReviewAppDbRepository>();
         services.AddScoped<IClubRepository, ClubDbRepository>();
         services.AddScoped<ITouristPositionRepository, TouristPositionRepository>();
+        services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();

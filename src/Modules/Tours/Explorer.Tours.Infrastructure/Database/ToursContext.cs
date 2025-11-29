@@ -16,9 +16,11 @@ public class ToursContext : DbContext
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Meetup> Meetups { get; set; }
 
-    public DbSet<TourProblem> TourProblems { get; set; }
 
-    public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
+
+    public DbSet<Facility> Facility { get; set; }
+
+    public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
