@@ -7,13 +7,60 @@
 		<IsTestProject>true</IsTestProject>
 	</PropertyGroup>
 
-	<!-- SAMO wildcard -->
 	<ItemGroup>
-		<None Update="TestData\*.sql">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+		<None Remove="TestData\a-delete.sql" />
+		<None Remove="TestData\b-tours.sql" />
+		<None Remove="TestData\b-equipment.sql" />
+		<None Remove="TestData\b-facility.sql" />
+		<None Remove="TestData\b-monuments.sql" />
+		<None Remove="TestData\c-annualawards.sql" />
+		<None Remove="TestData\c-meetups.sql" />
+		<None Remove="TestData\y-tourist-equipment.sql" />
+		<None Remove="TestData\z-insert-journal.sql" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Content Include="TestData\a-delete.sql">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="TestData\b-tours.sql">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="TestData\b-equipment.sql">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="TestData\b-facility.sql">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="TestData\b-monuments.sql">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="TestData\c-annualawards.sql">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="TestData\c-meetups.sql">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="TestData\y-tourist-equipment.sql">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.20" />
+	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
+	<PackageReference Include="Shouldly" Version="4.3.0" />
+	<PackageReference Include="xunit" Version="2.9.3" />
+	<PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		<PrivateAssets>all</PrivateAssets>
+	</PackageReference>
+	<PackageReference Include="coverlet.collector" Version="6.0.4">
+		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		<PrivateAssets>all</PrivateAssets>
+	</PackageReference>
+  </ItemGroup>
+	
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.20" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />

@@ -101,6 +101,23 @@ namespace Explorer.API.Controllers.Tourist
             await _journalService.Delete(id);
             return NoContent();
         }
+        [HttpGet("search/{query}")]
+        public async Task<ActionResult<List<JournalDto>>> Search(string query)
+        {
+            var touristId = GetTouristId();
+            var journals = await _journalService.GetAllByTouristId(touristId);
+
+            query = query.ToLower();
+
+            var filtered = journals.Where(j =>
+                (!string.IsNullOrEmpty(j.Name) && j.Name.ToLower().Contains(query)) ||
+                (!string.IsNullOrEmpty(j.Location) && j.Location.ToLower().Contains(query))
+            ).ToList();
+
+            return Ok(filtered);
+        }
+
+
     }
 
 

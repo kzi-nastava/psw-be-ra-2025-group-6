@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers.Administrator.Administration;
 
-[Authorize(Policy = "administratorPolicy")]
+
 [Route("api/administration/facility")]
 [ApiController]
 public class FacilityController : ControllerBase
@@ -19,24 +19,28 @@ public class FacilityController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "administrator, tourist")]
     public ActionResult<PagedResult<FacilityDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
     {
         return Ok(_facilityService.GetPaged(page, pageSize));
     }
 
     [HttpPost]
+    [Authorize(Policy = "administratorPolicy")]
     public ActionResult<FacilityDto> Create([FromBody] FacilityDto facility)
     {
         return Ok(_facilityService.Create(facility));
     }
 
     [HttpPut("{id:long}")]
+    [Authorize(Policy = "administratorPolicy")]
     public ActionResult<FacilityDto> Update([FromBody] FacilityDto facility)
     {
         return Ok(_facilityService.Update(facility));
     }
 
     [HttpDelete("{id:long}")]
+    [Authorize(Policy = "administratorPolicy")]
     public ActionResult Delete(long id)
     {
         _facilityService.Delete(id);
