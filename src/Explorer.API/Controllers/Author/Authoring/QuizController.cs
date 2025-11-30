@@ -51,6 +51,24 @@ public class QuizController : ControllerBase
         return Ok();
     }
 
+    [HttpDelete("{quizId:long}/questions/{questionId:long}")]
+    [Authorize(Policy = "authorPolicy")]
+    public ActionResult DeleteQuestion(long quizId, long questionId)
+    {
+        if (!TryGetPersonId(out var personId)) return Unauthorized();
+        _quizService.DeleteQuestion(quizId, questionId, personId);
+        return Ok();
+    }
+
+    [HttpDelete("{quizId:long}/questions/{questionId:long}/options/{optionId:long}")]
+    [Authorize(Policy = "authorPolicy")]
+    public ActionResult DeleteOption(long quizId, long questionId, long optionId)
+    {
+        if (!TryGetPersonId(out var personId)) return Unauthorized();
+        _quizService.DeleteOption(quizId, questionId, optionId, personId);
+        return Ok();
+    }
+
     [HttpGet]
     [Authorize(Policy = "touristPolicy")]
     public ActionResult<List<QuizDto>> GetAll()
@@ -64,6 +82,16 @@ public class QuizController : ControllerBase
     [HttpPost("{quizId:long}/submit")]
     [Authorize(Policy = "touristPolicy")]
     public ActionResult<QuizEvaluationResultDto> Submit(long quizId, [FromBody] SubmitQuizAnswersDto submission)
+    {
+        if (!TryGetPersonId(out var personId)) return Unauthorized();
+        submission.QuizId = quizId;
+        return Ok(_quizService.SubmitAnswers(submission, personId));
+    }
+
+    // Alias for submitting quiz answers using /solve route expected by some clients.
+    [HttpPost("{quizId:long}/solve")]
+    [Authorize(Policy = "touristPolicy")]
+    public ActionResult<QuizEvaluationResultDto> Solve(long quizId, [FromBody] SubmitQuizAnswersDto submission)
     {
         if (!TryGetPersonId(out var personId)) return Unauthorized();
         submission.QuizId = quizId;

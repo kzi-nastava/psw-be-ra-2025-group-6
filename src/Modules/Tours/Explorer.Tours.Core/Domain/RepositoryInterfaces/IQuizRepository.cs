@@ -10,5 +10,7 @@ public interface IQuizRepository
     DomainQuiz Create(DomainQuiz quiz);
     DomainQuiz Update(DomainQuiz quiz);
     void Delete(long quizId);
+    void DeleteQuestion(long quizId, long questionId);
+    void DeleteOption(long quizId, long questionId, long optionId);
     List<DomainQuiz> GetAllForTourists();
 }

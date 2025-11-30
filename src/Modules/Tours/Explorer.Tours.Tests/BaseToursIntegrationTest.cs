@@ -25,6 +25,18 @@ public class BaseToursIntegrationTest : BaseWebIntegrationTest<ToursTestFactory>
 
     private static void ReseedDatabase(ToursContext context)
     {
+        context.Database.ExecuteSqlRaw("CREATE SCHEMA IF NOT EXISTS tours;");
+        context.Database.EnsureCreated();
+        try
+        {
+            var databaseCreator = context.Database.GetService<IRelationalDatabaseCreator>();
+            databaseCreator.CreateTables();
+        }
+        catch
+        {
+            // Tables already exist
+        }
+
         var scriptFolder = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "TestData"));
         var scriptFiles = Directory.GetFiles(scriptFolder);
         Array.Sort(scriptFiles);

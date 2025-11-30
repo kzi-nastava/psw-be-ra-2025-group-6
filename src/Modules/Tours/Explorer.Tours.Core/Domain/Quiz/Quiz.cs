@@ -5,11 +5,11 @@ namespace Explorer.Tours.Core.Domain.Quiz;
 public class Quiz : Entity
 {
     public long AuthorId { get; private set; }
-    public string Title { get; private set; } = string.Empty;
-    public string? Description { get; private set; }
+    public string Title { get; set; } = string.Empty;
+    public string? Description { get; set; }
     public DateTime CreatedAt { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
-    public ICollection<QuizQuestion> Questions { get; private set; }
+    public DateTime? UpdatedAt { get; set; }
+    public ICollection<QuizQuestion> Questions { get; set; }
 
     public Quiz(long authorId, string title, string? description, DateTime createdAt, DateTime? updatedAt,
         ICollection<QuizQuestion> questions)

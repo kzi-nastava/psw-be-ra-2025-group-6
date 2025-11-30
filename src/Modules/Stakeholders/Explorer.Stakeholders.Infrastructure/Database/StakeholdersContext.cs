@@ -23,17 +23,11 @@ public class StakeholdersContext : DbContext
 
         modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
 
-<<<<<<< HEAD
-        modelBuilder.Entity<User>()
-            .Property(u => u.Role)
-            .HasConversion<string>();
-=======
         modelBuilder.Entity<TouristPosition>().HasIndex(tp => tp.TouristId).IsUnique();
 
         modelBuilder.Entity<User>()
        .Property(u => u.Role)
        .HasConversion<string>();
->>>>>>> development-new
 
         ConfigureStakeholder(modelBuilder);
         

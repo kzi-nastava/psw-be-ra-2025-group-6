@@ -14,6 +14,8 @@ public static class ClaimsPrincipalExtensions
         if (roleClaim == null)
             throw new Exception("Role claim not found");
 
-        return Enum.Parse<UserRole>(roleClaim);
+        // Role claims can come in different casing (e.g., "tourist" from the frontend),
+        // so parse in a case-insensitive way to avoid ArgumentException.
+        return Enum.Parse<UserRole>(roleClaim, ignoreCase: true);
     }
 }

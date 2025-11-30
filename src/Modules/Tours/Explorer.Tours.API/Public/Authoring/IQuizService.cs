@@ -8,6 +8,8 @@ public interface IQuizService
     QuizDto Create(QuizDto quiz, long authorId);
     QuizDto Update(QuizDto quiz, long authorId);
     void Delete(long quizId, long authorId);
+    void DeleteQuestion(long quizId, long questionId, long authorId);
+    void DeleteOption(long quizId, long questionId, long optionId, long authorId);
 
     List<QuizDto> GetAllForTourists();
     QuizEvaluationResultDto SubmitAnswers(SubmitQuizAnswersDto submission, long touristId);

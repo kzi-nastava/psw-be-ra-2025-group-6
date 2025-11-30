@@ -5,10 +5,10 @@ namespace Explorer.Tours.Core.Domain.Quiz;
 
 public class QuizQuestion : Entity
 {
-    public long QuizId { get; private set; }
-    public string Text { get; private set; } = string.Empty;
-    public bool AllowsMultipleAnswers { get; private set; }
-    public ICollection<QuizAnswerOption> Options { get; private set; }
+    public long QuizId { get; set; }
+    public string Text { get; set; } = string.Empty;
+    public bool AllowsMultipleAnswers { get; set; }
+    public ICollection<QuizAnswerOption> Options { get; set; }
 
     public QuizQuestion(long quizId, string text, bool allowsMultipleAnswers, ICollection<QuizAnswerOption> options)
     {

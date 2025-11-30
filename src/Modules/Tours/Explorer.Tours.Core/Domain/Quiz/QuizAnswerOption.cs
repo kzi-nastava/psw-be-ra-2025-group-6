@@ -4,10 +4,10 @@ namespace Explorer.Tours.Core.Domain.Quiz;
 
 public class QuizAnswerOption : Entity
 {
-    public long QuestionId { get; private set; }
-    public string Text { get; private set; }
-    public bool IsCorrect { get; private set; }
-    public string Feedback { get; private set; }
+    public long QuestionId { get; set; }
+    public string Text { get; set; }
+    public bool IsCorrect { get; set; }
+    public string Feedback { get; set; }
 
     public QuizAnswerOption(long questionId, string text, bool isCorrect, string feedback)
     {

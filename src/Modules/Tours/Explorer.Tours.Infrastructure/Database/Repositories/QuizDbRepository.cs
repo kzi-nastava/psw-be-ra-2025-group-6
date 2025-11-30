@@ -2,6 +2,7 @@ using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.Core.Domain.Quiz;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Explorer.Tours.Infrastructure.Database.Repositories;
@@ -43,25 +44,95 @@ public class QuizDbRepository : IQuizRepository
 
     public Quiz Update(Quiz quiz)
     {
-        try
-        {
-            DetachTrackedEntities(quiz.Id);
+        var existing = _dbSet.Include(q => q.Questions).ThenInclude(q => q.Options).FirstOrDefault(q => q.Id == quiz.Id);
+        if (existing == null) throw new NotFoundException("Quiz not found.");
 
-            _dbContext.Update(quiz);
-            _dbContext.SaveChanges();
-        }
-        catch (DbUpdateException e)
+        existing.Title = quiz.Title;
+        existing.Description = quiz.Description;
+        existing.UpdatedAt = quiz.UpdatedAt;
+
+        var incomingQuestions = quiz.Questions ?? new List<QuizQuestion>();
+        var incomingQuestionIds = incomingQuestions.Select(q => q.Id).ToHashSet();
+
+        // Remove questions missing from payload
+        var questionsToRemove = existing.Questions.Where(q => !incomingQuestionIds.Contains(q.Id)).ToList();
+        foreach (var question in questionsToRemove)
         {
-            throw new NotFoundException(e.Message);
+            _dbContext.Remove(question);
         }
 
-        return quiz;
+        // Upsert questions and their options
+        foreach (var incomingQuestion in incomingQuestions)
+        {
+            var storedQuestion = existing.Questions.FirstOrDefault(q => q.Id == incomingQuestion.Id);
+            if (storedQuestion == null)
+            {
+                // New question
+                incomingQuestion.QuizId = existing.Id;
+                _dbContext.Add(incomingQuestion);
+                continue;
+            }
+
+            storedQuestion.Text = incomingQuestion.Text;
+            storedQuestion.AllowsMultipleAnswers = incomingQuestion.AllowsMultipleAnswers;
+
+            var incomingOptions = incomingQuestion.Options ?? new List<QuizAnswerOption>();
+            var incomingOptionIds = incomingOptions.Select(o => o.Id).ToHashSet();
+
+            var storedOptions = storedQuestion.Options ?? new List<QuizAnswerOption>();
+            var optionsToRemove = storedOptions.Where(o => !incomingOptionIds.Contains(o.Id)).ToList();
+            foreach (var option in optionsToRemove)
+            {
+                _dbContext.Remove(option);
+            }
+
+            foreach (var incomingOption in incomingOptions)
+            {
+                var storedOption = storedOptions.FirstOrDefault(o => o.Id == incomingOption.Id);
+                if (storedOption == null)
+                {
+                    incomingOption.QuestionId = storedQuestion.Id;
+                    _dbContext.Add(incomingOption);
+                    continue;
+                }
+
+                storedOption.Text = incomingOption.Text;
+                storedOption.Feedback = incomingOption.Feedback;
+                storedOption.IsCorrect = incomingOption.IsCorrect;
+            }
+        }
+
+        _dbContext.SaveChanges();
+        return existing;
     }
 
     public void Delete(long quizId)
     {
         var quiz = GetWithDetails(quizId);
         _dbSet.Remove(quiz);
+        _dbContext.SaveChanges();
+    }
+
+    public void DeleteQuestion(long quizId, long questionId)
+    {
+        var quiz = GetWithDetails(quizId);
+        var question = quiz.Questions.FirstOrDefault(q => q.Id == questionId && q.QuizId == quizId);
+        if (question == null) throw new NotFoundException("Question not found.");
+
+        _dbContext.Remove(question);
+        _dbContext.SaveChanges();
+    }
+
+    public void DeleteOption(long quizId, long questionId, long optionId)
+    {
+        var quiz = GetWithDetails(quizId);
+        var question = quiz.Questions.FirstOrDefault(q => q.Id == questionId && q.QuizId == quizId);
+        if (question == null) throw new NotFoundException("Question not found.");
+
+        var option = question.Options.FirstOrDefault(o => o.Id == optionId && o.QuestionId == questionId);
+        if (option == null) throw new NotFoundException("Option not found.");
+
+        _dbContext.Remove(option);
         _dbContext.SaveChanges();
     }
 

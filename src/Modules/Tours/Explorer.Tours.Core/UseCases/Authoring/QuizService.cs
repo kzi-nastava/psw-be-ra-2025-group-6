@@ -43,6 +43,29 @@ public class QuizService : IQuizService
         var existing = _repository.GetWithDetails(quizDto.Id);
         if (existing == null || existing.AuthorId != authorId) throw new NotFoundException("Quiz not found.");
 
+        // Remove questions not present in payload to align persisted quiz with editor state.
+        var dtoQuestionIds = (quizDto.Questions ?? new List<QuizQuestionDto>()).Select(q => q.Id).ToHashSet();
+        var questionsToRemove = existing.Questions.Where(q => !dtoQuestionIds.Contains(q.Id)).ToList();
+        foreach (var question in questionsToRemove)
+        {
+            _repository.DeleteQuestion(quizDto.Id, question.Id);
+        }
+
+        // Remove options not present in payload for remaining questions.
+        foreach (var dtoQuestion in quizDto.Questions ?? new List<QuizQuestionDto>())
+        {
+            if (dtoQuestion.Id <= 0) continue; // new question; no existing options to prune
+
+            var existingQuestion = existing.Questions.FirstOrDefault(q => q.Id == dtoQuestion.Id);
+            if (existingQuestion == null) throw new NotFoundException("Question not found.");
+
+            var dtoOptionIds = (dtoQuestion.Options ?? new List<QuizAnswerOptionDto>()).Select(o => o.Id).ToHashSet();
+            var optionsToRemove = existingQuestion.Options.Where(o => !dtoOptionIds.Contains(o.Id)).ToList();
+            foreach (var option in optionsToRemove)
+            {
+                _repository.DeleteOption(quizDto.Id, dtoQuestion.Id, option.Id);
+            }
+        }
 
         quizDto.AuthorId = authorId;
         quizDto.CreatedAt = existing.CreatedAt;
@@ -57,12 +80,32 @@ public class QuizService : IQuizService
 
     public void Delete(long quizId, long authorId)
     {
-        var existing = _repository.GetById(quizId);
-        if (existing is null) throw new NotFoundException("Quiz not found.");
-        if (existing.AuthorId != authorId) throw new NotFoundException("Quiz not found.");
-
+        var existing = _repository.GetWithDetails(quizId);
+        if (existing.AuthorId != authorId) throw new ForbiddenException("Quiz not owned by author.");
 
         _repository.Delete(quizId);
+    }
+
+    public void DeleteQuestion(long quizId, long questionId, long authorId)
+    {
+        var quiz = _repository.GetWithDetails(quizId);
+        if (quiz.AuthorId != authorId) throw new ForbiddenException("Quiz not owned by author.");
+
+        if (quiz.Questions.All(q => q.Id != questionId)) throw new NotFoundException("Question not found.");
+
+        _repository.DeleteQuestion(quizId, questionId);
+    }
+
+    public void DeleteOption(long quizId, long questionId, long optionId, long authorId)
+    {
+        var quiz = _repository.GetWithDetails(quizId);
+        if (quiz.AuthorId != authorId) throw new ForbiddenException("Quiz not owned by author.");
+
+        var question = quiz.Questions.FirstOrDefault(q => q.Id == questionId);
+        if (question == null) throw new NotFoundException("Question not found.");
+        if (question.Options.All(o => o.Id != optionId)) throw new NotFoundException("Option not found.");
+
+        _repository.DeleteOption(quizId, questionId, optionId);
     }
 
     public List<QuizDto> GetAllForTourists()

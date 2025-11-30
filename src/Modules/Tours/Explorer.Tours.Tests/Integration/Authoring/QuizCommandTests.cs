@@ -129,6 +129,121 @@ public class QuizCommandTests : BaseToursIntegrationTest
     }
 
     [Fact]
+    public void Update_removes_missing_question()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, "1"); // quiz -1 owned by author 1
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        var updatedDto = new QuizDto
+        {
+            Id = -1,
+            Title = "Belgrade Basics Trimmed",
+            Description = "Only one question remains",
+            Questions = new List<QuizQuestionDto>
+            {
+                new QuizQuestionDto
+                {
+                    Id = -11,
+                    QuizId = -1,
+                    Text = "Which river flows through Belgrade?",
+                    AllowsMultipleAnswers = false,
+                    Options = new List<QuizAnswerOptionDto>
+                    {
+                        new QuizAnswerOptionDto{ Id = -112, QuestionId = -11, Text = "Danube", IsCorrect = true, Feedback = "Correct river."}
+                    }
+                }
+            }
+        };
+
+        var result = ((ObjectResult?)controller.Update(-1, updatedDto).Result)?.Value as QuizDto;
+
+        result.ShouldNotBeNull();
+        result.Questions.Count.ShouldBe(1);
+        dbContext.QuizQuestions.FirstOrDefault(q => q.Id == -12).ShouldBeNull();
+        dbContext.QuizAnswerOptions.FirstOrDefault(o => o.QuestionId == -12).ShouldBeNull();
+    }
+
+    [Fact]
+    public void Update_removes_missing_option()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, "1");
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        var updatedDto = new QuizDto
+        {
+            Id = -1,
+            Title = "Belgrade Basics Options Trimmed",
+            Description = "Remove one option",
+            Questions = new List<QuizQuestionDto>
+            {
+                new QuizQuestionDto
+                {
+                    Id = -11,
+                    QuizId = -1,
+                    Text = "Which river flows through Belgrade?",
+                    AllowsMultipleAnswers = false,
+                    Options = new List<QuizAnswerOptionDto>
+                    {
+                        new QuizAnswerOptionDto{ Id = -112, QuestionId = -11, Text = "Danube", IsCorrect = true, Feedback = "Correct river."}
+                    }
+                },
+                new QuizQuestionDto
+                {
+                    Id = -12,
+                    QuizId = -1,
+                    Text = "Select Serbian rivers",
+                    AllowsMultipleAnswers = true,
+                    Options = new List<QuizAnswerOptionDto>
+                    {
+                        new QuizAnswerOptionDto{ Id = -121, QuestionId = -12, Text = "Danube", IsCorrect = true, Feedback = "Danube flows through Serbia."},
+                        new QuizAnswerOptionDto{ Id = -123, QuestionId = -12, Text = "Sava", IsCorrect = true, Feedback = "Sava also flows through Serbia."}
+                    }
+                }
+            }
+        };
+
+        var result = ((ObjectResult?)controller.Update(-1, updatedDto).Result)?.Value as QuizDto;
+
+        result.ShouldNotBeNull();
+        dbContext.QuizAnswerOptions.FirstOrDefault(o => o.Id == -122).ShouldBeNull();
+        dbContext.QuizAnswerOptions.FirstOrDefault(o => o.Id == -121).ShouldNotBeNull();
+        dbContext.QuizQuestions.FirstOrDefault(q => q.Id == -12).ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void Deletes_question_with_options()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, "1"); // quiz -1 owned by author 1
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        var result = (OkResult)controller.DeleteQuestion(-1, -11);
+
+        result.ShouldNotBeNull();
+        result.StatusCode.ShouldBe(200);
+        dbContext.QuizQuestions.FirstOrDefault(q => q.Id == -11).ShouldBeNull();
+        dbContext.QuizAnswerOptions.FirstOrDefault(o => o.QuestionId == -11).ShouldBeNull();
+        dbContext.QuizQuestions.FirstOrDefault(q => q.Id == -12).ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void Deletes_option_only()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, "1");
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        var result = (OkResult)controller.DeleteOption(-1, -11, -111);
+
+        result.ShouldNotBeNull();
+        result.StatusCode.ShouldBe(200);
+        dbContext.QuizAnswerOptions.FirstOrDefault(o => o.Id == -111).ShouldBeNull();
+        dbContext.QuizAnswerOptions.FirstOrDefault(o => o.Id == -112).ShouldNotBeNull();
+    }
+
+    [Fact]
     public void Submits_answers_and_evaluates()
     {
         using var scope = Factory.Services.CreateScope();
