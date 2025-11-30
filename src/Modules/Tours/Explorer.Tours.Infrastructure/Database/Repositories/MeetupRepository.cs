@@ -43,12 +43,18 @@ public class MeetupRepository : IMeetupRepository
     {
         try
         {
+            var existing = DbContext.Meetups.Local.FirstOrDefault(e => e.Id == entity.Id);
+            if (existing != null)
+            {
+                DbContext.Entry(existing).State = EntityState.Detached;
+            }
+
             DbContext.Update(entity);
             DbContext.SaveChanges();
         }
         catch (DbUpdateException e)
         {
-            throw new NotFoundException(e.Message);
+            throw new Exception(e.Message);
         }
         return entity;
     }

@@ -1,4 +1,5 @@
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers;
 
-[Authorize(Policy = "meetupPolicy")] 
+[Authorize(Policy = "meetupPolicy")]
 [Route("api/tours/meetup")]
 [ApiController]
 public class MeetupController : ControllerBase
@@ -16,6 +17,11 @@ public class MeetupController : ControllerBase
     public MeetupController(IMeetupService meetupService)
     {
         _meetupService = meetupService;
+    }
+
+    private long GetCreatorId()
+    {
+        return User.PersonId();
     }
 
     [HttpGet]
@@ -33,20 +39,34 @@ public class MeetupController : ControllerBase
     [HttpPost]
     public ActionResult<MeetupDto> Create([FromBody] MeetupDto meetup)
     {
-        return Ok(_meetupService.Create(meetup));
+        meetup.CreatorId = GetCreatorId();
+        var result = _meetupService.Create(meetup);
+        return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
     }
 
     [HttpPut("{id:long}")]
     public ActionResult<MeetupDto> Update(long id, [FromBody] MeetupDto meetup)
     {
         meetup.Id = id;
-        return Ok(_meetupService.Update(meetup));
+        var existingMeetup = _meetupService.Get(id);
+        if (existingMeetup.CreatorId != GetCreatorId())
+        {
+            return Forbid();
+        }
+        meetup.CreatorId = GetCreatorId();
+        var result = _meetupService.Update(meetup);
+        return Ok(result);
     }
 
     [HttpDelete("{id:long}")]
     public ActionResult Delete(long id)
     {
+        var existingMeetup = _meetupService.Get(id);
+        if (existingMeetup.CreatorId != GetCreatorId())
+        {
+            return Forbid();
+        }
         _meetupService.Delete(id);
-        return Ok();
+        return NoContent();
     }
 }
