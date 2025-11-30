@@ -11,6 +11,7 @@ public class StakeholdersContext : DbContext
     public DbSet<ReviewApp> ReviewApps { get; set; }
     public DbSet<Club> Clubs { get; set; }
 
+    public DbSet<TouristPosition> TouristPositions { get; set; }
     public DbSet<TourProblem> TourProblems { get; set; }
 
 
@@ -21,6 +22,8 @@ public class StakeholdersContext : DbContext
         modelBuilder.HasDefaultSchema("stakeholders");
 
         modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
+
+        modelBuilder.Entity<TouristPosition>().HasIndex(tp => tp.TouristId).IsUnique();
 
         modelBuilder.Entity<User>()
        .Property(u => u.Role)
