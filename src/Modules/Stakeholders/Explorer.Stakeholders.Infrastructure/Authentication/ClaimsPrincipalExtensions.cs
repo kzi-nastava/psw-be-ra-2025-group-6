@@ -14,6 +14,6 @@ public static class ClaimsPrincipalExtensions
         if (roleClaim == null)
             throw new Exception("Role claim not found");
 
-        return Enum.Parse<UserRole>(roleClaim);
+        return Enum.Parse<UserRole>(roleClaim, ignoreCase: true);
     }
 }
