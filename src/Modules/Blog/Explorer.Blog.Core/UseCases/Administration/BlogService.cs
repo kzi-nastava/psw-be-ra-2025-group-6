@@ -33,14 +33,14 @@ public class BlogService : IBlogService
 
     public BlogDto Create(BlogCreateDto dto, long userId)
     {
-        var status = _mapper.Map<BlogStatus>(dto.Status);
         var blog = new BlogPost(
             userId,
             dto.Title,
             dto.Description,
             new List<string>(),
-            status
+            BlogStatus.DRAFT
         );
+
         var created = _blogRepository.Create(blog);
         return _mapper.Map<BlogDto>(created);
     }
@@ -48,6 +48,11 @@ public class BlogService : IBlogService
     public BlogDto Update(BlogDto blogDto)
     {
         var blog = _mapper.Map<BlogPost>(blogDto);
+        if (blog.Status != BlogStatus.POSTED)
+        {
+            throw new Exception("Only posted blogs can be changed.");
+        }
+
         var updated = _blogRepository.Update(blog);
         return _mapper.Map<BlogDto>(updated);
     }
@@ -75,6 +80,20 @@ public class BlogService : IBlogService
             throw new Exception("Blog not found");
 
         blog.AddImages(imagePaths);
+        _blogRepository.Update(blog);
+    }
+
+    public void Archive(long blogId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+
+        if (blog.Status != BlogStatus.POSTED)
+            throw new Exception("Only posted blogs can be archived.");
+
+        blog.Status = BlogStatus.ARCHIVED;
+
         _blogRepository.Update(blog);
     }
 }
