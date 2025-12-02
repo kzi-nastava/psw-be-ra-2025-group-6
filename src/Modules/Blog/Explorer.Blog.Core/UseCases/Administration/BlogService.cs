@@ -33,12 +33,14 @@ public class BlogService : IBlogService
 
     public BlogDto Create(BlogCreateDto dto, long userId)
     {
+        var status = _mapper.Map<BlogStatus>(dto.Status);
+
         var blog = new BlogPost(
             userId,
             dto.Title,
             dto.Description,
             new List<string>(),
-            BlogStatus.DRAFT
+            status
         );
 
         var created = _blogRepository.Create(blog);
@@ -49,9 +51,9 @@ public class BlogService : IBlogService
     {
         var blog = _mapper.Map<BlogPost>(blogDto);
         if (blog.Status != BlogStatus.POSTED)
-        {
             throw new Exception("Only posted blogs can be changed.");
-        }
+
+        blog.UpdateDescription(blogDto.Description);
 
         var updated = _blogRepository.Update(blog);
         return _mapper.Map<BlogDto>(updated);

@@ -37,7 +37,7 @@ public class BlogController : ControllerBase
         if (userRole != UserRole.Author && userRole != UserRole.Tourist)
             return Forbid();
 
-        var blogDto = new BlogCreateDto { Title = title, Description = description };
+        var blogDto = new BlogCreateDto { Title = title, Description = description, Status = BlogStatusDto.DRAFT };
         var createdBlog = _blogService.Create(blogDto, userId);
 
         if (images == null || !images.Any())

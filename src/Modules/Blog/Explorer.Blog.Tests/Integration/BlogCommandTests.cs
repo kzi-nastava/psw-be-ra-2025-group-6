@@ -1,6 +1,7 @@
 ﻿using Explorer.API.Controllers;
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
+using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Infrastructure.Database;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Microsoft.AspNetCore.Http;
@@ -56,7 +57,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         if (existingBlog == null)
         {
-            existingBlog = new DomainBlog(-11, "Test blog za update", "Opis bloga za update", new List<string>());
+            existingBlog = new DomainBlog(-11, "Test blog za update", "Opis bloga za update", new List<string>(), BlogStatus.POSTED);
 
             typeof(DomainBlog)
                 .GetProperty("Id")?
