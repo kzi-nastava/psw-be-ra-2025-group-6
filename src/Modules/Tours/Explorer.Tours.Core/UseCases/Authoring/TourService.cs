@@ -40,8 +40,6 @@ public class TourService : ITourService
 
     public TourDto Create(TourDto entity)
     {
-        entity.Status = TourStatusDto.DRAFT;
-        entity.Price = 0;
         var result = _tourRepository.Create(_mapper.Map<Tour>(entity));
         return _mapper.Map<TourDto>(result);
     }

@@ -11,6 +11,8 @@ public class Tour : Entity
     public float Price { get; init; }
     public TourStatus Status { get; init; }
 
+    public long AuthorId { get; init; }
+
     public Tour(
         string name,
         string description,
@@ -19,7 +21,6 @@ public class Tour : Entity
         float price,
         TourStatus status)
     {
-
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Invalid Name.");
 
@@ -38,5 +39,32 @@ public class Tour : Entity
         Tags = tags ?? new List<string>();
         Price = price;
         Status = status;
+    }
+    public Tour(
+        string name,
+        string description,
+        TourDifficulty difficulty,
+        List<string> tags,
+        long AuthorId)
+    {
+
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Invalid Name.");
+
+        if (!Enum.IsDefined(typeof(TourDifficulty), difficulty))
+            throw new ArgumentException("Invalid Difficulty.");
+        if (AuthorId <= 0)
+            throw new ArgumentException("Invalid AuthorId.");
+
+   
+
+
+        Name = name;
+        Description = description;
+        Difficulty = difficulty;
+        Tags = tags ?? new List<string>();
+        Price = 0;
+        Status = TourStatus.DRAFT;
+        this.AuthorId = AuthorId;
     }
 }
