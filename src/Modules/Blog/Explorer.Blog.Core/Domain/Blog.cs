@@ -9,6 +9,7 @@ public class Blog : Entity
     public string Description { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public List<string> Images { get; private set; }
+    public BlogStatus Status { get; set; }
 
     private Blog() { }
 
