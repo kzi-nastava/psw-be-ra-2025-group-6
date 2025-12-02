@@ -2,7 +2,7 @@
 
 namespace Explorer.Blog.Core.Domain;
 
-public class Blog : Entity
+public class BlogPost : Entity
 {
     public long UserId { get; private set; }
     public string Title { get; private set; }
@@ -11,9 +11,9 @@ public class Blog : Entity
     public List<string> Images { get; private set; }
     public BlogStatus Status { get; set; }
 
-    private Blog() { }
+    private BlogPost() { }
 
-    public Blog(long userId, string title, string description, List<string> images, BlogStatus status)
+    public BlogPost(long userId, string title, string description, List<string> images, BlogStatus status)
     {
         if (userId == 0) throw new ArgumentException("Invalid UserId.");
 
