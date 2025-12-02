@@ -8,4 +8,5 @@ public class BlogDto
     public string Description { get; set; }
     public DateTime CreatedAt { get; set; }
     public List<string> Images { get; set; }
+    public BlogStatusDto Status { get; set; }
 }

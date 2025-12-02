@@ -9,5 +9,6 @@ public class BlogProfile : Profile
     public BlogProfile()
     {
         CreateMap<BlogDto, Explorer.Blog.Core.Domain.Blog>().ReverseMap();
+        CreateMap<BlogStatus, BlogStatusDto>().ReverseMap();
     }
 }

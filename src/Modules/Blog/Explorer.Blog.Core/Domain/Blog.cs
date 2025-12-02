@@ -13,7 +13,7 @@ public class Blog : Entity
 
     private Blog() { }
 
-    public Blog(long userId, string title, string description, List<string> images)
+    public Blog(long userId, string title, string description, List<string> images, BlogStatus status)
     {
         if (userId == 0) throw new ArgumentException("Invalid UserId.");
 
@@ -28,6 +28,7 @@ public class Blog : Entity
         Description = description;
         Images = images ?? new List<string>();
         CreatedAt = DateTime.UtcNow;
+        Status = status;
     }
 
     public void AddImages(List<string> imagePaths)

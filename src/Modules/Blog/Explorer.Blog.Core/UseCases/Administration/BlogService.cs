@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
+using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.UseCases;
 
@@ -32,11 +33,13 @@ public class BlogService : IBlogService
 
     public BlogDto Create(BlogCreateDto dto, long userId)
     {
+        var status = _mapper.Map<BlogStatus>(dto.Status);
         var blog = new Explorer.Blog.Core.Domain.Blog(
             userId,
             dto.Title,
             dto.Description,
-            new List<string>() 
+            new List<string>(),
+            status
         );
         var created = _blogRepository.Create(blog);
         return _mapper.Map<BlogDto>(created);
