@@ -32,6 +32,7 @@ namespace Explorer.Stakeholders.Tests.Integration.AdminUsers
             await ExecuteSqlScript("TestData/a-delete.sql");
             await ExecuteSqlScript("TestData/b-users.sql");
             await ExecuteSqlScript("TestData/c-people.sql");
+            await ExecuteSqlScript("TestData/d-reviewapp.sql");
 
             // 2) authenticate as admin
             await AuthenticateClientAsAdmin();
