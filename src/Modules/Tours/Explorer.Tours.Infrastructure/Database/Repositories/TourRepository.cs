@@ -54,16 +54,21 @@ public class TourRepository<Tour, TDbContext> : ITourRepository<Tour>
 
     public Tour Update(Tour tour)
     {
+        var existingTour = Get(tour.Id);
+        if (existingTour == null)
+            throw new NotFoundException("Not found: " + tour.Id);
+
+        DbContext.Entry(existingTour).CurrentValues.SetValues(tour);
+
         try
         {
-            DbContext.Update(tour);
             DbContext.SaveChanges();
         }
         catch (DbUpdateException e)
         {
             throw new NotFoundException(e.Message);
         }
-        return tour;
+        return existingTour;
     }
 
     public void Delete(long id)

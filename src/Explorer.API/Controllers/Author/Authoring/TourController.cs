@@ -1,8 +1,11 @@
-﻿using Explorer.BuildingBlocks.Core.UseCases;
+﻿using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Explorer.API.Controllers.Author.Authoring;
 
@@ -38,18 +41,34 @@ public class TourController : ControllerBase
     [HttpPost]
     public ActionResult<TourDto> Create([FromBody] TourDto tour)
     {
+        var userId = User.PersonId();
+        tour.AuthorId = userId;
         return Ok(_tourService.Create(tour));
     }
 
     [HttpPut("{id:long}")]
-    public ActionResult<TourDto> Update([FromBody] TourDto tour)
+    public ActionResult<TourDto> Update(long id, [FromBody] TourDto tour)
     {
+        var existingTour = _tourService.Get(id);
+        if (existingTour.AuthorId != User.PersonId())
+        {
+            throw new ForbiddenException("You're not allowed to edit this tour");
+        }
+
+        tour.Id = id; // Ensure the DTO id matches the route id
+        tour.AuthorId = User.PersonId();
         return Ok(_tourService.Update(tour));
     }
+
 
     [HttpDelete("{id:long}")]
     public ActionResult Delete(long id)
     {
+        if (_tourService.Get(id).AuthorId != User.PersonId())
+        {
+            throw new ForbiddenException("You're not allowed to delete this tour");
+        }
+
         _tourService.Delete(id);
         return Ok();
     }
