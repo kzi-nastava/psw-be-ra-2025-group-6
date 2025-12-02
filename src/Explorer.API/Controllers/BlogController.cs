@@ -1,7 +1,9 @@
 ﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
+using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
+using Explorer.Tours.API.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -114,5 +116,11 @@ public class BlogController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
+    }
+
+    [HttpGet("paged")]
+    public ActionResult<PagedResult<BlogDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
+    {
+        return Ok(_blogService.GetPaged(page, pageSize));
     }
 }
