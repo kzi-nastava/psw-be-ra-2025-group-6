@@ -109,6 +109,65 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         Should.Throw<NotFoundException>(() => controller.UpdateBlog(-1000, updatedBlog));
     }
 
+    public async Task CreatesBlog_WithStatus()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        string title = "Test blog sa statusom";
+        string description = "Opis bloga";
+        List<IFormFile>? images = null;
+        BlogStatusDto status = BlogStatusDto.POSTED;
+
+        var actionResult = await controller.CreateBlog(title, description, images, status);
+        var okResult = actionResult.Result as OkObjectResult;
+        okResult.ShouldNotBeNull();
+
+        var result = okResult.Value as BlogDto;
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe(status);
+    }
+
+    [Fact]
+    public void ArchiveBlog_SetsStatusToArchived()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Blog za arhiviranje", "Opis", new List<string>(), BlogStatus.POSTED);
+        typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, -5);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        var result = controller.ArchiveBlog(blog.Id);
+        result.ShouldBeOfType<NoContentResult>();
+
+        var storedBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == blog.Id);
+        storedBlog.Status.ShouldBe(BlogStatus.ARCHIVED);
+    }
+
+
+    [Fact]
+    public void DeleteBlog_RemovesBlog()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Blog za brisanje", "Opis", new List<string>(), BlogStatus.POSTED);
+        typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, -6);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        var result = controller.DeleteBlog(blog.Id);
+        result.ShouldBeOfType<OkObjectResult>();
+
+        var storedBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == blog.Id);
+        storedBlog.ShouldBeNull();
+    }
+
     private static BlogController CreateController(IServiceScope scope)
     {
         return new BlogController(scope.ServiceProvider.GetRequiredService<IBlogService>())
