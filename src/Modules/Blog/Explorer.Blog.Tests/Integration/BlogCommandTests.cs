@@ -28,7 +28,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         string description = "Opis novog test bloga";
         List<IFormFile>? images = null;
 
-        var actionResult = await controller.CreateBlog(title, description, images);
+        var actionResult = await controller.CreateBlog(title, description, images, BlogStatusDto.DRAFT);
         var okResult = actionResult.Result as OkObjectResult;
         okResult.ShouldNotBeNull();
 

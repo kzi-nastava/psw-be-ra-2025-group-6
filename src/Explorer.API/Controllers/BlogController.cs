@@ -32,14 +32,15 @@ public class BlogController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<BlogDto>> CreateBlog([FromForm] string title,
                                                         [FromForm] string description,
-                                                        [FromForm] List<IFormFile>? images)
+                                                        [FromForm] List<IFormFile>? images,
+                                                        [FromForm] BlogStatusDto status)
     {
         var userId = User.PersonId();
         var userRole = User.Role();
         if (userRole != UserRole.Author && userRole != UserRole.Tourist)
             return Forbid();
 
-        var blogDto = new BlogCreateDto { Title = title, Description = description, Status = BlogStatusDto.DRAFT };
+        var blogDto = new BlogCreateDto { Title = title, Description = description, Status = status };
         var createdBlog = _blogService.Create(blogDto, userId);
 
         if (images == null || !images.Any())
@@ -63,6 +64,7 @@ public class BlogController : ControllerBase
 
             imagePaths.Add($"/images/blogs/{fileName}");
         }
+
         _blogService.AddImages(createdBlog.Id, imagePaths);
         createdBlog.Images = imagePaths;
         return Ok(createdBlog);
