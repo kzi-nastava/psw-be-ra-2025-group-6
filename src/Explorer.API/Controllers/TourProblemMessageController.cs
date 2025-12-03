@@ -32,8 +32,15 @@ namespace Explorer.API.Controllers
         [HttpGet("{problemId:long}")]
         public async Task<ActionResult<PagedResult<TourProblemMessageDto>>> GetForProblem(long problemId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await _tourProblemMessageService.GetForProblem(problemId, page, pageSize);
-            return Ok(result);
+            try
+            {
+                var result = await _tourProblemMessageService.GetForProblem(problemId, page, pageSize);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return new ObjectResult(e.ToString()) { StatusCode = 500 };
+            }
         }
     }
 }

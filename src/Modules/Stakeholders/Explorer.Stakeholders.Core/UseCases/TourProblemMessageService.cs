@@ -5,9 +5,10 @@ using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.API.Public.Authoring;
-using Explorer.Tours.API.Dtos;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Explorer.BuildingBlocks.Core.Exceptions;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {
@@ -18,14 +19,16 @@ namespace Explorer.Stakeholders.Core.UseCases
         private readonly ITourService _tourService;
         private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public TourProblemMessageService(ITourProblemMessageRepository tourProblemMessageRepository, ITourProblemRepository tourProblemRepository, ITourService tourService, INotificationService notificationService, IMapper mapper)
+        public TourProblemMessageService(ITourProblemMessageRepository tourProblemMessageRepository, ITourProblemRepository tourProblemRepository, ITourService tourService, INotificationService notificationService, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _tourProblemMessageRepository = tourProblemMessageRepository;
             _tourProblemRepository = tourProblemRepository;
             _tourService = tourService;
             _notificationService = notificationService;
             _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<TourProblemMessageDto> Create(TourProblemMessageDto messageDto)
@@ -69,10 +72,26 @@ namespace Explorer.Stakeholders.Core.UseCases
             return _mapper.Map<TourProblemMessageDto>(result);
         }
 
-        public Task<PagedResult<TourProblemMessageDto>> GetForProblem(long problemId, int page, int pageSize)
+        public async Task<PagedResult<TourProblemMessageDto>> GetForProblem(long problemId, int page, int pageSize)
         {
+            var problem = await _tourProblemRepository.GetById(problemId);
+            if (problem == null) throw new NotFoundException("Tour problem not found.");
+
+            var tour = _tourService.Get(problem.TourId);
+
+            var userIdClaim = _httpContextAccessor.HttpContext?.User?.Claims?.FirstOrDefault(c => c.Type == "personId");
+            if (userIdClaim == null || !long.TryParse(userIdClaim.Value, out var userId))
+            {
+                throw new ForbiddenException("User ID not found in token.");
+            }
+
+            if (userId != problem.TouristId && userId != tour.AuthorId)
+            {
+                throw new ForbiddenException("You are not authorized to view this conversation.");
+            }
+
             var result = _tourProblemMessageRepository.GetForProblem(problemId, page, pageSize);
-            return Task.FromResult(_mapper.Map<PagedResult<TourProblemMessageDto>>(result));
+            return _mapper.Map<PagedResult<TourProblemMessageDto>>(result);
         }
     }
 }

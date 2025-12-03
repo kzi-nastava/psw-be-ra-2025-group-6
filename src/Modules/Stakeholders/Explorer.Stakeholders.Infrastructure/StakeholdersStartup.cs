@@ -19,6 +19,7 @@ public static class StakeholdersStartup
 {
     public static IServiceCollection ConfigureStakeholdersModule(this IServiceCollection services)
     {
+        services.AddHttpContextAccessor();
         services.AddAutoMapper(typeof(UserMapperProfile).Assembly);
         SetupCore(services);
         SetupInfrastructure(services);
