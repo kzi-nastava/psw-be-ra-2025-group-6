@@ -10,5 +10,4 @@ public class BlogDto
     public List<string> Images { get; set; }
     public BlogStatusDto Status { get; set; }
     public DateTime? LastModifiedAt { get; set; }
-    public string Username { get; set; }
 }

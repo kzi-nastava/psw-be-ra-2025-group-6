@@ -54,11 +54,12 @@ public class BlogService : IBlogService
         if (blog == null)
             throw new NotFoundException("Blog not found");
 
-        if (blog.Status != BlogStatus.POSTED)
-            throw new Exception("Only posted blogs can be changed.");
+        if (blog.Status != BlogStatus.DRAFT)
+            throw new Exception("Only blogs POSTED blogs can be changed.");
 
         blog.UpdateTitle(blogDto.Title);
         blog.UpdateDescription(blogDto.Description);
+        blog.Status = (BlogStatus)blogDto.Status;
 
         var updated = _blogRepository.Update(blog);
         return _mapper.Map<BlogDto>(updated);
