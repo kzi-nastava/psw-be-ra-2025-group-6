@@ -71,10 +71,52 @@ public class BlogController : ControllerBase
     }
 
     [HttpPut("{id:long}")]
-    public ActionResult<BlogDto> UpdateBlog(long id, [FromBody] BlogDto dto)
+    public async Task<ActionResult<BlogDto>> UpdateBlog(int id,
+                                                        [FromForm] string title,
+                                                        [FromForm] string description,
+                                                        [FromForm] BlogStatusDto status,
+                                                        [FromForm] List<IFormFile>? images = null)
     {
         var userId = User.PersonId();
-        var updated = _blogService.Update(dto);
+        var blogDto = new BlogDto
+        {
+            Id = id,
+            Title = title,
+            Description = description,
+            Status = status,
+            UserId = userId,
+            CreatedAt = DateTime.UtcNow,
+            Images = new List<string>(),
+            LastModifiedAt = DateTime.UtcNow
+        };
+
+        var updated = _blogService.Update(blogDto);
+
+        if (images != null && images.Any())
+        {
+            var root = Directory.GetCurrentDirectory();
+            var folder = Path.Combine(root, "wwwroot/images/blogs");
+            Directory.CreateDirectory(folder);
+
+            var imagePaths = new List<string>();
+
+            foreach (var image in images)
+            {
+                var fileName = $"{Guid.NewGuid()}_{image.FileName}";
+                var path = Path.Combine(folder, fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await image.CopyToAsync(stream);
+                }
+
+                imagePaths.Add($"/images/blogs/{fileName}");
+            }
+
+            _blogService.AddImages(id, imagePaths);
+            updated.Images.AddRange(imagePaths);
+        }
+
         return Ok(updated);
     }
 
