@@ -36,6 +36,7 @@ public class StakeholdersContext : DbContext
             .WithOne()
             .HasForeignKey<UserProfile>(s => s.UserId);
         ConfigureReview(modelBuilder);
+        ConfigureTourProblems(modelBuilder);
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)
@@ -44,6 +45,17 @@ public class StakeholdersContext : DbContext
             .HasOne<User>()
             .WithOne()
             .HasForeignKey<Person>(s => s.UserId);
+    }
+
+    private static void ConfigureTourProblems(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TourProblem>(builder =>
+        {
+            builder.Property(p => p.Status).IsRequired();
+            builder.Property(p => p.ReportedAt).IsRequired();
+            builder.Property(p => p.DeadlineAt).IsRequired(false);
+            builder.Property(p => p.ResolvedAt).IsRequired(false);
+        });
     }
 
     private static void ConfigureReview(ModelBuilder modelBuilder)

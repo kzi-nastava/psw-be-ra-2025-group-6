@@ -11,5 +11,9 @@ namespace Explorer.Stakeholders.API.Dtos
         public int Priority { get; set; }
         public string Description { get; set; }
         public DateTime ReportedAt { get; set; }
+        public int Status { get; set; }
+        public DateTime? DeadlineAt { get; set; }
+        public DateTime? ResolvedAt { get; set; }
+        public bool IsOverdue { get; set; }
     }
 }

@@ -11,8 +11,11 @@ namespace Explorer.Stakeholders.Core.Domain
         public ProblemPriority Priority { get; private set; }
         public string Description { get; private set; }
         public DateTime ReportedAt { get; private set; }
+        public ProblemStatus Status { get; private set; }
+        public DateTime? DeadlineAt { get; private set; }
+        public DateTime? ResolvedAt { get; private set; }
 
-        
+
         private TourProblem() { }
 
         public TourProblem(long tourId, long touristId, ProblemCategory category,
@@ -24,6 +27,7 @@ namespace Explorer.Stakeholders.Core.Domain
             Priority = priority;
             Description = description;
             ReportedAt = DateTime.UtcNow;
+            Status = ProblemStatus.Open;
 
             Validate();
         }
@@ -35,6 +39,27 @@ namespace Explorer.Stakeholders.Core.Domain
             Description = description;
 
             Validate();
+        }
+
+        public void SetDeadline(DateTime deadlineUtc)
+        {
+            if (DeadlineAt.HasValue) throw new InvalidOperationException("Deadline already set for this problem.");
+            if (Status != ProblemStatus.Open) throw new InvalidOperationException("Cannot change deadline on a closed problem.");
+            if (deadlineUtc <= DateTime.UtcNow) throw new ArgumentException("Deadline must be in the future.");
+            DeadlineAt = deadlineUtc;
+        }
+
+        public void MarkClosed(DateTime closedAtUtc)
+        {
+            Status = ProblemStatus.Closed;
+            ResolvedAt = closedAtUtc;
+        }
+
+        public bool IsOverdue(DateTime utcNow)
+        {
+            if (Status != ProblemStatus.Open) return false;
+            if (DeadlineAt.HasValue && utcNow > DeadlineAt.Value) return true;
+            return ReportedAt <= utcNow.AddDays(-5);
         }
 
         private void Validate()
@@ -62,5 +87,12 @@ namespace Explorer.Stakeholders.Core.Domain
         Medium = 1,
         High = 2,
         Critical = 3
+    }
+
+    public enum ProblemStatus
+    {
+        Open = 0,
+        Closed = 1,
+        Penalized = 2
     }
 }

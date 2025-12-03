@@ -21,6 +21,12 @@ namespace Explorer.Stakeholders.Core.UseCases
             _mapper = mapper;
         }
 
+        public async Task<List<TourProblemDto>> GetAll()
+        {
+            var problems = await _repository.GetAll();
+            return problems.Select(_mapper.Map<TourProblemDto>).ToList();
+        }
+
         public async Task<TourProblemDto> Create(TourProblemDto problemDto)
         {
             var problem = new TourProblem(
@@ -55,6 +61,19 @@ namespace Explorer.Stakeholders.Core.UseCases
             );
 
             var result = await _repository.Update(existingProblem);
+            return _mapper.Map<TourProblemDto>(result);
+        }
+
+        public async Task<TourProblemDto> SetDeadline(long id, DateTime deadlineUtc)
+        {
+            var problem = await _repository.GetById(id);
+
+            if (problem == null)
+                throw new KeyNotFoundException($"Problem with ID {id} not found.");
+
+            problem.SetDeadline(deadlineUtc);
+
+            var result = await _repository.Update(problem);
             return _mapper.Map<TourProblemDto>(result);
         }
 

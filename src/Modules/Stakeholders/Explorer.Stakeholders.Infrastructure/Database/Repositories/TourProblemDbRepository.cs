@@ -21,6 +21,11 @@ public class TourProblemDbRepository : ITourProblemRepository
         _dbSet = DbContext.Set<TourProblem>();
     }
 
+    public async Task<List<TourProblem>> GetAll()
+    {
+        return await _dbSet.ToListAsync();
+    }
+
     public async Task<List<TourProblem>> GetByTourist(long touristId)
     {
         return await _dbSet
