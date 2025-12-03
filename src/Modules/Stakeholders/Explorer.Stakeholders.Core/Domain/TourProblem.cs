@@ -3,7 +3,7 @@ using System;
 
 namespace Explorer.Stakeholders.Core.Domain
 {
-    public class TourProblem : Entity
+    public class TourProblem : AggregateRoot
     {
         public long TourId { get; private set; }
         public long TouristId { get; private set; }
