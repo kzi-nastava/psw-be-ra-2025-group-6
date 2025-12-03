@@ -76,7 +76,7 @@ public class TourService : ITourService
         _tourRepository.Update(tour);
         return _mapper.Map<TourDto>(tour);
     }
-}
+
 
     public void AddEquipmentToTour(long tourId, long equipmentId)
     {
