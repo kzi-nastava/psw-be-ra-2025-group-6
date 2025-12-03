@@ -67,27 +67,30 @@ public class BlogCommandTests : BaseBlogIntegrationTest
             dbContext.SaveChanges();
         }
 
-        var updatedBlog = new BlogDto
-        {
-            Id = -3,
-            Title = "Promenjen naslov bloga",
-            Description = "Promenjen opis bloga",
-            UserId = existingBlog.UserId,
-            CreatedAt = existingBlog.CreatedAt,
-            Images = new List<string>()
-        };
+        string title = "Promenjen naslov bloga";
+        string description = "Promenjen opis bloga";
+        BlogStatusDto status = BlogStatusDto.DRAFT;
+        List<IFormFile>? images = null;
 
-        var result = ((ObjectResult)controller.UpdateBlog(existingBlog.Id, updatedBlog).Result)?.Value as BlogDto;
+        var actionResult = controller
+            .UpdateBlog(-3, title, description, status, images)
+            .GetAwaiter()
+            .GetResult();
 
-        result.ShouldNotBeNull();
-        ((long)result.Id).ShouldBe(existingBlog.Id);
-        result.Title.ShouldBe(updatedBlog.Title);
-        result.Description.ShouldBe(updatedBlog.Description);
+        var okResult = actionResult.Result as OkObjectResult;
+        okResult.ShouldNotBeNull();
 
-        var storedBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == existingBlog.Id);
+        var blogResult = okResult.Value as BlogDto;
+        blogResult.ShouldNotBeNull();
+
+        blogResult.Id.ShouldBe(-3);
+        blogResult.Title.ShouldBe(title);
+        blogResult.Description.ShouldBe(description);
+
+        var storedBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == -3);
         storedBlog.ShouldNotBeNull();
-        storedBlog.Title.ShouldBe(updatedBlog.Title);
-        storedBlog.Description.ShouldBe(updatedBlog.Description);
+        storedBlog.Title.ShouldBe(title);
+        storedBlog.Description.ShouldBe(description);
     }
 
     [Fact]
@@ -96,17 +99,16 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
 
-        var updatedBlog = new BlogDto
-        {
-            Id = -1000,
-            Title = "Nepostojeci blog",
-            Description = "Opis",
-            UserId = -11,
-            CreatedAt = DateTime.UtcNow,
-            Images = new List<string>()
-        };
+        string title = "Nepostojeci blog";
+        string description = "Opis";
+        BlogStatusDto status = BlogStatusDto.DRAFT;
+        List<IFormFile>? images = null;
 
-        Should.Throw<NotFoundException>(() => controller.UpdateBlog(-1000, updatedBlog));
+        Should.Throw<NotFoundException>(() =>
+            controller.UpdateBlog(-1000, title, description, status, images)
+                     .GetAwaiter()
+                     .GetResult()
+        );
     }
 
     public async Task CreatesBlog_WithStatus()
