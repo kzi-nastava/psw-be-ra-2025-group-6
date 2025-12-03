@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Explorer.Stakeholders.API\Explorer.Stakeholders.API.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj" />
+  </ItemGroup>
+
 </Project>

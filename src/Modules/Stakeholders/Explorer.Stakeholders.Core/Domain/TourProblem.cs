@@ -13,7 +13,7 @@ namespace Explorer.Stakeholders.Core.Domain
         public DateTime ReportedAt { get; private set; }
 
         
-        private TourProblem() { }
+        private TourProblem() { Description = string.Empty; }
 
         public TourProblem(long tourId, long touristId, ProblemCategory category,
                           ProblemPriority priority, string description)

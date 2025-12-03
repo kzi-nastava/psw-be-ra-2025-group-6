@@ -13,6 +13,7 @@ public class StakeholdersContext : DbContext
 
     public DbSet<TouristPosition> TouristPositions { get; set; }
     public DbSet<TourProblem> TourProblems { get; set; }
+    public DbSet<TourProblemMessage> TourProblemMessages { get; set; }
 
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
@@ -36,6 +37,7 @@ public class StakeholdersContext : DbContext
             .WithOne()
             .HasForeignKey<UserProfile>(s => s.UserId);
         ConfigureReview(modelBuilder);
+        ConfigureTourProblemMessage(modelBuilder);
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)
@@ -66,5 +68,13 @@ public class StakeholdersContext : DbContext
                 .HasForeignKey<ReviewApp>(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+    }
+
+    private static void ConfigureTourProblemMessage(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TourProblemMessage>()
+            .HasOne<TourProblem>()
+            .WithMany()
+            .HasForeignKey(s => s.TourProblemId);
     }
 }

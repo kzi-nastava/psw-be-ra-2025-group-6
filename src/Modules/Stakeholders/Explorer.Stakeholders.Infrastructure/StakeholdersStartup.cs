@@ -38,6 +38,7 @@ public static class StakeholdersStartup
         services.AddScoped<IClubService, ClubService>();
 
         services.AddScoped<ITourProblemService, TourProblemService>();
+        services.AddScoped<ITourProblemMessageService, TourProblemMessageService>();
 
     }
 
@@ -51,6 +52,7 @@ public static class StakeholdersStartup
         services.AddScoped<IClubRepository, ClubDbRepository>();
         services.AddScoped<ITouristPositionRepository, TouristPositionRepository>();
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
+        services.AddScoped<ITourProblemMessageRepository, TourProblemMessageDatabaseRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();
