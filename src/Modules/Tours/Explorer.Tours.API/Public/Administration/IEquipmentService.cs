@@ -5,6 +5,7 @@ namespace Explorer.Tours.API.Public.Administration;
 
 public interface IEquipmentService
 {
+    List<EquipmentDto> GetAll();
     PagedResult<EquipmentDto> GetPaged(int page, int pageSize);
     EquipmentDto Create(EquipmentDto equipment);
     EquipmentDto Update(EquipmentDto equipment);

@@ -27,6 +27,13 @@ public class ToursContext : DbContext
         modelBuilder.HasDefaultSchema("tours");
 
         ConfigureTouristEquipment(modelBuilder);
+
+        modelBuilder.Entity<Tour>()
+    .HasMany(t => t.Equipment)
+    .WithOne()
+    .HasForeignKey(e => e.TourId)
+    .OnDelete(DeleteBehavior.SetNull);
+
     }
 
     private static void ConfigureTouristEquipment(ModelBuilder modelBuilder)

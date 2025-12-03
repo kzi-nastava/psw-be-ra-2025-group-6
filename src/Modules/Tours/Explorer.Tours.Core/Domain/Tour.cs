@@ -3,7 +3,7 @@ using Explorer.BuildingBlocks.Core.Exceptions;
 
 namespace Explorer.Tours.Core.Domain;
 
-public class Tour : Entity
+public class Tour : AggregateRoot
 {
     public string Name { get; init; }
     public string? Description { get; init; }
@@ -14,13 +14,19 @@ public class Tour : Entity
 
     public long AuthorId { get; init; }
 
+    public List<Equipment>? Equipment { get; private set; }
+
+    private Tour() {
+    }
+
     public Tour(
         string name,
         string description,
         TourDifficulty difficulty,
         List<string> tags,
         float price,
-        TourStatus status)
+        TourStatus status,
+        List<Equipment> equipment)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Invalid Name.");
@@ -40,6 +46,7 @@ public class Tour : Entity
         Tags = tags ?? new List<string>();
         Price = price;
         Status = status;
+        Equipment = equipment ?? new List<Equipment>();
     }
     public Tour(
         string name,
@@ -67,6 +74,36 @@ public class Tour : Entity
         Price = 0;
         Status = TourStatus.DRAFT;
         this.AuthorId = AuthorId;
+        Equipment = new List<Equipment>();
+    }
+    public void AddEquipment(Equipment equipment)
+    {
+        if (equipment == null) { 
+        throw new ArgumentException("Invalid Equipment.");
+        }
+        if (Status == TourStatus.ARCHIVED)
+        {
+            throw new InvalidOperationException("Cannot modify equipment of an archived tour.");
+        }
+        else
+        {
+            Equipment.Add(equipment);
+        }
+    }
+    public void RemoveEquipment(Equipment equipment) {
+
+        if (equipment == null)
+        {
+            throw new ArgumentException("Invalid Equipment.");
+        }
+        if (Status == TourStatus.ARCHIVED)
+        {
+            throw new InvalidOperationException("Cannot modify equipment of an archived tour.");
+        }
+        else
+        {
+            Equipment.Remove(equipment);
+        }
     }
 
     public void Archive(long authorId)

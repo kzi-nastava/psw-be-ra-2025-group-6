@@ -29,6 +29,14 @@ public class TourController : ControllerBase
     [HttpGet]
     public ActionResult<List<TourDto>> GetAll()
     {
+        try
+        {
+            Debug.WriteLine("GetAll method called in TourController");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Exception in GetAll method: {ex.Message}");
+        }
         return Ok(_tourService.GetAll());
     }
 
@@ -87,5 +95,20 @@ public class TourController : ControllerBase
         return Ok(result);
     }
 
+
+
+    [HttpPut("{tourId}/add-equipment/{equipmentId}")]
+    public ActionResult AddEquipmentToTour(long tourId, long equipmentId)
+    {
+        _tourService.AddEquipmentToTour(tourId, equipmentId);
+        return Ok();
+    }
+
+    [HttpPut("{tourId}/remove-equipment/{equipmentId}")]
+    public ActionResult RemoveEquipmentFromTour(long tourId, long equipmentId)
+    {
+        _tourService.RemoveEquipmentFromTour(tourId, equipmentId);
+        return Ok();
+    }
 
 }
