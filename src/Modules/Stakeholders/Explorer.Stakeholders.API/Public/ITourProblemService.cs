@@ -8,6 +8,7 @@ namespace Explorer.Stakeholders.API.Public
     {
         Task<TourProblemDto> Create(TourProblemDto problemDto);
         Task<List<TourProblemDto>> GetByTourist(long touristId);
+        Task<List<TourProblemDto>> GetByAuthor(long authorId);
         Task<TourProblemDto> Update(TourProblemDto problemDto);
         Task Delete(long id, long touristId);
     }
