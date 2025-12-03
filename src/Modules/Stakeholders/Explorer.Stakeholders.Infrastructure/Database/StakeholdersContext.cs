@@ -14,6 +14,7 @@ public class StakeholdersContext : DbContext
     public DbSet<TouristPosition> TouristPositions { get; set; }
     public DbSet<TourProblem> TourProblems { get; set; }
     public DbSet<TourProblemMessage> TourProblemMessages { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
@@ -38,6 +39,7 @@ public class StakeholdersContext : DbContext
             .HasForeignKey<UserProfile>(s => s.UserId);
         ConfigureReview(modelBuilder);
         ConfigureTourProblemMessage(modelBuilder);
+        ConfigureNotification(modelBuilder);
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)
@@ -76,5 +78,12 @@ public class StakeholdersContext : DbContext
             .HasOne<TourProblem>()
             .WithMany()
             .HasForeignKey(s => s.TourProblemId);
+    }
+
+    private static void ConfigureNotification(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Notification>()
+            .Property(n => n.Status)
+            .HasConversion<string>();
     }
 }
