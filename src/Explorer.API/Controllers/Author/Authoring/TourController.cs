@@ -81,10 +81,17 @@ public class TourController : ControllerBase
         return Ok();
     }
 
-    [HttpPut("{tourId}/equipment/{equipmentId}")]
+    [HttpPut("{tourId}/add-equipment/{equipmentId}")]
     public ActionResult AddEquipmentToTour(long tourId, long equipmentId)
     {
         _tourService.AddEquipmentToTour(tourId, equipmentId);
+        return Ok();
+    }
+
+    [HttpPut("{tourId}/remove-equipment/{equipmentId}")]
+    public ActionResult RemoveEquipmentFromTour(long tourId, long equipmentId)
+    {
+        _tourService.RemoveEquipmentFromTour(tourId, equipmentId);
         return Ok();
     }
 

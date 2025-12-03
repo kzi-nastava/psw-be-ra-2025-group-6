@@ -75,4 +75,18 @@ public class TourService : ITourService
 
         _tourRepository.Update(tour);
     }
+
+    public void RemoveEquipmentFromTour(long tourId, long equipmentId)
+    {
+        var tour = _tourRepository.Get(tourId);
+        var equipment = _equipmentRepository.Get(equipmentId);
+        if (tour == null)
+            throw new KeyNotFoundException($"Tour with id {tourId} not found.");
+        if (equipment == null)
+            throw new KeyNotFoundException($"Equipment with id {equipmentId} not found.");
+
+        tour.RemoveEquipment(equipment);
+
+        _tourRepository.Update(tour);
+    }
 }
