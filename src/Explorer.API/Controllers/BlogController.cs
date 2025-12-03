@@ -92,7 +92,7 @@ public class BlogController : ControllerBase
     }
 
     [HttpDelete("{id:long}")]
-    public IActionResult DeleteBlog(long id)
+    public ActionResult DeleteBlog(long id)
     {
         var userId = User.PersonId();
 
@@ -106,12 +106,12 @@ public class BlogController : ControllerBase
     }
 
     [HttpPatch("{id:long}/archive")]
-    public ActionResult<BlogDto> ArchiveBlog(long id)
+    public IActionResult ArchiveBlog(long id)
     {
         try
         {
             _blogService.Archive(id);
-            return Ok();
+            return NoContent();
         }
         catch (Exception ex)
         {

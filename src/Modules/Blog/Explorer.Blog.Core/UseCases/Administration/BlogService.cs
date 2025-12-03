@@ -3,6 +3,7 @@ using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
 using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
@@ -49,10 +50,14 @@ public class BlogService : IBlogService
 
     public BlogDto Update(BlogDto blogDto)
     {
-        var blog = _mapper.Map<BlogPost>(blogDto);
+        var blog = _blogRepository.GetById(blogDto.Id);
+        if (blog == null)
+            throw new NotFoundException("Blog not found");
+
         if (blog.Status != BlogStatus.POSTED)
             throw new Exception("Only posted blogs can be changed.");
 
+        blog.UpdateTitle(blogDto.Title);
         blog.UpdateDescription(blogDto.Description);
 
         var updated = _blogRepository.Update(blog);

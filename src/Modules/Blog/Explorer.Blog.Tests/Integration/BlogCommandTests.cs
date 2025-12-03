@@ -137,7 +137,6 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
 
         var blog = new DomainBlog(-11, "Blog za arhiviranje", "Opis", new List<string>(), BlogStatus.POSTED);
-        typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, -5);
         dbContext.Blogs.Add(blog);
         dbContext.SaveChanges();
 
@@ -147,7 +146,6 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         var storedBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == blog.Id);
         storedBlog.Status.ShouldBe(BlogStatus.ARCHIVED);
     }
-
 
     [Fact]
     public void DeleteBlog_RemovesBlog()
@@ -162,7 +160,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         dbContext.SaveChanges();
 
         var result = controller.DeleteBlog(blog.Id);
-        result.ShouldBeOfType<OkObjectResult>();
+        result.ShouldBeOfType<NoContentResult>();
 
         var storedBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == blog.Id);
         storedBlog.ShouldBeNull();

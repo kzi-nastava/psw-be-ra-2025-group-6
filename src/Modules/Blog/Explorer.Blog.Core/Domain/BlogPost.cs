@@ -47,4 +47,12 @@ public class BlogPost : Entity
         Description = newDescription;
         LastModifiedAt = DateTime.UtcNow;
     }
+
+    public void UpdateTitle(string newTitle)
+    {
+        if (string.IsNullOrWhiteSpace(newTitle))
+            throw new Exception("Title cannot be empty");
+
+        Title = newTitle;
+    }
 }
