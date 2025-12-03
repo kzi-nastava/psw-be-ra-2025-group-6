@@ -72,4 +72,12 @@ public class TourController : ControllerBase
         _tourService.Delete(id);
         return Ok();
     }
+
+    [HttpPut("{tourId}/equipment/{equipmentId}")]
+    public ActionResult AddEquipmentToTour(long tourId, long equipmentId)
+    {
+        _tourService.AddEquipmentToTour(tourId, equipmentId);
+        return Ok();
+    }
+
 }

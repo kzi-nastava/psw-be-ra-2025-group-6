@@ -9,12 +9,14 @@ namespace Explorer.Tours.Core.UseCases.Authoring;
 
 public class TourService : ITourService
 {
-    private readonly ITourRepository<Tour> _tourRepository;
+    private readonly ITourRepository _tourRepository;
+    private readonly IEquipmentRepository _equipmentRepository;
     private readonly IMapper _mapper;
 
-    public TourService(ITourRepository<Tour> repository, IMapper mapper)
+    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper)
     {
         _tourRepository = repository;
+        _equipmentRepository = equipmentRepository;
         _mapper = mapper;
     }
 
@@ -58,5 +60,19 @@ public class TourService : ITourService
         }
         else
             _tourRepository.Delete(id);
+    }
+
+    public void AddEquipmentToTour(long tourId, long equipmentId)
+    {
+        var tour = _tourRepository.Get(tourId);
+        var equipment = _equipmentRepository.Get(equipmentId);
+        if (tour == null)
+            throw new KeyNotFoundException($"Tour with id {tourId} not found.");
+        if (equipment == null)
+            throw new KeyNotFoundException($"Equipment with id {equipmentId} not found.");
+
+        tour.AddEquipment(equipment);
+
+        _tourRepository.Update(tour);
     }
 }

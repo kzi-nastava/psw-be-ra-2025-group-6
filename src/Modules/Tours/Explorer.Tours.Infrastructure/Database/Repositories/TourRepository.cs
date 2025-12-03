@@ -3,17 +3,17 @@ using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Explorer.Tours.Core.Domain;
 
 namespace Explorer.Tours.Infrastructure.Database.Repositories;
 
-public class TourRepository<Tour, TDbContext> : ITourRepository<Tour>
-    where Tour : Entity
-    where TDbContext : DbContext
+public class TourRepository: ITourRepository
+
 {
-    protected readonly TDbContext DbContext;
+    protected readonly ToursContext DbContext;
     private readonly DbSet<Tour> _dbSet;
 
-    public TourRepository(TDbContext dbContext)
+    public TourRepository(ToursContext dbContext)
     {
         DbContext = dbContext;
         _dbSet = DbContext.Set<Tour>();
@@ -21,27 +21,36 @@ public class TourRepository<Tour, TDbContext> : ITourRepository<Tour>
 
     public List<Tour> GetAll()
     {
-        return _dbSet.ToList();
+        return DbContext.Tours
+            .Include(t => t.Equipment)
+            .ToList();
     }
 
     public PagedResult<Tour> GetPaged(int page, int pageSize)
     {
-            var totalCount = _dbSet.Count();
-            var items = _dbSet
-                .OrderBy(e => e.Id)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+        var query = DbContext.Tours
+            .Include(t => t.Equipment)
+            .OrderBy(t => t.Id);
 
-            return new PagedResult<Tour>(items, totalCount);
-        
+        var totalCount = query.Count();
 
+        var items = query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return new PagedResult<Tour>(items, totalCount);
     }
 
     public Tour Get(long id)
     {
-        var entity = _dbSet.Find(id);
-        if (entity == null) throw new NotFoundException("Not found: " + id);
+        var entity = DbContext.Tours
+        .Include(t => t.Equipment)
+        .FirstOrDefault(t => t.Id == id);
+
+        if (entity == null)
+            throw new NotFoundException("Not found: " + id);
+
         return entity;
     }
 

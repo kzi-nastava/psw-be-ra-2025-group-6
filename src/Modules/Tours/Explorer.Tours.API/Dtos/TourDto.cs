@@ -10,4 +10,6 @@ public class TourDto
     public float Price { get; set; }
     public TourStatusDto Status { get; set; }
     public long AuthorId { get; set; }
+
+    public List<EquipmentDto>? Equipment { get; set; }
 }
