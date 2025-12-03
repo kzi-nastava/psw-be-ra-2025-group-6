@@ -59,4 +59,19 @@ public class TourService : ITourService
         else
             _tourRepository.Delete(id);
     }
+    public TourDto Archive(long tourId, long authorId)
+    {
+        var tour = _tourRepository.Get(tourId);
+        tour.Archive(authorId);
+        _tourRepository.Update(tour);
+        return _mapper.Map<TourDto>(tour);
+    }
+
+    public TourDto Activate(long tourId, long authorId)
+    {
+        var tour = _tourRepository.Get(tourId);
+        tour.Activate(authorId);
+        _tourRepository.Update(tour);
+        return _mapper.Map<TourDto>(tour);
+    }
 }
