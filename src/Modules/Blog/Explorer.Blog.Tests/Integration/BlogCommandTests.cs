@@ -69,7 +69,6 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         existingBlog.Status = BlogStatus.DRAFT;
         dbContext.SaveChanges();
-
         string title = "Promenjen naslov bloga";
         string description = "Promenjen opis bloga";
         BlogStatusDto status = BlogStatusDto.POSTED;
