@@ -79,10 +79,9 @@ public class BlogController : ControllerBase
     [HttpGet("{id:long}")]
     public ActionResult<BlogDto> GetBlog(long id)
     {
-        var userId = User.PersonId();
         var blog = _blogService.GetById(id);
 
-        if (blog == null || blog.UserId != userId)
+        if (blog == null)
         {
             return NotFound();
         }
