@@ -57,7 +57,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         if (existingBlog == null)
         {
-            existingBlog = new DomainBlog(-11, "Test blog za update", "Opis bloga za update", new List<string>(), BlogStatus.POSTED);
+            existingBlog = new DomainBlog(-11, "Test blog za update", "Opis bloga za update", new List<string>(), BlogStatus.DRAFT);
 
             typeof(DomainBlog)
                 .GetProperty("Id")?
@@ -67,9 +67,12 @@ public class BlogCommandTests : BaseBlogIntegrationTest
             dbContext.SaveChanges();
         }
 
+        existingBlog.Status = BlogStatus.DRAFT;
+        dbContext.SaveChanges();
+
         string title = "Promenjen naslov bloga";
         string description = "Promenjen opis bloga";
-        BlogStatusDto status = BlogStatusDto.DRAFT;
+        BlogStatusDto status = BlogStatusDto.POSTED;
         List<IFormFile>? images = null;
 
         var actionResult = controller
