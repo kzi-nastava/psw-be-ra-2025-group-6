@@ -103,13 +103,13 @@ public class BlogController : ControllerBase
         return NoContent();
     }
 
-    [HttpPut("{id:long}/archive")]
-    public ActionResult<BlogDto> ArchiveBlog(long id, [FromBody] BlogDto dto)
+    [HttpPatch("{id:long}/archive")]
+    public ActionResult<BlogDto> ArchiveBlog(long id)
     {
         try
         {
             _blogService.Archive(id);
-            return NoContent();
+            return Ok();
         }
         catch (Exception ex)
         {
