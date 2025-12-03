@@ -29,6 +29,14 @@ public class TourController : ControllerBase
     [HttpGet]
     public ActionResult<List<TourDto>> GetAll()
     {
+        try
+        {
+            Debug.WriteLine("GetAll method called in TourController");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Exception in GetAll method: {ex.Message}");
+        }
         return Ok(_tourService.GetAll());
     }
 
