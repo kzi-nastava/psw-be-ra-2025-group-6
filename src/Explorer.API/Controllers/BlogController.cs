@@ -122,4 +122,18 @@ public class BlogController : ControllerBase
     {
         return Ok(_blogService.GetPaged(page, pageSize));
     }
+
+    [HttpPatch("{id:long}/description")]
+    public ActionResult<BlogDto> UpdateBlogDescription(long id, [FromBody] BlogDescriptionUpdateDto dto)
+    {
+        try
+        {
+            var updated = _blogService.UpdateDescription(id, dto.NewDescription);
+            return Ok(updated);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

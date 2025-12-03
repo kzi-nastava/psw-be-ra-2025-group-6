@@ -13,4 +13,5 @@ public interface IBlogService
     BlogDto Delete(long id);
     void AddImages(long blogId, List<string> imagePaths);
     void Archive(long blogId);
+    BlogDto UpdateDescription(long blogId, string newDescription);
 }

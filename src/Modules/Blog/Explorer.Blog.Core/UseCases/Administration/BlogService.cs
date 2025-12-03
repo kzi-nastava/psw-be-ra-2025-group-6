@@ -98,4 +98,18 @@ public class BlogService : IBlogService
 
         _blogRepository.Update(blog);
     }
+
+    public BlogDto UpdateDescription(long blogId, string newDescription)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+
+        if (blog.Status != BlogStatus.POSTED)
+            throw new Exception("Only posted blogs can update description with this endpoint.");
+
+        blog.UpdateDescription(newDescription);
+        var updated = _blogRepository.Update(blog);
+        return _mapper.Map<BlogDto>(updated);
+    }
 }
