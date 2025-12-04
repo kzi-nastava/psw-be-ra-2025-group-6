@@ -11,7 +11,7 @@ public class BlogPost : Entity
     public List<string> Images { get; private set; }
 
 
-    private readonly List<Comment> _comments;
+    private readonly List<Comment> _comments = new();
     public IReadOnlyList<Comment> Comments => _comments.AsReadOnly();
 
     private BlogPost() { }

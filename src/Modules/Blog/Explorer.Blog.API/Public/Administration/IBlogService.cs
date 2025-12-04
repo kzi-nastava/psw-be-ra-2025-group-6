@@ -12,4 +12,8 @@ public interface IBlogService
     BlogDto GetById(long id);
     BlogDto Delete(long id);
     void AddImages(long blogId, List<string> imagePaths);
+    void AddComment(long blogId, long userId, string text);
+    void EditComment(long blogId, int commentId, long userId, string text);
+    void DeleteComment(long blogId, int commentId, long userId);
+    List<CommentDto> GetComments(long id);
 }

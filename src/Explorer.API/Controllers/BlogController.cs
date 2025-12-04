@@ -4,6 +4,7 @@ using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.WebSockets;
 
 namespace Explorer.API.Controllers;
 
@@ -100,5 +101,39 @@ public class BlogController : ControllerBase
         _blogService.Delete(id);
 
         return NoContent();
+    }
+
+    [HttpPost("{id:long}/comments")]
+    public IActionResult AddComment(long id, [FromBody] CommentCreateDto dto)
+    {
+        var userId = User.PersonId();
+        _blogService.AddComment(id, userId, dto.Text);
+
+        return Ok();
+    }
+
+    [HttpPut("{id:long}/comments/{commentId:int}")]
+    public IActionResult EditComment(long id, int commentId, [FromBody] CommentCreateDto dto)
+    {
+        var userId = User.PersonId();
+        _blogService.EditComment(id, commentId, userId, dto.Text);
+
+        return Ok();
+    }
+
+    [HttpDelete("{id:long}/comments/{commentId:int}")]
+    public IActionResult DeleteComment(long id, int commentId)
+    {
+        var userId = User.PersonId();
+        _blogService.DeleteComment(id, commentId, userId);
+
+        return NoContent();
+    }
+
+    [HttpGet("{id:long}/comments")]
+    public IActionResult GetComment(long id) 
+    { 
+        var comments = _blogService.GetComments(id);
+        return Ok(); 
     }
 }
