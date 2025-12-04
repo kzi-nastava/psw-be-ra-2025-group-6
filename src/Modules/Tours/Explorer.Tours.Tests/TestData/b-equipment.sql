@@ -1,4 +1,4 @@
-﻿INSERT INTO tours."Equipment"("Id", "Name", "Description")
+INSERT INTO tours."Equipment"("Id", "Name", "Description")
 VALUES (-1, 'Voda', 'Količina vode varira od temperature i trajanja ture. Preporuka je da se pije pola litre vode na jedan sat umerena fizičke aktivnosti (npr. hajk u prirodi bez značajnog uspona) po umerenoj vrućini');
 
 INSERT INTO tours."Equipment"("Id", "Name", "Description")

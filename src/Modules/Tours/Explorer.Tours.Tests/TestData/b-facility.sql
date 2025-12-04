@@ -1,4 +1,4 @@
-﻿INSERT INTO tours."Facility"("Id", "Name", "Comment", "Longitude", "Latitude", "Type")
+INSERT INTO tours."Facility"("Id", "Name", "Comment", "Longitude", "Latitude", "Type")
 VALUES (1, 'Central Park WC', 'Original facility', '-73.968285', '40.785091', 2);
 
 INSERT INTO tours."Facility"("Id", "Name", "Comment", "Longitude", "Latitude", "Type")
