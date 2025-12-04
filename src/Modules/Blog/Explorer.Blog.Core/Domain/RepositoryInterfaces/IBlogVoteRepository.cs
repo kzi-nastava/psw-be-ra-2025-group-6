@@ -1,6 +1,4 @@
-﻿using Explorer.Blog.Core.Domain;
-
-namespace Explorer.Blog.Core.Domain.RepositoryInterfaces
+﻿namespace Explorer.Blog.Core.Domain.RepositoryInterfaces
 {
     public interface IBlogVoteRepository
     {

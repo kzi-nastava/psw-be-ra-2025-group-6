@@ -110,7 +110,10 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
     private static BlogController CreateController(IServiceScope scope)
     {
-        return new BlogController(scope.ServiceProvider.GetRequiredService<IBlogService>())
+        var blogService = scope.ServiceProvider.GetRequiredService<IBlogService>();
+        var blogVoteService = scope.ServiceProvider.GetRequiredService<IBlogVoteService>();
+
+        return new BlogController(blogService, blogVoteService)
         {
             ControllerContext = BuildContext("-11")
         };
