@@ -10,6 +10,10 @@ public class BlogPost : Entity
     public DateTime CreatedAt { get; private set; }
     public List<string> Images { get; private set; }
 
+
+    private readonly List<Comment> _comments;
+    public IReadOnlyList<Comment> Comments => _comments.AsReadOnly();
+
     private BlogPost() { }
 
     public BlogPost(long userId, string title, string description, List<string> images)
@@ -35,5 +39,37 @@ public class BlogPost : Entity
             return;
 
         Images = Images.Concat(imagePaths).ToList();
+    }
+
+    public void AddComment(long userId, string authorName, string text)
+    {
+        var comment = new Comment(userId, authorName, text);
+        _comments.Add(comment);
+    }
+
+    public void EditComment(int id, long userId, string text)
+    {
+        var comment = _comments[id];
+
+        if (comment.UserId != userId)
+            throw new InvalidOperationException("Only authors can edit their comments.");
+
+        if (DateTime.UtcNow - comment.CreatedAt > TimeSpan.FromMinutes(15))
+            throw new InvalidOperationException("Edit time expired.");
+
+        comment.Edit(text);
+    }
+
+    public void DeleteComment(int id, long userId)
+    {
+        var comment = _comments[id];
+
+        if (comment.UserId != userId)
+            throw new InvalidOperationException("Only authors can delete their comments.");
+
+        if (DateTime.UtcNow - comment.CreatedAt > TimeSpan.FromMinutes(15))
+            throw new InvalidOperationException("Delete time expired.");
+
+        _comments.RemoveAt(id);
     }
 }
