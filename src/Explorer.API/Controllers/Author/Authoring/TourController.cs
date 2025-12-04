@@ -111,4 +111,18 @@ public class TourController : ControllerBase
         return Ok();
     }
 
+    [HttpPost("{tourId:long}/key-points")]
+    public ActionResult<TourDto> AddKeyPoint(long tourId, [FromBody] KeyPointDto keyPoint)
+    {
+        var tour = _tourService.Get(tourId);
+        if (tour.AuthorId != User.PersonId())
+        {
+            throw new ForbiddenException("You're not allowed to add key points to this tour.");
+        }
+
+        keyPoint.TourId = tourId;
+        var result = _tourService.AddKeyPoint(tourId, keyPoint);
+        return Ok(result);
+    }
+
 }
