@@ -15,6 +15,7 @@
 		<None Remove="TestData\b-equipment.sql" />
 		<None Remove="TestData\b-facility.sql" />
 		<None Remove="TestData\b-monuments.sql" />
+		<None Remove="TestData\b-z-keypoints.sql" />
 		<None Remove="TestData\c-annualawards.sql" />
 		<None Remove="TestData\c-meetups.sql" />
 		<None Remove="TestData\y-tourist-equipment.sql" />
@@ -26,6 +27,9 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="TestData\b-tours.sql">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="TestData\b-z-keypoints.sql">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="TestData\b-equipment.sql">
