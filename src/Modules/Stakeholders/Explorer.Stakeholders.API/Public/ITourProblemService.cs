@@ -12,6 +12,6 @@ namespace Explorer.Stakeholders.API.Public
         Task<List<TourProblemDto>> GetByAuthor(long authorId);
         Task<TourProblemDto> Update(TourProblemDto problemDto);
         Task Delete(long id, long touristId);
-        Task<TourProblemDto> SetDeadline(long id, DateTime deadlineUtc);
-    }
+    Task<TourProblemDto> SetDeadline(long id, DateTime deadlineUtc, long adminPersonId);
+}
 }

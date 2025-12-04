@@ -1,5 +1,6 @@
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -38,7 +39,8 @@ namespace Explorer.Stakeholders.API.Controllers.Admin
 
             try
             {
-                var result = await _tourProblemService.SetDeadline(id, deadlineUtc);
+                var adminPersonId = User.PersonId();
+                var result = await _tourProblemService.SetDeadline(id, deadlineUtc, adminPersonId);
                 return Ok(result);
             }
             catch (ArgumentException ex)
