@@ -15,8 +15,8 @@ public class ToursContext : DbContext
     public DbSet<Tour> Tours { get; set; }
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Meetup> Meetups { get; set; }
-
-
+    public DbSet<ShoppingCart> ShoppingCarts { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
 
     public DbSet<Facility> Facility { get; set; }
 
@@ -27,6 +27,13 @@ public class ToursContext : DbContext
         modelBuilder.HasDefaultSchema("tours");
 
         ConfigureTouristEquipment(modelBuilder);
+        ConfigureShoppingCart(modelBuilder);
+    }
+
+    private static void ConfigureShoppingCart(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ShoppingCart>()
+            .OwnsMany(s => s.Items);
     }
 
     private static void ConfigureTouristEquipment(ModelBuilder modelBuilder)
