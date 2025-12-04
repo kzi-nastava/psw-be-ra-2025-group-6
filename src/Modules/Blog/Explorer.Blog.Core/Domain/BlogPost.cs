@@ -1,4 +1,5 @@
-﻿using Explorer.BuildingBlocks.Core.Domain;
+﻿using Explorer.Blog.Core.Domain.RepositoryInterfaces;
+using Explorer.BuildingBlocks.Core.Domain;
 
 namespace Explorer.Blog.Core.Domain;
 
@@ -36,4 +37,10 @@ public class BlogPost : Entity
 
         Images = Images.Concat(imagePaths).ToList();
     }
+
+    public int GetUpvotes(IBlogVoteRepository voteRepo)
+        => voteRepo.CountUpvotes(this.Id);
+
+    public int GetDownvotes(IBlogVoteRepository voteRepo)
+        => voteRepo.CountDownvotes(this.Id);
 }
