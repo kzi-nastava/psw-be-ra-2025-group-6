@@ -12,10 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 

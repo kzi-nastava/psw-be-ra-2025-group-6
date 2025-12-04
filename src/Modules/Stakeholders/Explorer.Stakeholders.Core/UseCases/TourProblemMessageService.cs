@@ -4,7 +4,6 @@ using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using Explorer.Tours.API.Public.Authoring;
 using Microsoft.AspNetCore.Http;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using System.Linq;
@@ -16,16 +15,16 @@ namespace Explorer.Stakeholders.Core.UseCases
     {
         private readonly ITourProblemMessageRepository _tourProblemMessageRepository;
         private readonly ITourProblemRepository _tourProblemRepository;
-        private readonly ITourService _tourService;
+        private readonly ITourInfoGateway _tourInfoGateway;
         private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public TourProblemMessageService(ITourProblemMessageRepository tourProblemMessageRepository, ITourProblemRepository tourProblemRepository, ITourService tourService, INotificationService notificationService, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public TourProblemMessageService(ITourProblemMessageRepository tourProblemMessageRepository, ITourProblemRepository tourProblemRepository, ITourInfoGateway tourInfoGateway, INotificationService notificationService, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _tourProblemMessageRepository = tourProblemMessageRepository;
             _tourProblemRepository = tourProblemRepository;
-            _tourService = tourService;
+            _tourInfoGateway = tourInfoGateway;
             _notificationService = notificationService;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
@@ -36,7 +35,8 @@ namespace Explorer.Stakeholders.Core.UseCases
             var problem = await _tourProblemRepository.GetById(messageDto.TourProblemId);
             if (problem == null) throw new NotFoundException("Tour problem not found.");
 
-            var tour = _tourService.Get(problem.TourId);
+            var tour = await _tourInfoGateway.GetById(problem.TourId);
+            if (tour == null) throw new NotFoundException("Tour not found.");
 
             if (messageDto.SenderId != problem.TouristId && messageDto.SenderId != tour.AuthorId)
             {
@@ -77,7 +77,8 @@ namespace Explorer.Stakeholders.Core.UseCases
             var problem = await _tourProblemRepository.GetById(problemId);
             if (problem == null) throw new NotFoundException("Tour problem not found.");
 
-            var tour = _tourService.Get(problem.TourId);
+            var tour = await _tourInfoGateway.GetById(problem.TourId);
+            if (tour == null) throw new NotFoundException("Tour not found.");
 
             var userIdClaim = _httpContextAccessor.HttpContext?.User?.Claims?.FirstOrDefault(c => c.Type == "personId");
             if (userIdClaim == null || !long.TryParse(userIdClaim.Value, out var userId))

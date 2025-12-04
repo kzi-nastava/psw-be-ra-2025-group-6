@@ -3,7 +3,6 @@ using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using Explorer.Tours.API.Public.Authoring;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +13,14 @@ namespace Explorer.Stakeholders.Core.UseCases
     public class TourProblemService : ITourProblemService
     {
         private readonly ITourProblemRepository _repository;
-        private readonly ITourService _tourService;
+        private readonly ITourInfoGateway _tourInfoGateway;
         private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
 
-        public TourProblemService(ITourProblemRepository repository, ITourService tourService, INotificationService notificationService, IMapper mapper)
+        public TourProblemService(ITourProblemRepository repository, ITourInfoGateway tourInfoGateway, INotificationService notificationService, IMapper mapper)
         {
             _repository = repository;
-            _tourService = tourService;
+            _tourInfoGateway = tourInfoGateway;
             _notificationService = notificationService;
             _mapper = mapper;
         }
@@ -54,7 +53,8 @@ namespace Explorer.Stakeholders.Core.UseCases
 
         public async Task<List<TourProblemDto>> GetByAuthor(long authorId)
         {
-            var authorTours = _tourService.GetAll().Where(t => t.AuthorId == authorId).ToList();
+            var authorTours = await _tourInfoGateway.GetByAuthor(authorId);
+            if (!authorTours.Any()) return new List<TourProblemDto>();
             var tourIds = authorTours.Select(t => t.Id).ToList();
             var problems = await _repository.GetByTourIds(tourIds);
             return problems.Select(_mapper.Map<TourProblemDto>).ToList();
@@ -88,7 +88,10 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             var result = await _repository.Update(problem);
 
-            var tour = _tourService.Get(problem.TourId);
+            var tour = await _tourInfoGateway.GetById(problem.TourId);
+            if (tour == null)
+                throw new KeyNotFoundException($"Tour with ID {problem.TourId} not found.");
+
             var content = $"The administrator has set a deadline of {deadlineUtc:yyyy-MM-dd} for resolving problem #{problem.Id} on the tour '{tour.Name}'. If you do not respond or take the required action by the specified deadline, appropriate penalties may be applied.";
 
             _notificationService.Create(new NotificationDto
