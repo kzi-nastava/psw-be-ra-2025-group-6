@@ -8,6 +8,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Explorer.Stakeholders.API\Explorer.Stakeholders.API.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Explorer.BuildingBlocks.Core\Explorer.BuildingBlocks.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
 </Project>

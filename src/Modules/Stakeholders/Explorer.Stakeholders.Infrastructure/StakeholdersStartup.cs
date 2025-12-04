@@ -19,6 +19,7 @@ public static class StakeholdersStartup
 {
     public static IServiceCollection ConfigureStakeholdersModule(this IServiceCollection services)
     {
+        services.AddHttpContextAccessor();
         services.AddAutoMapper(typeof(UserMapperProfile).Assembly);
         SetupCore(services);
         SetupInfrastructure(services);
@@ -38,6 +39,8 @@ public static class StakeholdersStartup
         services.AddScoped<IClubService, ClubService>();
 
         services.AddScoped<ITourProblemService, TourProblemService>();
+        services.AddScoped<ITourProblemMessageService, TourProblemMessageService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
     }
 
@@ -51,6 +54,8 @@ public static class StakeholdersStartup
         services.AddScoped<IClubRepository, ClubDbRepository>();
         services.AddScoped<ITouristPositionRepository, TouristPositionRepository>();
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
+        services.AddScoped<ITourProblemMessageRepository, TourProblemMessageDatabaseRepository>();
+        services.AddScoped<INotificationRepository, NotificationDatabaseRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();

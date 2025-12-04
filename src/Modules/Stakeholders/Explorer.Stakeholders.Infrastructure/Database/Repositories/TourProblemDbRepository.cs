@@ -33,6 +33,13 @@ public class TourProblemDbRepository : ITourProblemRepository
             .ToListAsync();
     }
 
+    public async Task<List<TourProblem>> GetByTourIds(List<long> tourIds)
+    {
+        return await _dbSet
+            .Where(p => tourIds.Contains(p.TourId))
+            .ToListAsync();
+    }
+
     public async Task<TourProblem?> GetById(long id)
     {
         var entity = await _dbSet.FindAsync(id);

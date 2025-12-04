@@ -15,8 +15,8 @@ namespace Explorer.Stakeholders.Core.Domain
         public DateTime? DeadlineAt { get; private set; }
         public DateTime? ResolvedAt { get; private set; }
 
-
-        private TourProblem() { }
+        
+        private TourProblem() { Description = string.Empty; }
 
         public TourProblem(long tourId, long touristId, ProblemCategory category,
                           ProblemPriority priority, string description)
