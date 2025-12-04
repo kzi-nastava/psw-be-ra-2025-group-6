@@ -12,4 +12,6 @@ public class TourDto
     public long AuthorId { get; set; }
 
     public List<EquipmentDto>? Equipment { get; set; }
+    public List<KeyPointDto>? KeyPoints { get; set; }
+    public double DistanceInKm { get; set; }
 }
