@@ -11,6 +11,8 @@ public interface ITourService
     TourDto Create(TourDto tour);
     TourDto Update(TourDto tour);
     void Delete(long id);
+    TourDto Archive(long tourId, long authorId);
+    TourDto Activate(long tourId, long authorId);
 
     void AddEquipmentToTour(long tourId, long equipmentId);
     void RemoveEquipmentFromTour(long tourId, long equipmentId);

@@ -81,6 +81,22 @@ public class TourController : ControllerBase
         return Ok();
     }
 
+    [HttpPut("{id:long}/archive")]
+    public ActionResult<TourDto> Archive(long id)
+    {
+        var result = _tourService.Archive(id, User.PersonId());
+        return Ok(result);
+    }
+
+    [HttpPut("{id:long}/activate")]
+    public ActionResult<TourDto> Activate(long id)
+    {
+        var result = _tourService.Activate(id, User.PersonId());
+        return Ok(result);
+    }
+
+
+
     [HttpPut("{tourId}/add-equipment/{equipmentId}")]
     public ActionResult AddEquipmentToTour(long tourId, long equipmentId)
     {
