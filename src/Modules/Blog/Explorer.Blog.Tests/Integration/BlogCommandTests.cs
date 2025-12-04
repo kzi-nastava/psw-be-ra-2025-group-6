@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using DomainBlog = Explorer.Blog.Core.Domain.Blog;
+using DomainBlog = Explorer.Blog.Core.Domain.BlogPost;
 
 namespace Explorer.Blog.Tests.Integration.Administration;
 
