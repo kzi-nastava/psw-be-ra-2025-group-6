@@ -3,8 +3,8 @@
     public class TourReviewDto
     {
         public long Id { get; set; }
-        public long UserId { get; init; }
-        public long TourId { get; init; }
+        public long UserId { get; set; }
+        public long TourId { get; set; }
         public int Rating { get; set; }
         public int CompletedPercent { get; set; }
         public string? Comment { get; set; }

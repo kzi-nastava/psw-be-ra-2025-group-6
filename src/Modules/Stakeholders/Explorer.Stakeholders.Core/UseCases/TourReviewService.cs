@@ -22,7 +22,8 @@ namespace Explorer.Stakeholders.Core.UseCases
                tourRev.UserId,
                tourRev.TourId,
                tourRev.Rating,
-               tourRev.Comment
+               tourRev.Comment,
+               tourRev.CompletedPercent
            );
 
             _tourReviewRepository.Create(review);
