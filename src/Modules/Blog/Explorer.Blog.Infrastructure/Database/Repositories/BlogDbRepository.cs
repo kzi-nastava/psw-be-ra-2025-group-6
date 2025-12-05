@@ -4,6 +4,7 @@ using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
+using Explorer.Blog.Core.Domain;
 
 namespace Explorer.Blog.Infrastructure.Database.Repositories;
 

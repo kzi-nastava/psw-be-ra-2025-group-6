@@ -1,5 +1,4 @@
 ﻿using Explorer.BuildingBlocks.Core.UseCases;
-using DomainBlog = Explorer.Blog.Core.Domain.BlogPost;
 
 namespace Explorer.Blog.Core.Domain.RepositoryInterfaces;
 

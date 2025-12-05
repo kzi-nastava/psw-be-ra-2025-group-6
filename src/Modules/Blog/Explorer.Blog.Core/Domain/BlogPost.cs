@@ -10,10 +10,12 @@ public class BlogPost : Entity
     public string Description { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public List<string> Images { get; private set; }
+    public BlogStatus Status { get; set; }
+    public DateTime? LastModifiedAt { get; private set; }
 
     private BlogPost() { }
 
-    public BlogPost(long userId, string title, string description, List<string> images)
+    public BlogPost(long userId, string title, string description, List<string> images, BlogStatus status)
     {
         if (userId == 0) throw new ArgumentException("Invalid UserId.");
 
@@ -28,6 +30,7 @@ public class BlogPost : Entity
         Description = description;
         Images = images ?? new List<string>();
         CreatedAt = DateTime.UtcNow;
+        Status = status;
     }
 
     public void AddImages(List<string> imagePaths)
@@ -36,6 +39,23 @@ public class BlogPost : Entity
             return;
 
         Images = Images.Concat(imagePaths).ToList();
+    }
+
+    public void UpdateDescription(string newDescription)
+    {
+        if (string.IsNullOrWhiteSpace(newDescription))
+            throw new ArgumentException("Description cannot be empty.");
+
+        Description = newDescription;
+        LastModifiedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateTitle(string newTitle)
+    {
+        if (string.IsNullOrWhiteSpace(newTitle))
+            throw new Exception("Title cannot be empty");
+
+        Title = newTitle;
     }
 
     public int GetUpvotes(IBlogVoteRepository voteRepo)
