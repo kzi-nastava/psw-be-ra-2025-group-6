@@ -105,4 +105,17 @@ public class TourService : ITourService
 
         _tourRepository.Update(tour);
     }
+    public TourDto AddKeyPoint(long tourId, KeyPointDto keyPoint)
+    {
+        var tour = _tourRepository.Get(tourId);
+
+        keyPoint.TourId = tourId;
+        var domainKeyPoint = _mapper.Map<KeyPoint>(keyPoint);
+
+        tour.AddKeyPoint(domainKeyPoint);
+
+        var result = _tourRepository.Update(tour);
+
+        return _mapper.Map<TourDto>(result);
+    }
 }

@@ -20,6 +20,8 @@ public class ToursContext : DbContext
 
     public DbSet<Facility> Facility { get; set; }
 
+    public DbSet<KeyPoint> KeyPoints { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,6 +35,12 @@ public class ToursContext : DbContext
     .WithOne()
     .HasForeignKey(e => e.TourId)
     .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Tour>()
+    .HasMany(t => t.KeyPoints)
+    .WithOne()
+    .HasForeignKey(kp => kp.TourId)
+    .OnDelete(DeleteBehavior.Cascade);
 
     }
 

@@ -18,5 +18,6 @@ public class ToursProfile : Profile
         CreateMap<Tour, TourDto>().ReverseMap();
         CreateMap<MonumentDto, Monument>().ReverseMap();
         CreateMap<MeetupDto, Meetup>().ReverseMap();
+        CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
     }
 }

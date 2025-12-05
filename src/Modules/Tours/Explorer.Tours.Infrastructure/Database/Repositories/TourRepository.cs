@@ -23,6 +23,7 @@ public class TourRepository: ITourRepository
     {
         return DbContext.Tours
             .Include(t => t.Equipment)
+            .Include(t => t.KeyPoints)
             .ToList();
     }
 
@@ -30,6 +31,7 @@ public class TourRepository: ITourRepository
     {
         var query = DbContext.Tours
             .Include(t => t.Equipment)
+            .Include(t => t.KeyPoints)
             .OrderBy(t => t.Id);
 
         var totalCount = query.Count();
@@ -46,6 +48,7 @@ public class TourRepository: ITourRepository
     {
         var entity = DbContext.Tours
         .Include(t => t.Equipment)
+        .Include(t => t.KeyPoints)
         .FirstOrDefault(t => t.Id == id);
 
         if (entity == null)
