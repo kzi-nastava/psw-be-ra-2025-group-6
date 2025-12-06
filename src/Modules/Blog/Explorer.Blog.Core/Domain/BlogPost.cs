@@ -12,6 +12,8 @@ public class BlogPost : Entity
     public List<string> Images { get; private set; }
     public BlogStatus Status { get; set; }
     public DateTime? LastModifiedAt { get; private set; }
+    public BlogQualityStatus QualityStatus { get; private set; } = BlogQualityStatus.None;
+
 
     private BlogPost() { }
 
@@ -63,4 +65,26 @@ public class BlogPost : Entity
 
     public int GetDownvotes(IBlogVoteRepository voteRepo)
         => voteRepo.CountDownvotes(this.Id);
+
+    public void UpdateQualityStatus(int score, int commentCount)
+    {
+        if(score < -10)
+        {
+            QualityStatus = BlogQualityStatus.Closed;
+            return;
+        }
+        if(score > 500 && commentCount > 30)
+        {
+            QualityStatus = BlogQualityStatus.Famous;
+            return;
+        }
+
+        if (score > 100 || commentCount > 10)
+        {
+            QualityStatus = BlogQualityStatus.Active;
+            return;
+        }
+
+        QualityStatus = BlogQualityStatus.None;
+    }
 }
