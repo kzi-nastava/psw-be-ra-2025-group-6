@@ -32,7 +32,9 @@ public class Tour : AggregateRoot
         List<string> tags,
         float price,
         TourStatus status,
-        List<Equipment> equipment)
+        List<Equipment> equipment,
+        List<KeyPoint> keypoints,
+        List<TourDuration> durations)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Invalid Name.");
@@ -54,9 +56,9 @@ public class Tour : AggregateRoot
         Status = status;
         Equipment = equipment ?? new List<Equipment>();
 
-        KeyPoints = new List<KeyPoint>();
+        KeyPoints = keypoints ?? new List<KeyPoint>();
         DistanceInKm = 0;
-        Duration = new List<TourDuration>();
+        Duration = durations ?? new List<TourDuration>();
 
 
     }
@@ -163,10 +165,16 @@ public class Tour : AggregateRoot
         if (duration == null)
             throw new ArgumentException("Invalid duration.");
 
-        Duration = Duration
-            .Where(d => d.TravelType != duration.TravelType)
-            .Append(duration)
-            .ToList();
+        var existing = Duration.FirstOrDefault(d => d.TravelType == duration.TravelType);
+        if (existing != null)
+        {
+            existing.UpdateMinutes(duration.Minutes);
+        }
+        else
+        {
+            Duration.Add(duration);
+        }
     }
+
 
 }

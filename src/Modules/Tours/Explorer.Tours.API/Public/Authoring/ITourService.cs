@@ -19,5 +19,5 @@ public interface ITourService
 
     TourDto AddKeyPoint(long tourId, KeyPointDto keyPoint);
     TourDto UpdateTourDistance(long tourId, double distance);
-    TourDto UpdateDuration(long tourId, TravelTypeDto travelType, double minutes);
+    TourDto UpdateDuration(long tourId, List<TourDurationDto> durations);
 }

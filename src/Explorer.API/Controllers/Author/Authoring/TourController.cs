@@ -64,7 +64,7 @@ public class TourController : ControllerBase
             throw new ForbiddenException("You're not allowed to edit this tour");
         }
 
-        tour.Id = id; // Ensure the DTO id matches the route id
+        tour.Id = id;
         tour.AuthorId = User.PersonId();
         return Ok(_tourService.Update(tour));
     }
@@ -138,22 +138,17 @@ public class TourController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPut("{tourId}/duration")]
-    public ActionResult<TourDto> UpdateDuration(long tourId,
-    [FromQuery] TravelTypeDto travelType,
-    [FromQuery] double minutes)
+    [HttpPut("{tourId}/durations")]
+    public ActionResult<TourDto> UpdateDurations(long tourId, [FromBody] List<TourDurationDto> durations)
     {
         var tour = _tourService.Get(tourId);
-        if (tour == null) return NotFound();
-
         if (tour.AuthorId != User.PersonId())
-        {
             throw new ForbiddenException("You're not allowed to edit this tour.");
-        }
 
-        var result = _tourService.UpdateDuration(tourId, travelType, minutes);
+        var result = _tourService.UpdateDuration(tourId, durations);
         return Ok(result);
     }
+
 
 
 }

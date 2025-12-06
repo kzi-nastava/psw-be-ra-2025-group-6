@@ -24,5 +24,12 @@ public class TourDuration : ValueObject
         yield return TravelType;
         yield return Minutes;
     }
+    public void UpdateMinutes(double minutes)
+    {
+        if (minutes < 0)
+            throw new ArgumentException("Invalid duration.");
+
+        Minutes = minutes;
+    }
 }
 
