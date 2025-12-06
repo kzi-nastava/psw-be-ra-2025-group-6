@@ -1,4 +1,5 @@
-﻿using Explorer.BuildingBlocks.Core.Domain;
+﻿using Explorer.Blog.Core.Domain.RepositoryInterfaces;
+using Explorer.BuildingBlocks.Core.Domain;
 
 namespace Explorer.Blog.Core.Domain;
 
@@ -11,6 +12,7 @@ public class BlogPost : Entity
     public List<string> Images { get; private set; }
     public BlogStatus Status { get; set; }
     public DateTime? LastModifiedAt { get; private set; }
+
     private BlogPost() { }
 
     public BlogPost(long userId, string title, string description, List<string> images, BlogStatus status)
@@ -55,4 +57,10 @@ public class BlogPost : Entity
 
         Title = newTitle;
     }
+
+    public int GetUpvotes(IBlogVoteRepository voteRepo)
+        => voteRepo.CountUpvotes(this.Id);
+
+    public int GetDownvotes(IBlogVoteRepository voteRepo)
+        => voteRepo.CountDownvotes(this.Id);
 }

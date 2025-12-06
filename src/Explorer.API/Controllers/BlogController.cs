@@ -3,7 +3,6 @@ using Explorer.Blog.API.Public.Administration;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
-using Explorer.Tours.API.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,10 +14,12 @@ namespace Explorer.API.Controllers;
 public class BlogController : ControllerBase
 {
     private readonly IBlogService _blogService;
+    private readonly IBlogVoteService _blogVoteService;
 
-    public BlogController(IBlogService blogService)
+    public BlogController(IBlogService blogService, IBlogVoteService blogVoteService)
     {
         _blogService = blogService;
+        _blogVoteService = blogVoteService;
     }
 
     [HttpGet("my-blogs")]
@@ -145,6 +146,24 @@ public class BlogController : ControllerBase
         _blogService.Delete(id);
 
         return NoContent();
+    }
+
+    [HttpPost("{id:long}/vote")]
+    public IActionResult VoteOnBlog(long id, [FromBody] VoteTypeDto voteType)
+    {
+        var userId = User.PersonId();
+        _blogVoteService.Vote(userId, id, voteType);
+        var votes = _blogVoteService.GetVotes(id);
+        return Ok(votes);
+    }
+
+    [HttpGet("{id:long}/votes")]
+    public IActionResult GetVotes(long id)
+    {
+        var votes = _blogVoteService.GetVotes(id);
+        var userId = User.PersonId();
+        var userVote = userId != 0 ? _blogVoteService.GetUserVote(userId, id)?.Type : null;
+        return Ok(new { votes.upvotes, votes.downvotes, userVote });
     }
 
     [HttpPatch("{id:long}/archive")]
