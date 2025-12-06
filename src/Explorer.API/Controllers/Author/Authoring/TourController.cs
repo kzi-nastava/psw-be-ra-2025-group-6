@@ -3,6 +3,7 @@ using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
+using Explorer.Tours.Core.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -136,5 +137,23 @@ public class TourController : ControllerBase
         var result = _tourService.UpdateTourDistance(tourId, distance);
         return Ok(result);
     }
+
+    [HttpPut("{tourId}/duration")]
+    public ActionResult<TourDto> UpdateDuration(long tourId,
+    [FromQuery] TravelTypeDto travelType,
+    [FromQuery] double minutes)
+    {
+        var tour = _tourService.Get(tourId);
+        if (tour == null) return NotFound();
+
+        if (tour.AuthorId != User.PersonId())
+        {
+            throw new ForbiddenException("You're not allowed to edit this tour.");
+        }
+
+        var result = _tourService.UpdateDuration(tourId, travelType, minutes);
+        return Ok(result);
+    }
+
 
 }

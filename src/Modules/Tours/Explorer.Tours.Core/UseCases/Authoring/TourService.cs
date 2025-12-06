@@ -129,4 +129,17 @@ public class TourService : ITourService
 
         return _mapper.Map<TourDto>(result);
     }
+
+    public TourDto UpdateDuration(long tourId, TravelTypeDto travelTypeDto, double minutes)
+    {
+        var tour = _tourRepository.Get(tourId);
+        if (tour == null) throw new KeyNotFoundException("Tour not found.");
+
+        var travelType = _mapper.Map<TravelType>(travelTypeDto);
+
+        var duration = new TourDuration(travelType, minutes);
+
+        tour.SetDuration(duration);
+        return _mapper.Map<TourDto>((_tourRepository.Update(tour)));
+    }
 }

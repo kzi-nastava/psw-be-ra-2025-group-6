@@ -20,6 +20,8 @@ public class Tour : AggregateRoot
 
     public double DistanceInKm { get; private set; }
 
+    public List<TourDuration> Duration { get; private set; }
+
     private Tour() {
     }
 
@@ -54,6 +56,9 @@ public class Tour : AggregateRoot
 
         KeyPoints = new List<KeyPoint>();
         DistanceInKm = 0;
+        Duration = new List<TourDuration>();
+
+
     }
     public Tour(
         string name,
@@ -85,6 +90,7 @@ public class Tour : AggregateRoot
 
         KeyPoints = new List<KeyPoint>();
         DistanceInKm = 0;
+        Duration = new List<TourDuration>();
     }
     public void AddEquipment(Equipment equipment)
     {
@@ -149,4 +155,18 @@ public class Tour : AggregateRoot
         if (distance < 0) throw new ArgumentException("Distance cannot be negative.");
         DistanceInKm = distance;
     }
+    public void SetDuration(TourDuration duration)
+    {
+        if (Status == TourStatus.ARCHIVED)
+            throw new InvalidOperationException("Cannot modify duration of archived tour.");
+
+        if (duration == null)
+            throw new ArgumentException("Invalid duration.");
+
+        Duration = Duration
+            .Where(d => d.TravelType != duration.TravelType)
+            .Append(duration)
+            .ToList();
+    }
+
 }
