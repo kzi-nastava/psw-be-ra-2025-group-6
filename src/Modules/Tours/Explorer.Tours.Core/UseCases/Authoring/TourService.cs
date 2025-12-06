@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
@@ -113,6 +114,16 @@ public class TourService : ITourService
         var domainKeyPoint = _mapper.Map<KeyPoint>(keyPoint);
 
         tour.AddKeyPoint(domainKeyPoint);
+
+        var result = _tourRepository.Update(tour);
+
+        return _mapper.Map<TourDto>(result);
+    }
+    public TourDto UpdateTourDistance(long tourId, double distance)
+    {
+        var tour = _tourRepository.Get(tourId);
+
+        tour.SetDistance(distance);
 
         var result = _tourRepository.Update(tour);
 

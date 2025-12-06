@@ -18,4 +18,5 @@ public interface ITourService
     void RemoveEquipmentFromTour(long tourId, long equipmentId);
 
     TourDto AddKeyPoint(long tourId, KeyPointDto keyPoint);
+    TourDto UpdateTourDistance(long tourId, double distance);
 }

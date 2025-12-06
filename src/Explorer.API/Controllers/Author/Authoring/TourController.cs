@@ -124,5 +124,17 @@ public class TourController : ControllerBase
         var result = _tourService.AddKeyPoint(tourId, keyPoint);
         return Ok(result);
     }
+    [HttpPut("{tourId}/distance")]
+    public ActionResult<TourDto> UpdateDistance(long tourId, [FromQuery] double distance)
+    {
+        var tour = _tourService.Get(tourId);
+        if (tour.AuthorId != User.PersonId())
+        {
+            throw new ForbiddenException("You're not allowed to edit this tour.");
+        }
+
+        var result = _tourService.UpdateTourDistance(tourId, distance);
+        return Ok(result);
+    }
 
 }
