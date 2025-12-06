@@ -87,4 +87,12 @@ public class BlogPost : Entity
 
         QualityStatus = BlogQualityStatus.None;
     }
+
+    public void RecalculateQualityStatus(IBlogVoteRepository voteRepository)
+    {
+        int score = voteRepository.CountUpvotes(Id) - voteRepository.CountDownvotes(Id);
+        int commentCount = 0; //_comments.Count;
+
+        UpdateQualityStatus(score, commentCount);
+    }
 }
