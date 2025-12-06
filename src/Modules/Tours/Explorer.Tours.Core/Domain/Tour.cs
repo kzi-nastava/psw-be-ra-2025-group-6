@@ -16,11 +16,11 @@ public class Tour : AggregateRoot
 
     public List<Equipment>? Equipment { get; private set; }
 
-    public List<KeyPoint> KeyPoints { get; private set; }
+    public List<KeyPoint>? KeyPoints { get; private set; }
 
     public double DistanceInKm { get; private set; }
 
-    public List<TourDuration> Duration { get; private set; }
+    public List<TourDuration>? Duration { get; private set; }
 
     private Tour() {
     }

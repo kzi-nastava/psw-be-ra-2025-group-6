@@ -2,6 +2,7 @@
 using Explorer.Tours.Core.Domain;
 using System.Text.Json.Serialization;
 
+namespace Explorer.Tours.Core.Domain;
 public class TourDuration : ValueObject
 {
     public TravelType TravelType { get; private set; }
