@@ -57,6 +57,18 @@ public class TourRepository: ITourRepository
         return entity;
     }
 
+    public Tour GetWithKeyPoints(long id)
+    {
+        var entity = DbContext.Tours
+            .Include(t => t.KeyPoints)
+            .FirstOrDefault(t => t.Id == id);
+
+        if (entity == null)
+            throw new NotFoundException("Not found: " + id);
+
+        return entity;
+    }
+
     public Tour Create(Tour tour)
     {
         _dbSet.Add(tour);
