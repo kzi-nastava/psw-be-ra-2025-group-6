@@ -3,6 +3,7 @@ using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
+using Explorer.Tours.Core.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -63,7 +64,7 @@ public class TourController : ControllerBase
             throw new ForbiddenException("You're not allowed to edit this tour");
         }
 
-        tour.Id = id; // Ensure the DTO id matches the route id
+        tour.Id = id;
         tour.AuthorId = User.PersonId();
         return Ok(_tourService.Update(tour));
     }
@@ -136,5 +137,18 @@ public class TourController : ControllerBase
         var result = _tourService.UpdateTourDistance(tourId, distance);
         return Ok(result);
     }
+
+    [HttpPut("{tourId}/durations")]
+    public ActionResult<TourDto> UpdateDurations(long tourId, [FromBody] List<TourDurationDto> durations)
+    {
+        var tour = _tourService.Get(tourId);
+        if (tour.AuthorId != User.PersonId())
+            throw new ForbiddenException("You're not allowed to edit this tour.");
+
+        var result = _tourService.UpdateDuration(tourId, durations);
+        return Ok(result);
+    }
+
+
 
 }

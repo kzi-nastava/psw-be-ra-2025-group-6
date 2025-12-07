@@ -16,9 +16,11 @@ public class Tour : AggregateRoot
 
     public List<Equipment>? Equipment { get; private set; }
 
-    public List<KeyPoint> KeyPoints { get; private set; }
+    public List<KeyPoint>? KeyPoints { get; private set; }
 
     public double DistanceInKm { get; private set; }
+
+    public List<TourDuration>? Duration { get; private set; }
 
     private Tour() {
     }
@@ -30,7 +32,9 @@ public class Tour : AggregateRoot
         List<string> tags,
         float price,
         TourStatus status,
-        List<Equipment> equipment)
+        List<Equipment> equipment,
+        List<KeyPoint> keypoints,
+        List<TourDuration> durations)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Invalid Name.");
@@ -52,8 +56,11 @@ public class Tour : AggregateRoot
         Status = status;
         Equipment = equipment ?? new List<Equipment>();
 
-        KeyPoints = new List<KeyPoint>();
+        KeyPoints = keypoints ?? new List<KeyPoint>();
         DistanceInKm = 0;
+        Duration = durations ?? new List<TourDuration>();
+
+
     }
     public Tour(
         string name,
@@ -85,6 +92,7 @@ public class Tour : AggregateRoot
 
         KeyPoints = new List<KeyPoint>();
         DistanceInKm = 0;
+        Duration = new List<TourDuration>();
     }
     public void AddEquipment(Equipment equipment)
     {
@@ -149,4 +157,24 @@ public class Tour : AggregateRoot
         if (distance < 0) throw new ArgumentException("Distance cannot be negative.");
         DistanceInKm = distance;
     }
+    public void SetDuration(TourDuration duration)
+    {
+        if (Status == TourStatus.ARCHIVED)
+            throw new InvalidOperationException("Cannot modify duration of archived tour.");
+
+        if (duration == null)
+            throw new ArgumentException("Invalid duration.");
+
+        var existing = Duration.FirstOrDefault(d => d.TravelType == duration.TravelType);
+        if (existing != null)
+        {
+            existing.UpdateMinutes(duration.Minutes);
+        }
+        else
+        {
+            Duration.Add(duration);
+        }
+    }
+
+
 }
