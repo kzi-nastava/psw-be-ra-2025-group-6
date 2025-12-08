@@ -2,17 +2,14 @@
 
 namespace Explorer.Blog.Core.Domain;
 
-public class BlogPost : Entity
+public class BlogPost : AggregateRoot
 {
     public long UserId { get; private set; }
     public string Title { get; private set; }
     public string Description { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public List<string> Images { get; private set; }
-
-
-    private readonly List<Comment> _comments = new();
-    public IReadOnlyList<Comment> Comments => _comments.AsReadOnly();
+    public List<Comment> Comments { get; private set; }
 
     private BlogPost() { }
 
@@ -44,12 +41,12 @@ public class BlogPost : Entity
     public void AddComment(long userId, string authorName, string text)
     {
         var comment = new Comment(userId, authorName, text);
-        _comments.Add(comment);
+        Comments.Add(comment);
     }
 
     public void EditComment(int id, long userId, string text)
     {
-        var comment = _comments[id];
+        var comment = Comments[id];
 
         if (comment.UserId != userId)
             throw new InvalidOperationException("Only authors can edit their comments.");
@@ -62,7 +59,7 @@ public class BlogPost : Entity
 
     public void DeleteComment(int id, long userId)
     {
-        var comment = _comments[id];
+        var comment = Comments[id];
 
         if (comment.UserId != userId)
             throw new InvalidOperationException("Only authors can delete their comments.");
@@ -70,6 +67,6 @@ public class BlogPost : Entity
         if (DateTime.UtcNow - comment.CreatedAt > TimeSpan.FromMinutes(15))
             throw new InvalidOperationException("Delete time expired.");
 
-        _comments.RemoveAt(id);
+        Comments.RemoveAt(id);
     }
 }

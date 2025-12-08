@@ -1,4 +1,5 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
+using System.Text.Json.Serialization;
 
 namespace Explorer.Blog.Core.Domain;
 
@@ -26,6 +27,16 @@ public class Comment : ValueObject
         AuthorName = authorName;
         Text = text;
         CreatedAt = DateTime.UtcNow;
+    }
+
+    [JsonConstructor]
+    public Comment(long userId, string authorName, string text, DateTime createdAt, DateTime? lastUpdatedAt)
+    {
+        UserId = userId;
+        AuthorName = authorName;
+        Text = text;
+        CreatedAt = createdAt;
+        LastUpdatedAt = lastUpdatedAt;
     }
 
     public void Edit(string newText)
