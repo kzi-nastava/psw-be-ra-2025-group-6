@@ -18,6 +18,25 @@ public class BlogContext : DbContext
 
     private static void ConfigureBlogPost(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<BlogPost>().Property(comment => comment.Comments).HasColumnType("jsonb");
+        modelBuilder.Entity<BlogPost>(builder =>
+        {
+            builder.ToTable("Blogs", "blog");
+
+            builder.HasKey(b => b.Id);
+
+            builder.Property(b => b.Images)
+               .HasColumnType("text[]");
+
+            builder.OwnsMany(b => b.Comments, comments =>
+            {
+                comments.ToJson();            
+                comments.Property(c => c.UserId);
+                comments.Property(c => c.AuthorName);
+                comments.Property(c => c.Text);
+                comments.Property(c => c.CreatedAt);
+                comments.Property(c => c.LastUpdatedAt);
+            });
+        });
     }
+
 }

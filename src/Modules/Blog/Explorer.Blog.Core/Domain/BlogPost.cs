@@ -9,7 +9,7 @@ public class BlogPost : AggregateRoot
     public string Description { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public List<string> Images { get; private set; }
-    public List<Comment> Comments { get; private set; }
+    public List<Comment> Comments { get; private set; } = new();
 
     private BlogPost() { }
 
@@ -40,12 +40,20 @@ public class BlogPost : AggregateRoot
 
     public void AddComment(long userId, string authorName, string text)
     {
+        if (Comments == null)
+        {
+            Comments = new List<Comment>();
+        }
+
         var comment = new Comment(userId, authorName, text);
         Comments.Add(comment);
     }
 
     public void EditComment(int id, long userId, string text)
     {
+        if (Comments == null || id < 0 || id >= Comments.Count)
+            throw new InvalidOperationException("Comment does not exist.");
+
         var comment = Comments[id];
 
         if (comment.UserId != userId)
@@ -59,6 +67,9 @@ public class BlogPost : AggregateRoot
 
     public void DeleteComment(int id, long userId)
     {
+        if (Comments == null || id < 0 || id >= Comments.Count)
+            throw new InvalidOperationException("Comment does not exist.");
+
         var comment = Comments[id];
 
         if (comment.UserId != userId)

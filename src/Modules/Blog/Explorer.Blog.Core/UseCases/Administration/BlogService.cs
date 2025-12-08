@@ -79,7 +79,7 @@ public class BlogService : IBlogService
         _blogRepository.Update(blog);
     }
 
-    public void AddComment(long blogId, long userId, string text)
+    public CommentDto AddComment(long blogId, long userId, string text)
     {
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found.");
@@ -90,24 +90,36 @@ public class BlogService : IBlogService
 
         blog.AddComment(userId, authorName, text);
         _blogRepository.Update(blog);
+
+        var comment = blog.Comments.Last();
+
+        return _mapper.Map<CommentDto>(comment);
     }
 
-    public void EditComment(long blogId, int commentId, long userId, string text)
+    public CommentDto EditComment(long blogId, int commentId, long userId, string text)
     {
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found.");
 
         blog.EditComment(commentId, userId, text);
         _blogRepository.Update(blog);
+
+        var comment = blog.Comments.Last();
+
+        return _mapper.Map<CommentDto>(comment);
     }
 
-    public void DeleteComment(long blogId, int commentId, long userId) 
+    public CommentDto DeleteComment(long blogId, int commentId, long userId) 
     { 
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found");
 
         blog.DeleteComment(commentId, userId);
         _blogRepository.Update(blog);
+
+        var comment = blog.Comments.Last();
+
+        return _mapper.Map<CommentDto>(comment);
     }
 
     public List<CommentDto> GetComments(long blogId)

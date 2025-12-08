@@ -4,7 +4,6 @@ using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.WebSockets;
 
 namespace Explorer.API.Controllers;
 
@@ -107,9 +106,9 @@ public class BlogController : ControllerBase
     public IActionResult AddComment(long id, [FromBody] CommentCreateDto dto)
     {
         var userId = User.PersonId();
-        _blogService.AddComment(id, userId, dto.Text);
+        var created = _blogService.AddComment(id, userId, dto.Text);
 
-        return Ok();
+        return Ok(created);
     }
 
     [HttpPut("{id:long}/comments/{commentId:int}")]
@@ -125,6 +124,29 @@ public class BlogController : ControllerBase
     public IActionResult DeleteComment(long id, int commentId)
     {
         var userId = User.PersonId();
+
+        try
+        {
+            _blogService.DeleteComment(id, commentId, userId);
+            return NoContent();
+        }
+        catch (Exception ex) when (ex.Message == "Blog not found")
+        {
+            return NotFound();
+        }
+        catch (InvalidOperationException ex) when (ex.Message == "Comment does not exist.")
+        {
+            return NotFound();
+        }
+        catch (InvalidOperationException ex) when (ex.Message == "Only authors can delete their comments.")
+        {
+            return Forbid(); // 403
+        }
+        catch (InvalidOperationException ex) when (ex.Message == "Delete time expired.")
+        {
+            return BadRequest("Vreme za brisanje komentara je isteklo.");
+        }
+
         _blogService.DeleteComment(id, commentId, userId);
 
         return NoContent();
@@ -134,6 +156,6 @@ public class BlogController : ControllerBase
     public IActionResult GetComment(long id) 
     { 
         var comments = _blogService.GetComments(id);
-        return Ok(); 
+        return Ok(comments); 
     }
 }
