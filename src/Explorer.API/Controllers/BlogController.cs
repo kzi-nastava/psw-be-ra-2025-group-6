@@ -14,12 +14,10 @@ namespace Explorer.API.Controllers;
 public class BlogController : ControllerBase
 {
     private readonly IBlogService _blogService;
-    private readonly IBlogVoteService _blogVoteService;
 
-    public BlogController(IBlogService blogService, IBlogVoteService blogVoteService)
+    public BlogController(IBlogService blogService)
     {
         _blogService = blogService;
-        _blogVoteService = blogVoteService;
     }
 
     [HttpGet("my-blogs")]
@@ -149,20 +147,36 @@ public class BlogController : ControllerBase
     }
 
     [HttpPost("{id:long}/vote")]
-    public IActionResult VoteOnBlog(long id, [FromBody] VoteTypeDto voteType)
+    public IActionResult VoteOnBlog(long id, [FromBody] VoteRequestDto request)
     {
         var userId = User.PersonId();
-        _blogVoteService.Vote(userId, id, voteType);
-        var votes = _blogVoteService.GetVotes(id);
-        return Ok(votes);
+
+        if (request.VoteType == null)
+            _blogService.RemoveVote(userId, id);
+        else
+            _blogService.Vote(userId, id, request.VoteType.Value);
+
+        var votes = _blogService.GetVotes(id);
+        var userVote = _blogService.GetUserVote(userId, id);
+        return Ok(new { votes.upvotes, votes.downvotes, userVote });
+    }
+
+    [HttpDelete("{id:long}/vote")]
+    public IActionResult RemoveVote(long id)
+    {
+        var userId = User.PersonId();
+        _blogService.RemoveVote(userId, id);
+        var votes = _blogService.GetVotes(id);
+        var userVote = _blogService.GetUserVote(userId, id);
+        return Ok(new { votes.upvotes, votes.downvotes, userVote });
     }
 
     [HttpGet("{id:long}/votes")]
     public IActionResult GetVotes(long id)
     {
-        var votes = _blogVoteService.GetVotes(id);
+        var votes = _blogService.GetVotes(id);
         var userId = User.PersonId();
-        var userVote = userId != 0 ? _blogVoteService.GetUserVote(userId, id)?.Type : null;
+        var userVote = _blogService.GetUserVote(userId, id);
         return Ok(new { votes.upvotes, votes.downvotes, userVote });
     }
 

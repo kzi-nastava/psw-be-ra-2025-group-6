@@ -25,13 +25,11 @@ public static class BlogStartup
     private static void SetupCore(IServiceCollection services)
     {
         services.AddScoped<IBlogService, BlogService>();
-        services.AddScoped<IBlogVoteService, BlogVoteService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IBlogRepository, BlogDbRepository>();
-        services.AddScoped<IBlogVoteRepository, BlogVoteDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("blog"));
         dataSourceBuilder.EnableDynamicJson();

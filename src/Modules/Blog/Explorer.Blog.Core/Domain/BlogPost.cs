@@ -3,7 +3,7 @@ using Explorer.BuildingBlocks.Core.Domain;
 
 namespace Explorer.Blog.Core.Domain;
 
-public class BlogPost : Entity
+public class BlogPost : AggregateRoot
 {
     public long UserId { get; private set; }
     public string Title { get; private set; }
@@ -12,6 +12,9 @@ public class BlogPost : Entity
     public List<string> Images { get; private set; }
     public BlogStatus Status { get; set; }
     public DateTime? LastModifiedAt { get; private set; }
+
+    private readonly List<BlogVote> _votes = new();
+    public IReadOnlyCollection<BlogVote> Votes => _votes.AsReadOnly();
 
     private BlogPost() { }
 
@@ -58,9 +61,31 @@ public class BlogPost : Entity
         Title = newTitle;
     }
 
-    public int GetUpvotes(IBlogVoteRepository voteRepo)
-        => voteRepo.CountUpvotes(this.Id);
+    public void AddOrUpdateVote(long userId, VoteType type)
+    {
+        var existing = _votes.FirstOrDefault(v => v.UserId == userId);
+        if (existing != null)
+        {
+            existing.UpdateVote(type); // samo update tip i vreme
+        }
+        else
+        {
+            _votes.Add(new BlogVote(userId, type));
+        }
+    }
 
-    public int GetDownvotes(IBlogVoteRepository voteRepo)
-        => voteRepo.CountDownvotes(this.Id);
+    public void RemoveVote(long userId)
+    {
+        var existing = _votes.FirstOrDefault(v => v.UserId == userId);
+        if (existing != null)
+        {
+            _votes.Remove(existing);
+        }
+    }
+
+    public int CountUpvotes()
+        => _votes.Count(v => v.Type == VoteType.Upvote);
+
+    public int CountDownvotes()
+        => _votes.Count(v => v.Type == VoteType.Downvote);
 }

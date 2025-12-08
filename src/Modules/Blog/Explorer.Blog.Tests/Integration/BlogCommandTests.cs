@@ -170,12 +170,34 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         storedBlog.ShouldBeNull();
     }
 
+    [Fact]
+    public void VoteOnBlog_UpdatesAggregatedVotes()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Test blog", "Opis", new List<string>(), BlogStatus.POSTED);
+        typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, -3);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        blog.AddOrUpdateVote(-11, VoteType.Upvote);
+
+        blog.CountUpvotes().ShouldBe(1);
+        blog.CountDownvotes().ShouldBe(0);
+
+        blog.AddOrUpdateVote(-11, VoteType.Downvote);
+        blog.CountUpvotes().ShouldBe(0);
+        blog.CountDownvotes().ShouldBe(1);
+    }
+
+
     private static BlogController CreateController(IServiceScope scope)
     {
         var blogService = scope.ServiceProvider.GetRequiredService<IBlogService>();
-        var blogVoteService = scope.ServiceProvider.GetRequiredService<IBlogVoteService>();
 
-        return new BlogController(blogService, blogVoteService)
+        return new BlogController(blogService)
         {
             ControllerContext = BuildContext("-11")
         };
