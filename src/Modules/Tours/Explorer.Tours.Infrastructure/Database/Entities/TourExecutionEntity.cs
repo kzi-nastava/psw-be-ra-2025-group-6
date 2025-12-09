@@ -15,4 +15,7 @@ public class TourExecutionEntity
     public string InitialPositionJson { get; set; }
     public string ExecutionKeyPointsJson { get; set; }
     public DateTime LastActivity { get; set; }
+    public string CompletedKeyPointsJson { get; set; }
+    public double ProgressPercentage { get; set; }
+    public long? CurrentKeyPointId { get; set; }
 }
