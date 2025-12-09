@@ -104,6 +104,93 @@ public class TourExecutionTests : BaseToursIntegrationTest
         result.FirstKeyPoint.ShouldNotBeNull();
     }
 
+    [Fact]
+    public void Completes_execution_successfully()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, TOURIST_ID);
+
+        // Start execution first
+        var startDto = new TourExecutionStartDto
+        {
+            TourId = -3,
+            Latitude = 48.8566,
+            Longitude = 2.3522
+        };
+        var startResult = controller.Start(startDto).Result as CreatedAtActionResult;
+        var startData = startResult!.Value as TourExecutionStartResultDto;
+        var executionId = startData!.TourExecutionId;
+
+        // Act - Complete execution
+        var completeResult = controller.Complete(executionId);
+        var ok = completeResult.Result as OkObjectResult;
+
+        // Assert
+        ok.ShouldNotBeNull();
+        var result = ok.Value as TourExecutionResultDto;
+        result.ShouldNotBeNull();
+        result.TourExecutionId.ShouldBe(executionId);
+        result.Status.ShouldBe("completed");
+        result.EndTime.ShouldNotBeNull();
+        result.EndTime.Value.ShouldBeGreaterThan(result.StartTime);
+    }
+
+    [Fact]
+    public void Abandons_execution_successfully()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, TOURIST_ID);
+
+        // Start execution first
+        var startDto = new TourExecutionStartDto
+        {
+            TourId = -3,
+            Latitude = 48.8566,
+            Longitude = 2.3522
+        };
+        var startResult = controller.Start(startDto).Result as CreatedAtActionResult;
+        var startData = startResult!.Value as TourExecutionStartResultDto;
+        var executionId = startData!.TourExecutionId;
+
+        // Act - Abandon execution
+        var abandonResult = controller.Abandon(executionId);
+        var ok = abandonResult.Result as OkObjectResult;
+
+        // Assert
+        ok.ShouldNotBeNull();
+        var result = ok.Value as TourExecutionResultDto;
+        result.ShouldNotBeNull();
+        result.TourExecutionId.ShouldBe(executionId);
+        result.Status.ShouldBe("abandoned");
+        result.EndTime.ShouldNotBeNull();
+        result.EndTime.Value.ShouldBeGreaterThan(result.StartTime);
+    }
+
+    [Fact]
+    public void Complete_fails_for_execution_belonging_to_different_tourist()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller1 = CreateController(scope, TOURIST_ID);
+        var controller2 = CreateController(scope, 2); // Different tourist
+
+        // Start execution with tourist 1
+        var startDto = new TourExecutionStartDto
+        {
+            TourId = -3,
+            Latitude = 48.8566,
+            Longitude = 2.3522
+        };
+        var startResult = controller1.Start(startDto).Result as CreatedAtActionResult;
+        var startData = startResult!.Value as TourExecutionStartResultDto;
+        var executionId = startData!.TourExecutionId;
+
+        // Act & Assert - Tourist 2 tries to complete tourist 1's execution
+        Should.Throw<InvalidOperationException>(() => controller2.Complete(executionId));
+    }
+
     private static TourExecutionController CreateController(IServiceScope scope, long touristId)
     {
         return new TourExecutionController(scope.ServiceProvider.GetRequiredService<ITourExecutionService>())
