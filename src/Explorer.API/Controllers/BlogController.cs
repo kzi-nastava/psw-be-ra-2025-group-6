@@ -124,29 +124,6 @@ public class BlogController : ControllerBase
     public IActionResult DeleteComment(long id, int commentId)
     {
         var userId = User.PersonId();
-
-        try
-        {
-            _blogService.DeleteComment(id, commentId, userId);
-            return NoContent();
-        }
-        catch (Exception ex) when (ex.Message == "Blog not found")
-        {
-            return NotFound();
-        }
-        catch (InvalidOperationException ex) when (ex.Message == "Comment does not exist.")
-        {
-            return NotFound();
-        }
-        catch (InvalidOperationException ex) when (ex.Message == "Only authors can delete their comments.")
-        {
-            return Forbid(); // 403
-        }
-        catch (InvalidOperationException ex) when (ex.Message == "Delete time expired.")
-        {
-            return BadRequest("Vreme za brisanje komentara je isteklo.");
-        }
-
         _blogService.DeleteComment(id, commentId, userId);
 
         return NoContent();

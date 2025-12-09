@@ -74,6 +74,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
             UserId = existingBlog.UserId,
             CreatedAt = existingBlog.CreatedAt,
             Images = new List<string>()
+
         };
 
         var result = ((ObjectResult)controller.UpdateBlog(existingBlog.Id, updatedBlog).Result)?.Value as BlogDto;

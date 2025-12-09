@@ -4,6 +4,7 @@ using Explorer.Blog.API.Public.Administration;
 using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
@@ -12,12 +13,12 @@ public class BlogService : IBlogService
 {
     private readonly IBlogRepository _blogRepository;
     private readonly IMapper _mapper;
-    private readonly IUserRepository _userRepository;
+    private readonly IInternalStakeholderService _stakeholderService;
 
-    public BlogService(IBlogRepository blogRepository, IUserRepository userRepository, IMapper mapper)
+    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper)
     {
         _blogRepository = blogRepository;
-        _userRepository = userRepository;
+        _stakeholderService = stakeholderService;
         _mapper = mapper;
     }
 
@@ -83,10 +84,7 @@ public class BlogService : IBlogService
     {
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found.");
-        var user = _userRepository.GetById(userId);
-        if (user == null) throw new Exception("User not found.");
-
-        var authorName = user.Username;
+        var authorName = _stakeholderService.GetUsername(userId);
 
         blog.AddComment(userId, authorName, text);
         _blogRepository.Update(blog);
