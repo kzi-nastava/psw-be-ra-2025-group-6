@@ -140,6 +140,23 @@ namespace Explorer.Stakeholders.Core.UseCases
             return _mapper.Map<TourProblemDto>(result);
         }
 
+        public async Task<TourProblemDto> FinalizeStatus(long id, int status, long adminPersonId)
+        {
+            var problem = await _repository.GetById(id);
+
+            if (problem == null)
+                throw new NotFoundException($"Problem with ID {id} not found.");
+
+            if (!Enum.IsDefined(typeof(ProblemStatus), status))
+                throw new ArgumentException("Unknown status.");
+
+            problem.FinalizeStatus((ProblemStatus)status, DateTime.UtcNow);
+
+            var result = await _repository.Update(problem);
+
+            return _mapper.Map<TourProblemDto>(result);
+        }
+
         public async Task Delete(long id, long touristId)
         {
             var problem = await _repository.GetById(id);

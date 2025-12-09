@@ -59,6 +59,19 @@ namespace Explorer.Stakeholders.Core.Domain
             ResolvedAt = closedAtUtc;
         }
 
+        public void FinalizeStatus(ProblemStatus newStatus, DateTime finalizedAtUtc)
+        {
+            if (newStatus == ProblemStatus.Open)
+                throw new ArgumentException("Cannot finalize to Open state.");
+            if (Status != ProblemStatus.Open)
+                throw new InvalidOperationException("Problem already finalized.");
+            if (ResolutionFeedback == ProblemResolutionFeedback.Pending)
+                throw new InvalidOperationException("Cannot finalize without resolution feedback.");
+
+            Status = newStatus;
+            ResolvedAt = finalizedAtUtc;
+        }
+
         public void SetResolutionFeedback(ProblemResolutionFeedback feedback, string? comment)
         {
             if (feedback == ProblemResolutionFeedback.Pending)

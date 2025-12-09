@@ -52,10 +52,40 @@ namespace Explorer.Stakeholders.API.Controllers.Admin
                 return Conflict(ex.Message);
             }
         }
+
+        [HttpPost("{id}/finalize")]
+        public async Task<ActionResult<TourProblemDto>> Finalize(long id, [FromBody] FinalizeProblemRequest request)
+        {
+            if (request == null) return BadRequest("Finalize payload is required.");
+
+            try
+            {
+                var adminPersonId = User.PersonId();
+                var result = await _tourProblemService.FinalizeStatus(id, request.Status, adminPersonId);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Explorer.BuildingBlocks.Core.Exceptions.NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
     }
 
     public class SetDeadlineRequest
     {
         public DateTime DeadlineAt { get; set; }
+    }
+
+    public class FinalizeProblemRequest
+    {
+        public int Status { get; set; }
     }
 }
