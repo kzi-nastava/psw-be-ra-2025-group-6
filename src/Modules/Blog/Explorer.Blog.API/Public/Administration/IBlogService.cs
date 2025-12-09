@@ -12,4 +12,10 @@ public interface IBlogService
     BlogDto GetById(long id);
     BlogDto Delete(long id);
     void AddImages(long blogId, List<string> imagePaths);
+    void Archive(long blogId);
+    BlogDto UpdateDescription(long blogId, string newDescription);
+    void Vote(long userId, long blogId, VoteTypeDto voteType);
+    public void RemoveVote(long userId, long blogId);
+    (int upvotes, int downvotes) GetVotes(long blogId);
+    BlogVoteDto? GetUserVote(long userId, long blogId);
 }

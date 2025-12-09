@@ -8,6 +8,12 @@ public class BlogProfile : Profile
 {
     public BlogProfile()
     {
-        CreateMap<BlogDto, Explorer.Blog.Core.Domain.Blog>().ReverseMap();
+        CreateMap<BlogDto, BlogPost>().ReverseMap();
+        CreateMap<BlogStatus, BlogStatusDto>().ReverseMap();
+        //CreateMap<BlogVoteDto, BlogVote>().ReverseMap();
+        CreateMap<VoteType, VoteTypeDto>().ConvertUsing(src => (VoteTypeDto)(int)src);
+        CreateMap<VoteTypeDto, VoteType>().ConvertUsing(src => (VoteType)(int)src);
+        CreateMap<BlogVote, BlogVoteDto>().ForMember(dest => dest.Type, opt => opt.MapFrom(src => (VoteTypeDto)(int)src.Type));
+        CreateMap<BlogVoteDto, BlogVote>().ForMember(dest => dest.Type, opt => opt.MapFrom(src => (VoteType)(int)src.Type));
     }
 }
