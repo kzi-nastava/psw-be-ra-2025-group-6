@@ -1,6 +1,7 @@
 ﻿using Explorer.API.Controllers;
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
+using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Infrastructure.Database;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Microsoft.AspNetCore.Http;
@@ -28,7 +29,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         string description = "Opis novog test bloga";
         List<IFormFile>? images = null;
 
-        var actionResult = await controller.CreateBlog(title, description, images);
+        var actionResult = await controller.CreateBlog(title, description, images, BlogStatusDto.DRAFT);
         var okResult = actionResult.Result as OkObjectResult;
         okResult.ShouldNotBeNull();
 
@@ -57,7 +58,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         if (existingBlog == null)
         {
-            existingBlog = new DomainBlog(-11, "Test blog za update", "Opis bloga za update", new List<string>());
+            existingBlog = new DomainBlog(-11, "Test blog za update", "Opis bloga za update", new List<string>(), BlogStatus.DRAFT);
 
             typeof(DomainBlog)
                 .GetProperty("Id")?
@@ -77,18 +78,32 @@ public class BlogCommandTests : BaseBlogIntegrationTest
             Images = new List<string>()
 
         };
+        existingBlog.Status = BlogStatus.DRAFT;
+        dbContext.SaveChanges();
+        string title = "Promenjen naslov bloga";
+        string description = "Promenjen opis bloga";
+        BlogStatusDto status = BlogStatusDto.POSTED;
+        List<IFormFile>? images = null;
 
-        var result = ((ObjectResult)controller.UpdateBlog(existingBlog.Id, updatedBlog).Result)?.Value as BlogDto;
+        var actionResult = controller
+            .UpdateBlog(-3, title, description, status, images)
+            .GetAwaiter()
+            .GetResult();
 
-        result.ShouldNotBeNull();
-        ((long)result.Id).ShouldBe(existingBlog.Id);
-        result.Title.ShouldBe(updatedBlog.Title);
-        result.Description.ShouldBe(updatedBlog.Description);
+        var okResult = actionResult.Result as OkObjectResult;
+        okResult.ShouldNotBeNull();
 
-        var storedBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == existingBlog.Id);
+        var blogResult = okResult.Value as BlogDto;
+        blogResult.ShouldNotBeNull();
+
+        blogResult.Id.ShouldBe(-3);
+        blogResult.Title.ShouldBe(title);
+        blogResult.Description.ShouldBe(description);
+
+        var storedBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == -3);
         storedBlog.ShouldNotBeNull();
-        storedBlog.Title.ShouldBe(updatedBlog.Title);
-        storedBlog.Description.ShouldBe(updatedBlog.Description);
+        storedBlog.Title.ShouldBe(title);
+        storedBlog.Description.ShouldBe(description);
     }
 
     [Fact]
@@ -97,17 +112,128 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
 
-        var updatedBlog = new BlogDto
-        {
-            Id = -1000,
-            Title = "Nepostojeci blog",
-            Description = "Opis",
-            UserId = -11,
-            CreatedAt = DateTime.UtcNow,
-            Images = new List<string>()
-        };
+        string title = "Nepostojeci blog";
+        string description = "Opis";
+        BlogStatusDto status = BlogStatusDto.DRAFT;
+        List<IFormFile>? images = null;
 
-        Should.Throw<NotFoundException>(() => controller.UpdateBlog(-1000, updatedBlog));
+        Should.Throw<NotFoundException>(() =>
+            controller.UpdateBlog(-1000, title, description, status, images)
+                     .GetAwaiter()
+                     .GetResult()
+        );
+    }
+
+    [Fact]
+    public async Task CreatesBlog_WithStatus()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        string title = "Test blog sa statusom";
+        string description = "Opis bloga";
+        List<IFormFile>? images = null;
+        BlogStatusDto status = BlogStatusDto.POSTED;
+
+        var actionResult = await controller.CreateBlog(title, description, images, status);
+        var okResult = actionResult.Result as OkObjectResult;
+        okResult.ShouldNotBeNull();
+
+        var result = okResult.Value as BlogDto;
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe(status);
+    }
+
+    [Fact]
+    public void ArchiveBlog_SetsStatusToArchived()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Blog za arhiviranje", "Opis", new List<string>(), BlogStatus.POSTED);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        var result = controller.ArchiveBlog(blog.Id);
+        result.ShouldBeOfType<NoContentResult>();
+
+        var storedBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == blog.Id);
+        storedBlog.Status.ShouldBe(BlogStatus.ARCHIVED);
+    }
+
+    [Fact]
+    public void DeleteBlog_RemovesBlog()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Blog za brisanje", "Opis", new List<string>(), BlogStatus.POSTED);
+        typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, -6);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        var result = controller.DeleteBlog(blog.Id);
+        result.ShouldBeOfType<NoContentResult>();
+
+        var storedBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == blog.Id);
+        storedBlog.ShouldBeNull();
+    }
+
+    [Fact]
+    public void VoteOnBlog_UpdatesAggregatedVotes()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Test blog", "Opis", new List<string>(), BlogStatus.POSTED);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        blog.AddOrUpdateVote(-11, VoteType.Upvote);
+        blog.CountUpvotes().ShouldBe(1);
+        blog.CountDownvotes().ShouldBe(0);
+
+        blog.AddOrUpdateVote(-11, VoteType.Downvote);
+        blog.CountUpvotes().ShouldBe(0);
+        blog.CountDownvotes().ShouldBe(1);
+    }
+
+    [Fact]
+    public void RemoveVote_NonExistingVote_DoesNothing()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Blog test", "Opis", new List<string>(), BlogStatus.POSTED);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        blog.RemoveVote(999);
+        blog.Votes.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void CountUpvotesAndDownvotes_ReturnsCorrectValues()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Test blog", "Opis", new List<string>(), BlogStatus.POSTED);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        blog.AddOrUpdateVote(1, VoteType.Upvote);
+        blog.AddOrUpdateVote(2, VoteType.Upvote);
+        blog.AddOrUpdateVote(3, VoteType.Downvote);
+
+        blog.CountUpvotes().ShouldBe(2);
+        blog.CountDownvotes().ShouldBe(1);
     }
 
     [Fact]
@@ -125,7 +251,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         if (blog == null)
         {
-            blog = new DomainBlog(-11, "Test blog za komentare", "Opis test bloga", new List<string>());
+            blog = new DomainBlog(-11, "Test blog za komentare", "Opis test bloga", new List<string>(), BlogStatus.POSTED);
 
             typeof(DomainBlog)
                 .GetProperty("Id")?
@@ -178,7 +304,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         if (blog == null)
         {
-            blog = new DomainBlog(-11, $"Test blog {blogId}", "Opis test bloga", new List<string>());
+            blog = new DomainBlog(-11, $"Test blog {blogId}", "Opis test bloga", new List<string>(), BlogStatus.POSTED);
             typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, blogId);
             dbContext.Blogs.Add(blog);
             dbContext.SaveChanges();
@@ -228,7 +354,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         if (blog == null)
         {
-            blog = new DomainBlog(-11, $"Test blog {blogId}", "Opis test bloga", new List<string>());
+            blog = new DomainBlog(-11, $"Test blog {blogId}", "Opis test bloga", new List<string>(), BlogStatus.POSTED);
             typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, blogId);
             dbContext.Blogs.Add(blog);
             dbContext.SaveChanges();
@@ -265,7 +391,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         if (blog == null)
         {
-            blog = new DomainBlog(-11, $"Test blog {blogId}", "Opis test bloga", new List<string>());
+            blog = new DomainBlog(-11, $"Test blog {blogId}", "Opis test bloga", new List<string>(), BlogStatus.POSTED);
             typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, blogId);
             dbContext.Blogs.Add(blog);
             dbContext.SaveChanges();
@@ -307,7 +433,9 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
     private static BlogController CreateController(IServiceScope scope)
     {
-        return new BlogController(scope.ServiceProvider.GetRequiredService<IBlogService>())
+        var blogService = scope.ServiceProvider.GetRequiredService<IBlogService>();
+
+        return new BlogController(blogService)
         {
             ControllerContext = BuildContext("-11")
         };

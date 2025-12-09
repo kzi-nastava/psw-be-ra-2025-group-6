@@ -14,6 +14,21 @@ public class BlogContext : DbContext
         modelBuilder.HasDefaultSchema("blog");
 
         ConfigureBlogPost(modelBuilder);
+
+        modelBuilder.Entity<BlogPost>(b =>
+        {
+            b.HasKey(x => x.Id);
+
+            b.OwnsMany(x => x.Votes, v =>
+            {
+                v.WithOwner().HasForeignKey("BlogId");
+                v.Property(vote => vote.Type).HasColumnName("Value");
+                v.Property(vote => vote.VotedAt);
+                v.Property(vote => vote.UserId);
+                v.HasKey("BlogId", "UserId");
+                v.ToTable("Votes", "blog");
+            });
+        });
     }
 
     private static void ConfigureBlogPost(ModelBuilder modelBuilder)
