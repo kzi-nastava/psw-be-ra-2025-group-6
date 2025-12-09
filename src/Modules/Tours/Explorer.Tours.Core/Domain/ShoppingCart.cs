@@ -47,19 +47,14 @@ public class ShoppingCart : Entity
 
     public List<TourPurchaseToken> Checkout()
     {
-        if (Items.Count == 0)
+        if (_items.Count == 0)
             throw new InvalidOperationException("Cannot checkout an empty cart.");
 
-        var tokens = new List<TourPurchaseToken>();
+        var tokens = _items
+            .Select(item => new TourPurchaseToken(TouristId, item.TourId, item.TourName, item.Price))
+            .ToList();
 
-        foreach (var item in Items)
-        {
-            var token = new TourPurchaseToken(TouristId, item.TourId, item.TourName, item.Price);
-            tokens.Add(token);
-        }
-
-        // Isprazniti korpu nakon checkout-a
-        Items.Clear();
+        _items.Clear();
         LastModified = DateTime.UtcNow;
 
         return tokens;
