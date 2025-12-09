@@ -25,6 +25,12 @@ namespace Explorer.Tours.Core.UseCases
         public ShoppingCartDto GetByTouristId(long touristId)
         {
             var cart = _shoppingCartRepository.GetByTouristId(touristId);
+
+            if (cart == null)
+            {
+                cart = new ShoppingCart(touristId);
+                _shoppingCartRepository.Create(cart); 
+            }
             return _mapper.Map<ShoppingCartDto>(cart);
         }
 

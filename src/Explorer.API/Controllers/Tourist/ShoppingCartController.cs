@@ -1,3 +1,4 @@
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
@@ -23,7 +24,7 @@ namespace Explorer.API.Controllers.Tourist
         [HttpGet]
         public ActionResult<ShoppingCartDto> Get()
         {
-            var touristId = long.Parse(User.Claims.First(i => i.Type == "personId").Value);
+            var touristId = User.PersonId();
             var result = _shoppingCartService.GetByTouristId(touristId);
             return Ok(result);
         }
@@ -31,17 +32,35 @@ namespace Explorer.API.Controllers.Tourist
         [HttpPost("items/{tourId:long}")]
         public ActionResult<ShoppingCartDto> AddItem(long tourId)
         {
-            var touristId = long.Parse(User.Claims.First(i => i.Type == "personId").Value);
-            var result = _shoppingCartService.AddItem(touristId, tourId);
-            return Ok(result);
+            try
+            {
+                var touristId = User.PersonId(); 
+                var result = _shoppingCartService.AddItem(touristId, tourId);
+                return Ok(result);
+            }
+            catch (ArgumentException ex) when (ex.Message.Contains("already in the cart"))
+            {
+                return Conflict(new { message = ex.Message }); // 409 status ispravka (duplikati) 
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message }); // 400 status ispravka 
+            }
         }
 
         [HttpDelete("items/{tourId:long}")]
         public ActionResult<ShoppingCartDto> RemoveItem(long tourId)
         {
-            var touristId = long.Parse(User.Claims.First(i => i.Type == "personId").Value);
-            var result = _shoppingCartService.RemoveItem(touristId, tourId);
-            return Ok(result);
+            try
+            {
+                var touristId = User.PersonId();
+                var result = _shoppingCartService.RemoveItem(touristId, tourId);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message }); // 404 status ispravka 
+            }
         }
 
         [HttpPost("checkout")]
