@@ -44,6 +44,7 @@ public static class ToursStartup
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IMeetupService, MeetupService>();
         services.AddScoped<IAdminMapService, AdminMapService>();
+        services.AddScoped<IShoppingCartService, ShoppingCartService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -56,6 +57,7 @@ public static class ToursStartup
         services.AddScoped<ITourRepository<Tour>, TourRepository<Tour,ToursContext>>();
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<IMeetupRepository, MeetupRepository>();
+        services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
 
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
