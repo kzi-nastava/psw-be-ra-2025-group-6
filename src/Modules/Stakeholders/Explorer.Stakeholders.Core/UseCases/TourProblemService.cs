@@ -1,8 +1,8 @@
-﻿using AutoMapper;
+using AutoMapper;
+using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using Explorer.Stakeholders.API.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +13,22 @@ namespace Explorer.Stakeholders.Core.UseCases
     public class TourProblemService : ITourProblemService
     {
         private readonly ITourProblemRepository _repository;
+        private readonly ITourInfoGateway _tourInfoGateway;
+        private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
 
-        public TourProblemService(ITourProblemRepository repository, IMapper mapper)
+        public TourProblemService(ITourProblemRepository repository, ITourInfoGateway tourInfoGateway, INotificationService notificationService, IMapper mapper)
         {
             _repository = repository;
+            _tourInfoGateway = tourInfoGateway;
+            _notificationService = notificationService;
             _mapper = mapper;
+        }
+
+        public async Task<List<TourProblemDto>> GetAll()
+        {
+            var problems = await _repository.GetAll();
+            return problems.Select(_mapper.Map<TourProblemDto>).ToList();
         }
 
         public async Task<TourProblemDto> Create(TourProblemDto problemDto)
@@ -41,6 +51,15 @@ namespace Explorer.Stakeholders.Core.UseCases
             return problems.Select(_mapper.Map<TourProblemDto>).ToList();
         }
 
+        public async Task<List<TourProblemDto>> GetByAuthor(long authorId)
+        {
+            var authorTours = await _tourInfoGateway.GetByAuthor(authorId);
+            if (!authorTours.Any()) return new List<TourProblemDto>();
+            var tourIds = authorTours.Select(t => t.Id).ToList();
+            var problems = await _repository.GetByTourIds(tourIds);
+            return problems.Select(_mapper.Map<TourProblemDto>).ToList();
+        }
+
         public async Task<TourProblemDto> Update(TourProblemDto problemDto)
         {
             var existingProblem = await _repository.GetById(problemDto.Id);
@@ -55,6 +74,34 @@ namespace Explorer.Stakeholders.Core.UseCases
             );
 
             var result = await _repository.Update(existingProblem);
+            return _mapper.Map<TourProblemDto>(result);
+        }
+
+        public async Task<TourProblemDto> SetDeadline(long id, DateTime deadlineUtc, long adminPersonId)
+        {
+            var problem = await _repository.GetById(id);
+
+            if (problem == null)
+                throw new KeyNotFoundException($"Problem with ID {id} not found.");
+
+            problem.SetDeadline(deadlineUtc);
+
+            var result = await _repository.Update(problem);
+
+            var tour = await _tourInfoGateway.GetById(problem.TourId);
+            if (tour == null)
+                throw new KeyNotFoundException($"Tour with ID {problem.TourId} not found.");
+
+            var content = $"The administrator has set a deadline of {deadlineUtc:yyyy-MM-dd} for resolving problem #{problem.Id} on the tour '{tour.Name}'. If you do not respond or take the required action by the specified deadline, appropriate penalties may be applied.";
+
+            _notificationService.Create(new NotificationDto
+            {
+                RecipientId = tour.AuthorId,
+                SenderId = adminPersonId,
+                Content = content,
+                ReferenceId = problem.Id
+            });
+
             return _mapper.Map<TourProblemDto>(result);
         }
 
