@@ -150,9 +150,52 @@ namespace Explorer.Stakeholders.Core.UseCases
             if (!Enum.IsDefined(typeof(ProblemStatus), status))
                 throw new ArgumentException("Unknown status.");
 
-            problem.FinalizeStatus((ProblemStatus)status, DateTime.UtcNow);
+            var statusEnum = (ProblemStatus)status;
+
+            problem.FinalizeStatus(statusEnum, DateTime.UtcNow);
 
             var result = await _repository.Update(problem);
+
+            var tour = await _tourInfoGateway.GetById(problem.TourId);
+            if (tour == null)
+                throw new NotFoundException($"Tour with ID {problem.TourId} not found.");
+
+            if (statusEnum == ProblemStatus.Closed)
+            {
+                _notificationService.Create(new NotificationDto
+                {
+                    RecipientId = tour.AuthorId,
+                    SenderId = adminPersonId,
+                    Content = $"Thank you for resolving the issue reported by the tourist (ID: {problem.TouristId}) on tour (ID: {problem.TourId}) in a timely manner.",
+                    ReferenceId = problem.Id
+                });
+
+                _notificationService.Create(new NotificationDto
+                {
+                    RecipientId = problem.TouristId,
+                    SenderId = adminPersonId,
+                    Content = "Your reported issue has been successfully resolved. Thank you for your cooperation.",
+                    ReferenceId = problem.Id
+                });
+            }
+            else if (statusEnum == ProblemStatus.Penalized)
+            {
+                _notificationService.Create(new NotificationDto
+                {
+                    RecipientId = tour.AuthorId,
+                    SenderId = adminPersonId,
+                    Content = $"The tourist (ID: {problem.TouristId}) marked that the issue on tour (ID: {problem.TourId}) was not adequately resolved. Penalties have been applied to this tour based on the report. Repeated reports may lead to stricter administrative measures.",
+                    ReferenceId = problem.Id
+                });
+
+                _notificationService.Create(new NotificationDto
+                {
+                    RecipientId = problem.TouristId,
+                    SenderId = adminPersonId,
+                    Content = "Your feedback has been recorded. Since you marked the issue as not resolved, the tour and its author have been sanctioned according to the platform rules. Thank you for helping maintain tour quality.",
+                    ReferenceId = problem.Id
+                });
+            }
 
             return _mapper.Map<TourProblemDto>(result);
         }
