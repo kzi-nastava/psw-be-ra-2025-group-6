@@ -37,4 +37,31 @@ public class TourExecutionController : ControllerBase
         if (result == null) return NotFound(new { title = "No active session", detail = "Nema aktivne sesije" });
         return Ok(result);
     }
+
+    /// <summary>
+    /// Proverava napredak turiste na aktivnoj turi
+    /// </summary>
+    /// <param name="id">ID TourExecution sesije</param>
+    /// <param name="dto">Trenutne GPS koordinate turiste</param>
+    /// <returns>Informacije o napretku i eventualnoj completiranoj ta?ci</returns>
+    [HttpPost("{id}/check-progress")]
+    public ActionResult<ProgressResponseDto> CheckProgress(long id, [FromBody] TrackPointDto dto)
+    {
+        var touristId = GetTouristId();
+        var result = _executionService.CheckProgress(id, dto, touristId);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Vra?a listu otklju?anih tajni za konkretnu sesiju
+    /// </summary>
+    /// <param name="id">ID TourExecution sesije</param>
+    /// <returns>Lista otklju?anih tajni</returns>
+    [HttpGet("{id}/unlocked-secrets")]
+    public ActionResult<UnlockedSecretsDto> GetUnlockedSecrets(long id)
+    {
+        var touristId = GetTouristId();
+        var result = _executionService.GetUnlockedSecrets(id, touristId);
+        return Ok(result);
+    }
 }
