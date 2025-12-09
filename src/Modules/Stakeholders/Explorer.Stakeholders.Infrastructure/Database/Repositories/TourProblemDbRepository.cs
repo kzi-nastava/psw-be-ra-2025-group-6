@@ -74,4 +74,11 @@ public class TourProblemDbRepository : ITourProblemRepository
         _dbSet.Remove(entity);
         await DbContext.SaveChangesAsync();
     }
+
+    public async Task<int> CountByTourAndStatus(long tourId, ProblemStatus status)
+    {
+        return await _dbSet
+            .Where(p => p.TourId == tourId && p.Status == status)
+            .CountAsync();
+    }
 }

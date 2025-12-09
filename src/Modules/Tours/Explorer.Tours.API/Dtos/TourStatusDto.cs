@@ -4,6 +4,7 @@
     {
         DRAFT,
         CONFIRMED,
-        ARCHIVED
+        ARCHIVED,
+        SUSPENDED
     }
 }

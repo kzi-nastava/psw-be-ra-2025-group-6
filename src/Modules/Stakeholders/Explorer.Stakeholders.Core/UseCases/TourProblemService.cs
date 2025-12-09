@@ -195,6 +195,19 @@ namespace Explorer.Stakeholders.Core.UseCases
                     Content = "Your feedback has been recorded. Since you marked the issue as not resolved, the tour and its author have been sanctioned according to the platform rules. Thank you for helping maintain tour quality.",
                     ReferenceId = problem.Id
                 });
+
+                var penalizedCount = await _repository.CountByTourAndStatus(problem.TourId, ProblemStatus.Penalized);
+                if (penalizedCount >= 3)
+                {
+                    await _tourInfoGateway.SuspendTour(problem.TourId);
+                    _notificationService.Create(new NotificationDto
+                    {
+                        RecipientId = tour.AuthorId,
+                        SenderId = adminPersonId,
+                        Content = $"Tour (ID: {problem.TourId}) has been suspended due to repeated unresolved issues.",
+                        ReferenceId = problem.Id
+                    });
+                }
             }
 
             return _mapper.Map<TourProblemDto>(result);

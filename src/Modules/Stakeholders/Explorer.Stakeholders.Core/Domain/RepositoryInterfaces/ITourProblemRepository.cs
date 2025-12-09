@@ -12,4 +12,5 @@ public interface ITourProblemRepository
     Task<TourProblem> Create(TourProblem problem);
     Task<TourProblem> Update(TourProblem problem);
     Task Delete(long id);
+    Task<int> CountByTourAndStatus(long tourId, ProblemStatus status);
 }

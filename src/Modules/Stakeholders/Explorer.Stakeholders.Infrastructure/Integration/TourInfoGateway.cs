@@ -67,6 +67,24 @@ namespace Explorer.Stakeholders.Infrastructure.Integration
             }
         }
 
+        public async Task SuspendTour(long id, CancellationToken cancellationToken = default)
+        {
+            const string query = "UPDATE tours.\"Tours\" SET \"Status\" = @Status WHERE \"Id\" = @Id;";
+            try
+            {
+                await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+                await using var command = connection.CreateCommand();
+                command.CommandText = query;
+                command.Parameters.AddWithValue("@Id", id);
+                command.Parameters.AddWithValue("@Status", 3); // TourStatus.SUSPENDED
+                await command.ExecuteNonQueryAsync(cancellationToken);
+            }
+            catch (PostgresException ex) when (IsMissingSchema(ex))
+            {
+                // Ignore if tours schema not present in this environment
+            }
+        }
+
         private static bool IsMissingSchema(PostgresException ex) =>
             ex.SqlState == PostgresErrorCodes.InvalidSchemaName ||
             ex.SqlState == PostgresErrorCodes.InvalidCatalogName ||

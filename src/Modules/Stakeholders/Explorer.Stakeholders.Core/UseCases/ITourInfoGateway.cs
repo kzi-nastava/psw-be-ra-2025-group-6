@@ -10,5 +10,6 @@ namespace Explorer.Stakeholders.Core.UseCases
     {
         Task<TourInfo?> GetById(long id, CancellationToken cancellationToken = default);
         Task<List<TourInfo>> GetByAuthor(long authorId, CancellationToken cancellationToken = default);
+        Task SuspendTour(long id, CancellationToken cancellationToken = default);
     }
 }
