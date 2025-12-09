@@ -1,4 +1,5 @@
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.Core.UseCases;
@@ -41,6 +42,21 @@ namespace Explorer.API.Controllers.Tourist
             var touristId = long.Parse(User.Claims.First(i => i.Type == "personId").Value);
             var result = _shoppingCartService.RemoveItem(touristId, tourId);
             return Ok(result);
+        }
+
+        [HttpPost("checkout")]
+        public ActionResult<List<TourPurchaseTokenDto>> Checkout()
+        {
+            try
+            {
+                var touristId = User.PersonId(); // Koristi extension metodu
+                var result = _shoppingCartService.Checkout(touristId);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

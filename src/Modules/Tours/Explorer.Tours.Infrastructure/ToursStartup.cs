@@ -58,6 +58,7 @@ public static class ToursStartup
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<IMeetupRepository, MeetupRepository>();
         services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
+        services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
 
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));

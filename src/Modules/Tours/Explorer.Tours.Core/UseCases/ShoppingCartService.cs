@@ -9,14 +9,16 @@ namespace Explorer.Tours.Core.UseCases
 {
     public class ShoppingCartService : IShoppingCartService
     {
+        private readonly ITourPurchaseTokenRepository _tokenRepository;
         private readonly IShoppingCartRepository _shoppingCartRepository;
         private readonly ITourRepository<Tour> _tourRepository;
         private readonly IMapper _mapper;
 
-        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, ITourRepository<Tour> tourRepository, IMapper mapper)
+        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, ITourRepository<Tour> tourRepository, ITourPurchaseTokenRepository tokenRepository, IMapper mapper)
         {
             _shoppingCartRepository = shoppingCartRepository;
             _tourRepository = tourRepository;
+            _tokenRepository = tokenRepository;
             _mapper = mapper;
         }
 
@@ -54,6 +56,26 @@ namespace Explorer.Tours.Core.UseCases
             _shoppingCartRepository.Update(cart);
 
             return _mapper.Map<ShoppingCartDto>(cart);
+        }
+
+        public List<TourPurchaseTokenDto> Checkout(long touristId)
+        {
+            var cart = _shoppingCartRepository.GetByTouristId(touristId);
+            if (cart == null || cart.Items.Count == 0)
+            {
+                throw new InvalidOperationException("Cannot checkout an empty cart.");
+            }
+
+            // Domain metoda kreira tokene i prazni korpu
+            var tokens = cart.Checkout();
+
+            // Èuvanje tokena u bazi
+            _tokenRepository.CreateBulk(tokens);
+
+            // Update korpe (sada prazna)
+            _shoppingCartRepository.Update(cart);
+
+            return _mapper.Map<List<TourPurchaseTokenDto>>(tokens);
         }
     }
 }

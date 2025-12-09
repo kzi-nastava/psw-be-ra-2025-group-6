@@ -8,5 +8,7 @@ namespace Explorer.Tours.API.Public
         ShoppingCartDto GetByTouristId(long touristId);
         ShoppingCartDto AddItem(long touristId, long tourId);
         ShoppingCartDto RemoveItem(long touristId, long tourId);
+
+        List<TourPurchaseTokenDto> Checkout(long touristId); // NOVO
     }
 }

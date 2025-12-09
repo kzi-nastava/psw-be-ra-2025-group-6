@@ -43,4 +43,24 @@ public class ShoppingCart : Entity
             LastModified = DateTime.UtcNow;
         }
     }
+
+    public List<TourPurchaseToken> Checkout()
+    {
+        if (Items.Count == 0)
+            throw new InvalidOperationException("Cannot checkout an empty cart.");
+
+        var tokens = new List<TourPurchaseToken>();
+
+        foreach (var item in Items)
+        {
+            var token = new TourPurchaseToken(TouristId, item.TourId, item.TourName, item.Price);
+            tokens.Add(token);
+        }
+
+        // Isprazniti korpu nakon checkout-a
+        Items.Clear();
+        LastModified = DateTime.UtcNow;
+
+        return tokens;
+    }
 }
