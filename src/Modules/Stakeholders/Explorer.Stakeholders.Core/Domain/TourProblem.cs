@@ -14,6 +14,9 @@ namespace Explorer.Stakeholders.Core.Domain
         public ProblemStatus Status { get; private set; }
         public DateTime? DeadlineAt { get; private set; }
         public DateTime? ResolvedAt { get; private set; }
+        public ProblemResolutionFeedback ResolutionFeedback { get; private set; }
+        public string? ResolutionComment { get; private set; }
+        public DateTime? ResolutionAt { get; private set; }
 
         
         private TourProblem() { Description = string.Empty; }
@@ -28,6 +31,7 @@ namespace Explorer.Stakeholders.Core.Domain
             Description = description;
             ReportedAt = DateTime.UtcNow;
             Status = ProblemStatus.Open;
+            ResolutionFeedback = ProblemResolutionFeedback.Pending;
 
             Validate();
         }
@@ -53,6 +57,19 @@ namespace Explorer.Stakeholders.Core.Domain
         {
             Status = ProblemStatus.Closed;
             ResolvedAt = closedAtUtc;
+        }
+
+        public void SetResolutionFeedback(ProblemResolutionFeedback feedback, string? comment)
+        {
+            if (feedback == ProblemResolutionFeedback.Pending)
+                throw new ArgumentException("Resolution feedback must be Resolved or NotResolved.");
+
+            if (feedback == ProblemResolutionFeedback.NotResolvedByTourist && string.IsNullOrWhiteSpace(comment))
+                throw new ArgumentException("Resolution comment is required when marking as not resolved.");
+
+            ResolutionFeedback = feedback;
+            ResolutionComment = string.IsNullOrWhiteSpace(comment) ? null : comment.Trim();
+            ResolutionAt = DateTime.UtcNow;
         }
 
         public bool IsOverdue(DateTime utcNow)
@@ -94,5 +111,12 @@ namespace Explorer.Stakeholders.Core.Domain
         Open = 0,
         Closed = 1,
         Penalized = 2
+    }
+
+    public enum ProblemResolutionFeedback
+    {
+        Pending = 0,
+        ResolvedByTourist = 1,
+        NotResolvedByTourist = 2
     }
 }

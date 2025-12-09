@@ -59,6 +59,9 @@ public class StakeholdersContext : DbContext
             builder.Property(p => p.ReportedAt).IsRequired();
             builder.Property(p => p.DeadlineAt).IsRequired(false);
             builder.Property(p => p.ResolvedAt).IsRequired(false);
+            builder.Property(p => p.ResolutionFeedback).IsRequired();
+            builder.Property(p => p.ResolutionComment).HasMaxLength(1000).IsRequired(false);
+            builder.Property(p => p.ResolutionAt).IsRequired(false);
         });
     }
 

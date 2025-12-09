@@ -1,4 +1,5 @@
 using AutoMapper;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
@@ -101,6 +102,40 @@ namespace Explorer.Stakeholders.Core.UseCases
                 Content = content,
                 ReferenceId = problem.Id
             });
+
+            return _mapper.Map<TourProblemDto>(result);
+        }
+
+        public async Task<TourProblemDto> SetResolutionFeedback(long id, TourProblemResolutionDto resolutionDto, long touristPersonId)
+        {
+            var problem = await _repository.GetById(id);
+
+            if (problem == null)
+                throw new NotFoundException($"Problem with ID {id} not found.");
+
+            if (problem.TouristId != touristPersonId)
+                throw new ForbiddenException("You can only update resolution feedback for your own problems.");
+
+            var feedback = (ProblemResolutionFeedback)resolutionDto.Feedback;
+            problem.SetResolutionFeedback(feedback, resolutionDto.Comment);
+
+            var result = await _repository.Update(problem);
+
+            var tour = await _tourInfoGateway.GetById(problem.TourId);
+            if (tour != null)
+            {
+                var content = feedback == ProblemResolutionFeedback.ResolvedByTourist
+                    ? $"Tourist marked problem #{problem.Id} on '{tour.Name}' as resolved."
+                    : $"Tourist marked problem #{problem.Id} on '{tour.Name}' as not resolved: {resolutionDto.Comment}";
+
+                _notificationService.Create(new NotificationDto
+                {
+                    RecipientId = tour.AuthorId,
+                    SenderId = touristPersonId,
+                    Content = content,
+                    ReferenceId = problem.Id
+                });
+            }
 
             return _mapper.Map<TourProblemDto>(result);
         }

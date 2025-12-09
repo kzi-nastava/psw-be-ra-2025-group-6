@@ -15,5 +15,8 @@ namespace Explorer.Stakeholders.API.Dtos
         public DateTime? DeadlineAt { get; set; }
         public DateTime? ResolvedAt { get; set; }
         public bool IsOverdue { get; set; }
+        public int ResolutionFeedback { get; set; }
+        public string? ResolutionComment { get; set; }
+        public DateTime? ResolutionAt { get; set; }
     }
 }
