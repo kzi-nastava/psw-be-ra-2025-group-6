@@ -1,7 +1,8 @@
-﻿using Explorer.BuildingBlocks.Core.Exceptions;
+﻿using Explorer.Blog.Core.Domain;
+using Explorer.Blog.Core.Domain.RepositoryInterfaces;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
-using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 using Explorer.Blog.Core.Domain;
 
@@ -32,13 +33,18 @@ public class BlogDbRepository : IBlogRepository
 
     public BlogPost Update(BlogPost blog)
     {
-        var existingBlog = _dbSet.FirstOrDefault(b => b.Id == blog.Id);
+        var existingBlog = _dbSet.Include(b => b.Votes).FirstOrDefault(b => b.Id == blog.Id);
         if (existingBlog == null)
             throw new NotFoundException($"Blog with Id {blog.Id} not found.");
 
-        DbContext.Entry(existingBlog).State = EntityState.Detached;
+        DbContext.Entry(existingBlog).CurrentValues.SetValues(blog);
 
-        DbContext.Entry(blog).State = EntityState.Modified;
+        var existingVotes = existingBlog.Votes.ToList();
+        existingVotes.ForEach(v => existingBlog.Votes.ToList().Remove(v));
+        foreach (var vote in blog.Votes)
+        {
+            existingBlog.Votes.ToList().Add(vote);
+        }
 
         DbContext.SaveChanges();
         return blog;
@@ -53,7 +59,9 @@ public class BlogDbRepository : IBlogRepository
 
     public BlogPost GetById(long id)
     {
-        return _dbSet.FirstOrDefault(b => b.Id == id);
+        return _dbSet
+            .Include(b => b.Votes)
+            .FirstOrDefault(b => b.Id == id);
     }
 
     public void Delete(BlogPost blog)

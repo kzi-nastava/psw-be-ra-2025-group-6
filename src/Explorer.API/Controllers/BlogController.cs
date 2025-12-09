@@ -3,7 +3,6 @@ using Explorer.Blog.API.Public.Administration;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
-using Explorer.Tours.API.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -145,6 +144,40 @@ public class BlogController : ControllerBase
         _blogService.Delete(id);
 
         return NoContent();
+    }
+
+    [HttpPost("{id:long}/vote")]
+    public IActionResult VoteOnBlog(long id, [FromBody] VoteRequestDto request)
+    {
+        var userId = User.PersonId();
+
+        if (request.VoteType == null)
+            _blogService.RemoveVote(userId, id);
+        else
+            _blogService.Vote(userId, id, request.VoteType.Value);
+
+        var votes = _blogService.GetVotes(id);
+        var userVote = _blogService.GetUserVote(userId, id);
+        return Ok(new { votes.upvotes, votes.downvotes, userVote });
+    }
+
+    [HttpDelete("{id:long}/vote")]
+    public IActionResult RemoveVote(long id)
+    {
+        var userId = User.PersonId();
+        _blogService.RemoveVote(userId, id);
+        var votes = _blogService.GetVotes(id);
+        var userVote = _blogService.GetUserVote(userId, id);
+        return Ok(new { votes.upvotes, votes.downvotes, userVote });
+    }
+
+    [HttpGet("{id:long}/votes")]
+    public IActionResult GetVotes(long id)
+    {
+        var votes = _blogService.GetVotes(id);
+        var userId = User.PersonId();
+        var userVote = _blogService.GetUserVote(userId, id);
+        return Ok(new { votes.upvotes, votes.downvotes, userVote });
     }
 
     [HttpPatch("{id:long}/archive")]

@@ -113,6 +113,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         );
     }
 
+    [Fact]
     public async Task CreatesBlog_WithStatus()
     {
         using var scope = Factory.Services.CreateScope();
@@ -170,9 +171,65 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         storedBlog.ShouldBeNull();
     }
 
+    [Fact]
+    public void VoteOnBlog_UpdatesAggregatedVotes()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Test blog", "Opis", new List<string>(), BlogStatus.POSTED);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        blog.AddOrUpdateVote(-11, VoteType.Upvote);
+        blog.CountUpvotes().ShouldBe(1);
+        blog.CountDownvotes().ShouldBe(0);
+
+        blog.AddOrUpdateVote(-11, VoteType.Downvote);
+        blog.CountUpvotes().ShouldBe(0);
+        blog.CountDownvotes().ShouldBe(1);
+    }
+
+    [Fact]
+    public void RemoveVote_NonExistingVote_DoesNothing()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Blog test", "Opis", new List<string>(), BlogStatus.POSTED);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        blog.RemoveVote(999);
+        blog.Votes.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void CountUpvotesAndDownvotes_ReturnsCorrectValues()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Test blog", "Opis", new List<string>(), BlogStatus.POSTED);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        blog.AddOrUpdateVote(1, VoteType.Upvote);
+        blog.AddOrUpdateVote(2, VoteType.Upvote);
+        blog.AddOrUpdateVote(3, VoteType.Downvote);
+
+        blog.CountUpvotes().ShouldBe(2);
+        blog.CountDownvotes().ShouldBe(1);
+    }
+
     private static BlogController CreateController(IServiceScope scope)
     {
-        return new BlogController(scope.ServiceProvider.GetRequiredService<IBlogService>())
+        var blogService = scope.ServiceProvider.GetRequiredService<IBlogService>();
+
+        return new BlogController(blogService)
         {
             ControllerContext = BuildContext("-11")
         };

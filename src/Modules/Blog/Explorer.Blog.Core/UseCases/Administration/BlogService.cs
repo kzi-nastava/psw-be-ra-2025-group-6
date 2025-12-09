@@ -5,6 +5,7 @@ using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Blog.Core.Domain;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -117,5 +118,46 @@ public class BlogService : IBlogService
         blog.UpdateDescription(newDescription);
         var updated = _blogRepository.Update(blog);
         return _mapper.Map<BlogDto>(updated);
+    }
+
+    public void Vote(long userId, long blogId, VoteTypeDto voteType)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+
+        var type = _mapper.Map<VoteType>(voteType);
+        blog.AddOrUpdateVote(userId, type);
+        _blogRepository.Update(blog);
+    }
+
+    public void RemoveVote(long userId, long blogId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+
+        blog.RemoveVote(userId);
+        _blogRepository.Update(blog);
+    }
+
+
+    public (int upvotes, int downvotes) GetVotes(long blogId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+        int up = blog.Votes.Count(v => v.Type == VoteType.Upvote);
+        int down = blog.Votes.Count(v => v.Type == VoteType.Downvote);
+        return (up, down);
+    }
+
+    public BlogVoteDto? GetUserVote(long userId, long blogId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+        var vote = blog.Votes.FirstOrDefault(v => v.UserId == userId);
+        return vote == null ? null : _mapper.Map<BlogVoteDto>(vote);
     }
 }
