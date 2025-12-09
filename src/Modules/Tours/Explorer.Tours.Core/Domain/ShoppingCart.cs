@@ -5,8 +5,9 @@ namespace Explorer.Tours.Core.Domain;
 public class ShoppingCart : Entity
 {
     public long TouristId { get; init; }
-    public List<OrderItem> Items { get; init; } = new List<OrderItem>();
-    public double TotalPrice => Items.Sum(item => item.Price);
+    private readonly List<OrderItem> _items = new();
+    public IReadOnlyCollection<OrderItem> Items => _items;
+    public double TotalPrice => _items.Sum(item => item.Price);
     public DateTime LastModified { get; private set; }
 
     public ShoppingCart(long touristId)
@@ -26,20 +27,20 @@ public class ShoppingCart : Entity
         if (tour.Status != TourStatus.CONFIRMED)
             throw new ArgumentException("Tour must be confirmed to be purchased.");
 
-        if (Items.Any(item => item.TourId == tour.Id))
+        if (_items.Any(item => item.TourId == tour.Id))
             throw new ArgumentException("Tour is already in the cart.");
 
         var orderItem = new OrderItem(tour.Id, tour.Name, tour.Price);
-        Items.Add(orderItem);
+        _items.Add(orderItem);
         LastModified = DateTime.UtcNow;
     }
 
     public void RemoveItem(long tourId)
     {
-        var itemToRemove = Items.FirstOrDefault(item => item.TourId == tourId);
+        var itemToRemove = _items.FirstOrDefault(item => item.TourId == tourId);
         if (itemToRemove != null)
         {
-            Items.Remove(itemToRemove);
+            _items.Remove(itemToRemove);
             LastModified = DateTime.UtcNow;
         }
     }
