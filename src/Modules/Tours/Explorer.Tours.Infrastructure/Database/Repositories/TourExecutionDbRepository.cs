@@ -52,7 +52,34 @@ public class TourExecutionDbRepository : ITourExecutionRepository
         var entity = query.FirstOrDefault();
         if (entity == null) return null;
 
-        var pos = JsonSerializer.Deserialize<Dictionary<string,double>>(entity.InitialPositionJson);
+        return MapToExecution(entity);
+    }
+
+    public TourExecution? GetById(long executionId)
+    {
+        var entity = _dbContext.Set<TourExecutionEntity>().Find(executionId);
+        if (entity == null) return null;
+
+        return MapToExecution(entity);
+    }
+
+    public TourExecution Update(TourExecution execution)
+    {
+        var entity = _dbContext.Set<TourExecutionEntity>().Find(execution.Id);
+        if (entity == null) throw new NotFoundException("Execution not found");
+
+        entity.Status = execution.Status.ToString();
+        entity.EndTime = execution.EndTime;
+        entity.LastActivity = execution.LastActivity;
+        entity.ExecutionKeyPointsJson = JsonSerializer.Serialize(execution.ExecutionKeyPoints);
+
+        _dbContext.SaveChanges();
+        return execution;
+    }
+
+    private TourExecution MapToExecution(TourExecutionEntity entity)
+    {
+        var pos = JsonSerializer.Deserialize<Dictionary<string, double>>(entity.InitialPositionJson);
         var tp = new TrackPoint(pos!["Latitude"], pos["Longitude"]);
         var execution = new TourExecution(entity.TourId, entity.TouristId, tp);
         typeof(Explorer.BuildingBlocks.Core.Domain.Entity).GetProperty("Id")?.SetValue(execution, entity.Id);

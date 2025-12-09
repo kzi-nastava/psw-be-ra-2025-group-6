@@ -109,6 +109,52 @@ public class TourExecutionService : ITourExecutionService
         };
     }
 
+    public TourExecutionResultDto CompleteExecution(long executionId, long touristId)
+    {
+        var execution = _executionRepository.GetById(executionId);
+        if (execution == null) throw new NotFoundException("Execution not found");
+
+        if (execution.TouristId != touristId)
+            throw new InvalidOperationException("Cannot complete execution that does not belong to tourist");
+
+        execution.Complete();
+        _executionRepository.Update(execution);
+
+        return new TourExecutionResultDto
+        {
+            TourExecutionId = execution.Id,
+            TourId = execution.TourId,
+            TouristId = execution.TouristId,
+            Status = execution.Status.ToString(),
+            StartTime = execution.StartTime,
+            EndTime = execution.EndTime,
+            LastActivity = execution.LastActivity
+        };
+    }
+
+    public TourExecutionResultDto AbandonExecution(long executionId, long touristId)
+    {
+        var execution = _executionRepository.GetById(executionId);
+        if (execution == null) throw new NotFoundException("Execution not found");
+
+        if (execution.TouristId != touristId)
+            throw new InvalidOperationException("Cannot abandon execution that does not belong to tourist");
+
+        execution.Abandon();
+        _executionRepository.Update(execution);
+
+        return new TourExecutionResultDto
+        {
+            TourExecutionId = execution.Id,
+            TourId = execution.TourId,
+            TouristId = execution.TouristId,
+            Status = execution.Status.ToString(),
+            StartTime = execution.StartTime,
+            EndTime = execution.EndTime,
+            LastActivity = execution.LastActivity
+        };
+    }
+
     private List<TrackPointDto> GenerateSimpleRoute(double startLat, double startLng, double endLat, double endLng)
     {
         return new List<TrackPointDto>

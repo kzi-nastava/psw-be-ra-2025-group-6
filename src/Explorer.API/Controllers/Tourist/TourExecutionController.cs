@@ -37,4 +37,20 @@ public class TourExecutionController : ControllerBase
         if (result == null) return NotFound(new { title = "No active session", detail = "Nema aktivne sesije" });
         return Ok(result);
     }
+
+    [HttpPut("{executionId}/complete")]
+    public ActionResult<TourExecutionResultDto> Complete(long executionId)
+    {
+        var touristId = GetTouristId();
+        var result = _executionService.CompleteExecution(executionId, touristId);
+        return Ok(result);
+    }
+
+    [HttpPut("{executionId}/abandon")]
+    public ActionResult<TourExecutionResultDto> Abandon(long executionId)
+    {
+        var touristId = GetTouristId();
+        var result = _executionService.AbandonExecution(executionId, touristId);
+        return Ok(result);
+    }
 }
