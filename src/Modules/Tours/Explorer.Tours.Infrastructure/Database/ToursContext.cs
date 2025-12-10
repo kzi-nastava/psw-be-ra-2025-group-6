@@ -1,5 +1,6 @@
 ﻿using Explorer.Tours.Core.Domain;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Explorer.Tours.Infrastructure.Database;
 
@@ -20,6 +21,8 @@ public class ToursContext : DbContext
 
     public DbSet<Facility> Facility { get; set; }
 
+    public DbSet<KeyPoint> KeyPoints { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -27,6 +30,28 @@ public class ToursContext : DbContext
         modelBuilder.HasDefaultSchema("tours");
 
         ConfigureTouristEquipment(modelBuilder);
+
+        modelBuilder.Entity<Tour>()
+    .HasMany(t => t.Equipment)
+    .WithOne()
+    .HasForeignKey(e => e.TourId)
+    .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Tour>()
+    .HasMany(t => t.KeyPoints)
+    .WithOne()
+    .HasForeignKey(kp => kp.TourId)
+    .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Tour>()
+    .Property(t => t.Duration)
+    .HasConversion(
+        v => JsonSerializer.Serialize(v, new JsonSerializerOptions()),
+        v => JsonSerializer.Deserialize<List<TourDuration>>(v, new JsonSerializerOptions())!
+    )
+    .HasColumnType("jsonb");
+
+
     }
 
     private static void ConfigureTouristEquipment(ModelBuilder modelBuilder)

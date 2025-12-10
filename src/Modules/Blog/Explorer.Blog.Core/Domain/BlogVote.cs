@@ -2,20 +2,17 @@
 
 namespace Explorer.Blog.Core.Domain
 {
-    public class BlogVote : Entity
+    public class BlogVote : ValueObject
     {
-        public long BlogPostId { get; private set; }
         public long UserId { get; private set; }
         public DateTime VotedAt { get; private set; }
         public VoteType Type { get; private set; }
 
         private BlogVote() { }
 
-        public BlogVote(long blogPostId, long userId, VoteType type)
+        public BlogVote(long userId, VoteType type)
         {
-            if (blogPostId == 0) throw new ArgumentException("Invalid BlogPostId.");
             if (userId == 0) throw new ArgumentException("Invalid UserId.");
-            BlogPostId = blogPostId;
             UserId = userId;
             Type = type;
             VotedAt = DateTime.UtcNow;
@@ -25,6 +22,12 @@ namespace Explorer.Blog.Core.Domain
         {
             Type = newType;
             VotedAt = DateTime.UtcNow;
+        }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return UserId;
+            yield return Type;
         }
     }
 }

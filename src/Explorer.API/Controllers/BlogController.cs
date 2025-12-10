@@ -14,12 +14,10 @@ namespace Explorer.API.Controllers;
 public class BlogController : ControllerBase
 {
     private readonly IBlogService _blogService;
-    private readonly IBlogVoteService _blogVoteService;
 
-    public BlogController(IBlogService blogService, IBlogVoteService blogVoteService)
+    public BlogController(IBlogService blogService)
     {
         _blogService = blogService;
-        _blogVoteService = blogVoteService;
     }
 
     [HttpGet("my-blogs")]
@@ -148,21 +146,71 @@ public class BlogController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("{id:long}/vote")]
-    public IActionResult VoteOnBlog(long id, [FromBody] VoteTypeDto voteType)
+    [HttpPost("{id:long}/comments")]
+    public IActionResult AddComment(long id, [FromBody] CommentCreateDto dto)
     {
         var userId = User.PersonId();
-        _blogVoteService.Vote(userId, id, voteType);
-        var votes = _blogVoteService.GetVotes(id);
-        return Ok(votes);
+        var created = _blogService.AddComment(id, userId, dto.Text);
+
+        return Ok(created);
+    }
+
+    [HttpPut("{id:long}/comments/{commentId:int}")]
+    public IActionResult EditComment(long id, int commentId, [FromBody] CommentCreateDto dto)
+    {
+        var userId = User.PersonId();
+        _blogService.EditComment(id, commentId, userId, dto.Text);
+
+        return Ok();
+    }
+
+    [HttpDelete("{id:long}/comments/{commentId:int}")]
+    public IActionResult DeleteComment(long id, int commentId)
+    {
+        var userId = User.PersonId();
+        _blogService.DeleteComment(id, commentId, userId);
+
+        return NoContent();
+    }
+
+    [HttpGet("{id:long}/comments")]
+    public IActionResult GetComment(long id)
+    {
+        var comments = _blogService.GetComments(id);
+        return Ok(comments);
+    }
+
+    [HttpPost("{id:long}/vote")]
+    public IActionResult VoteOnBlog(long id, [FromBody] VoteRequestDto request)
+    {
+        var userId = User.PersonId();
+
+        if (request.VoteType == null)
+            _blogService.RemoveVote(userId, id);
+        else
+            _blogService.Vote(userId, id, request.VoteType.Value);
+
+        var votes = _blogService.GetVotes(id);
+        var userVote = _blogService.GetUserVote(userId, id);
+        return Ok(new { votes.upvotes, votes.downvotes, userVote });
+    }
+
+    [HttpDelete("{id:long}/vote")]
+    public IActionResult RemoveVote(long id)
+    {
+        var userId = User.PersonId();
+        _blogService.RemoveVote(userId, id);
+        var votes = _blogService.GetVotes(id);
+        var userVote = _blogService.GetUserVote(userId, id);
+        return Ok(new { votes.upvotes, votes.downvotes, userVote });
     }
 
     [HttpGet("{id:long}/votes")]
     public IActionResult GetVotes(long id)
     {
-        var votes = _blogVoteService.GetVotes(id);
+        var votes = _blogService.GetVotes(id);
         var userId = User.PersonId();
-        var userVote = userId != 0 ? _blogVoteService.GetUserVote(userId, id)?.Type : null;
+        var userVote = _blogService.GetUserVote(userId, id);
         return Ok(new { votes.upvotes, votes.downvotes, userVote });
     }
 

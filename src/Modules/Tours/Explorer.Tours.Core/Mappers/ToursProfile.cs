@@ -15,8 +15,11 @@ public class ToursProfile : Profile
         CreateMap<TouristEquipmentDto, TouristEquipment>().ReverseMap();
         CreateMap<TourDifficulty, TourDifficultyDto>().ReverseMap();
         CreateMap<TourStatus, TourStatusDto>().ReverseMap();
+        CreateMap<TravelType, TravelTypeDto>().ReverseMap();
+        CreateMap<TourDuration, TourDurationDto>().ReverseMap();
         CreateMap<Tour, TourDto>().ReverseMap();
         CreateMap<MonumentDto, Monument>().ReverseMap();
         CreateMap<MeetupDto, Meetup>().ReverseMap();
+        CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
     }
 }
