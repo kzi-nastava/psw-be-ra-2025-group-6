@@ -11,5 +11,7 @@ public class BlogDto
     public List<CommentDto> Comments { get; set; } = new();
     public BlogStatusDto Status { get; set; }
     public DateTime? LastModifiedAt { get; set; }
+    public BlogQualityStatusDto QualityStatus { get; set; }
+    public string Username { get; set; }
 
 }

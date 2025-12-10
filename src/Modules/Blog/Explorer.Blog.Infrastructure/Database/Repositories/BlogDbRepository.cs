@@ -1,4 +1,5 @@
-﻿using Explorer.Blog.Core.Domain;
+﻿using Explorer.Blog.API.Dtos;
+using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
@@ -71,5 +72,13 @@ public class BlogDbRepository : IBlogRepository
     {
         _dbSet.Remove(blog);
         DbContext.SaveChanges();
+    }
+
+    public List<BlogPost> GetAll()
+    {
+        return _dbSet
+            .Include(b => b.Votes)
+            .Include(b => b.Comments)
+            .ToList();
     }
 }

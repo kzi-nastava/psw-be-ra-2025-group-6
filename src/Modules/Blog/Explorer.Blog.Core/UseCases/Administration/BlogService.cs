@@ -14,7 +14,6 @@ public class BlogService : IBlogService
     private readonly IBlogRepository _blogRepository;
     private readonly IMapper _mapper;
     private readonly IInternalStakeholderService _stakeholderService;
-
     public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper)
     {
         _blogRepository = blogRepository;
@@ -25,14 +24,14 @@ public class BlogService : IBlogService
     public PagedResult<BlogDto> GetPaged(int page, int pageSize)
     {
         var result = _blogRepository.GetPaged(page, pageSize);
-        var items = result.Results.Select(_mapper.Map<BlogDto>).ToList();
+        var items = result.Results.Select(MapBlogWithUsername).ToList();
         return new PagedResult<BlogDto>(items, result.TotalCount);
     }
 
     public List<BlogDto> GetByUser(long userId)
     {
         var blogs = _blogRepository.GetByUser(userId);
-        return blogs.Select(blog => _mapper.Map<BlogDto>(blog)).ToList();
+        return blogs.Select(MapBlogWithUsername).ToList();
     }
 
     public BlogDto Create(BlogCreateDto dto, long userId)
@@ -73,8 +72,7 @@ public class BlogService : IBlogService
     {
         var blog = _blogRepository.GetById(id);
         if (blog == null) return null;
-
-        return _mapper.Map<BlogDto>(blog);
+        return MapBlogWithUsername(blog);
     }
 
     public BlogDto Delete(long id)
@@ -190,6 +188,7 @@ public class BlogService : IBlogService
 
         var type = _mapper.Map<VoteType>(voteType);
         blog.AddOrUpdateVote(userId, type);
+        blog.RecalculateQualityStatus();
         _blogRepository.Update(blog);
     }
 
@@ -200,6 +199,7 @@ public class BlogService : IBlogService
             throw new Exception("Blog not found");
 
         blog.RemoveVote(userId);
+        blog.RecalculateQualityStatus();
         _blogRepository.Update(blog);
     }
 
@@ -221,5 +221,38 @@ public class BlogService : IBlogService
             throw new Exception("Blog not found");
         var vote = blog.Votes.FirstOrDefault(v => v.UserId == userId);
         return vote == null ? null : _mapper.Map<BlogVoteDto>(vote);
+    }
+
+    public BlogDto RecalculateQualityStatus(long blogId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        blog.RecalculateQualityStatus();
+        var updated = _blogRepository.Update(blog);
+        return  _mapper.Map<BlogDto>(updated);
+    }
+
+    public List<BlogDto> GetBlogsByQualityStatus(BlogQualityStatusDto statusDto)
+    {
+        BlogQualityStatus status = statusDto switch
+        {
+            BlogQualityStatusDto.None => BlogQualityStatus.None,
+            BlogQualityStatusDto.Active => BlogQualityStatus.Active,
+            BlogQualityStatusDto.Famous => BlogQualityStatus.Famous,
+            BlogQualityStatusDto.Closed => BlogQualityStatus.Closed,
+            _ => BlogQualityStatus.None
+        };
+
+        var blogs = _blogRepository.GetAll()
+            .Where(b => b.QualityStatus == status)
+            .ToList();
+
+        return blogs.Select(MapBlogWithUsername).ToList();
+    }
+
+    private BlogDto MapBlogWithUsername(BlogPost blog)
+    {
+        var dto = _mapper.Map<BlogDto>(blog);
+        dto.Username = _stakeholderService.GetUsername(blog.UserId);
+        return dto;
     }
 }

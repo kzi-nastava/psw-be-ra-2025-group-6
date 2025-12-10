@@ -13,6 +13,7 @@ public class BlogPost : AggregateRoot
 
     public BlogStatus Status { get; set; }
     public DateTime? LastModifiedAt { get; private set; }
+    public BlogQualityStatus QualityStatus { get; private set; } = BlogQualityStatus.None;
 
     private readonly List<BlogVote> _votes = new();
     public IReadOnlyCollection<BlogVote> Votes => _votes.AsReadOnly();
@@ -109,7 +110,7 @@ public class BlogPost : AggregateRoot
         var existing = _votes.FirstOrDefault(v => v.UserId == userId);
         if (existing != null)
         {
-            existing.UpdateVote(type); // samo update tip i vreme
+            existing.UpdateVote(type); 
         }
         else
         {
@@ -131,4 +132,34 @@ public class BlogPost : AggregateRoot
 
     public int CountDownvotes()
         => _votes.Count(v => v.Type == VoteType.Downvote);
+
+    public void UpdateQualityStatus(int score, int commentCount)
+    {
+        if(score < -10)
+        {
+            QualityStatus = BlogQualityStatus.Closed;
+            return;
+        }
+        if(score > 500 && commentCount > 30)
+        {
+            QualityStatus = BlogQualityStatus.Famous;
+            return;
+        }
+
+        if (score > 100 || commentCount > 10)
+        {
+            QualityStatus = BlogQualityStatus.Active;
+            return;
+        }
+
+        QualityStatus = BlogQualityStatus.None;
+    }
+
+    public void RecalculateQualityStatus()
+    {
+        int score = CountUpvotes() - CountDownvotes();
+        int commentCount = Comments.Count;
+
+        UpdateQualityStatus(score, commentCount);
+    }
 }

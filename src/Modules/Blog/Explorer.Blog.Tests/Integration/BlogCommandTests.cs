@@ -338,7 +338,6 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         storedBlog.Comments[commentIndex].Text.ShouldBe(dto.Text);
     }
 
-
     [Fact]
     public void EditComment_fails_when_different_user()
     {
@@ -429,6 +428,86 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         after.Comments.Count.ShouldBeGreaterThan(0);
         after.Comments.Any(c => c.Text == "Tekst za brisanje").ShouldBeFalse();
+    }
+
+    [Fact]
+    public void RemoveVote_ExistingVote_RemovesVote()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Blog za test remove vote", "Opis", new List<string>(), BlogStatus.POSTED);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        blog.AddOrUpdateVote(1, VoteType.Upvote);
+        blog.Votes.Count.ShouldBe(1);
+
+        blog.RemoveVote(1);
+
+        blog.Votes.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData(-20, 0, BlogQualityStatus.Closed)]
+    [InlineData(600, 40, BlogQualityStatus.Famous)]
+    [InlineData(200, 5, BlogQualityStatus.Active)]
+    [InlineData(50, 15, BlogQualityStatus.Active)]
+    [InlineData(50, 5, BlogQualityStatus.None)]
+    public void UpdateQualityStatus_SetsCorrectStatus(int score, int commentCount, BlogQualityStatus expected)
+    {
+        var blog = new DomainBlog(-11, "Blog za test quality", "Opis", new List<string>(), BlogStatus.POSTED);
+
+        blog.UpdateQualityStatus(score, commentCount);
+
+        blog.QualityStatus.ShouldBe(expected);
+    }
+
+    [Fact]
+    public void RecalculateQualityStatus_CalculatesCorrectly()
+    {
+        var blog = new DomainBlog(-11, "Blog za test recalc", "Opis", new List<string>(), BlogStatus.POSTED);
+
+        for (int i = 0; i < 5; i++)
+            blog.AddOrUpdateVote(-11, VoteType.Upvote); 
+        for (int i = 0; i < 3; i++)
+            blog.AddOrUpdateVote(-11, VoteType.Downvote); 
+
+        for (int i = 0; i < 12; i++)
+            blog.AddComment(-11, "Test user", $"Komentar {i}");
+
+        blog.RecalculateQualityStatus();
+
+        blog.QualityStatus.ShouldBe(BlogQualityStatus.Active);
+    }
+
+    [Fact]
+    public void RecalculateQualityStatus_SetsClosed_WhenScoreTooLow()
+    {
+        var blog = new DomainBlog(-11, "Blog za test recalc closed", "Opis", new List<string>(), BlogStatus.POSTED);
+
+        for (int i = 0; i < 15; i++)
+            blog.AddOrUpdateVote(i + 1, VoteType.Downvote);
+
+        blog.RecalculateQualityStatus();
+
+        blog.QualityStatus.ShouldBe(BlogQualityStatus.Closed);
+    }
+
+    [Fact]
+    public void RecalculateQualityStatus_SetsFamous_WhenHighScoreAndManyComments()
+    {
+        var blog = new DomainBlog(-11, "Blog za test recalc famous", "Opis", new List<string>(), BlogStatus.POSTED);
+
+        for (int i = 1; i <= 600; i++)
+            blog.AddOrUpdateVote(i, VoteType.Upvote);
+
+        for (int i = 1; i <= 40; i++)
+            blog.AddComment(i, $"User{i}", $"Komentar {i}");
+
+        blog.RecalculateQualityStatus();
+
+        blog.QualityStatus.ShouldBe(BlogQualityStatus.Famous);
     }
 
     private static BlogController CreateController(IServiceScope scope)
