@@ -15,4 +15,5 @@ public class TourDto
     public List<KeyPointDto>? KeyPoints { get; set; } = new List<KeyPointDto>();
     public double DistanceInKm { get; set; }
     public List<TourDurationDto>? Duration { get; set;  }
+    public DateTime? PublishedTime { get; set; }
 }
