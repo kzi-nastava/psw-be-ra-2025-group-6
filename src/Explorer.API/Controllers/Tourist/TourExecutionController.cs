@@ -38,6 +38,7 @@ public class TourExecutionController : ControllerBase
         return Ok(result);
     }
 
+
     [HttpPut("{executionId}/complete")]
     public ActionResult<TourExecutionResultDto> Complete(long executionId)
     {
@@ -51,6 +52,22 @@ public class TourExecutionController : ControllerBase
     {
         var touristId = GetTouristId();
         var result = _executionService.AbandonExecution(executionId, touristId);
+        return Ok(result);
+    }
+
+    [HttpPost("{id}/check-progress")]
+    public ActionResult<ProgressResponseDto> CheckProgress(long id, [FromBody] TrackPointDto dto)
+    {
+        var touristId = GetTouristId();
+        var result = _executionService.CheckProgress(id, dto, touristId);
+        return Ok(result);
+    }
+
+    [HttpGet("{id}/unlocked-secrets")]
+    public ActionResult<UnlockedSecretsDto> GetUnlockedSecrets(long id)
+    {
+        var touristId = GetTouristId();
+        var result = _executionService.GetUnlockedSecrets(id, touristId);
         return Ok(result);
     }
 }

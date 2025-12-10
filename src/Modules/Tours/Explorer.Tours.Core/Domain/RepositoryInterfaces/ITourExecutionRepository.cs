@@ -7,5 +7,7 @@ public interface ITourExecutionRepository
     TourExecution Create(TourExecution execution);
     TourExecution? GetActiveForTourist(long touristId, long? tourId = null);
     TourExecution? GetById(long executionId);
+
+    TourExecution Get(long id);
     TourExecution Update(TourExecution execution);
 }

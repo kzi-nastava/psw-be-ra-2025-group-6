@@ -8,4 +8,8 @@ public interface ITourExecutionService
     TourExecutionStartResultDto? GetActiveExecution(long touristId, long? tourId = null);
     TourExecutionResultDto CompleteExecution(long executionId, long touristId);
     TourExecutionResultDto AbandonExecution(long executionId, long touristId);
+
+    ProgressResponseDto CheckProgress(long executionId, TrackPointDto dto, long touristId);
+    UnlockedSecretsDto GetUnlockedSecrets(long executionId, long touristId);
+
 }
