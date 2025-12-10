@@ -91,4 +91,14 @@ public class TourRepository: ITourRepository
         _dbSet.Remove(entity);
         DbContext.SaveChanges();
     }
+    public List<Tour> GetPublishedTours()
+    {
+        return DbContext.Tours
+            .Include(t => t.Equipment)
+            .Include(t => t.KeyPoints)
+            .Where(t => t.Status == TourStatus.CONFIRMED)
+            .ToList();
+    }
+
+
 }

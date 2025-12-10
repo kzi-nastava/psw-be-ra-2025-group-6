@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Explorer.Tours.Core.Domain;
 using Npgsql;
+using Explorer.Tours.Core.UseCases.Tourist;
 
 namespace Explorer.Tours.Infrastructure;
 
@@ -44,6 +45,7 @@ public static class ToursStartup
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IMeetupService, MeetupService>();
         services.AddScoped<IAdminMapService, AdminMapService>();
+        services.AddScoped<ITouristViewService, TouristViewService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)

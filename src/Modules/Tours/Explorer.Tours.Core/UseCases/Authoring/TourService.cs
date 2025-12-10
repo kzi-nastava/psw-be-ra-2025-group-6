@@ -151,7 +151,21 @@ public class TourService : ITourService
         _tourRepository.Update(tour);
         return _mapper.Map<TourDto>(tour);
     }
+    private TouristTourDto MapToTouristView(Tour tour)
+    {
 
+        return new TouristTourDto
+        {
+            Name = tour.Name,
+            FirstKeyPoint = _mapper.Map<KeyPointDto>(tour.GetFirstKeyPoint()),
+            Difficulty = (TourDifficultyDto)tour.Difficulty,
+            Price = tour.Price,
+            Tags = tour.Tags,
+            DistanceInKm = tour.DistanceInKm,
+            Duration = _mapper.Map<List<TourDurationDto>>(tour.Duration),
+            Description = tour.Description,
+        };
+    }
 
 
 }

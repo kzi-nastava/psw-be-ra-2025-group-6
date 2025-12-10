@@ -1,5 +1,6 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
 using Explorer.BuildingBlocks.Core.Exceptions;
+using System.Collections.Specialized;
 
 namespace Explorer.Tours.Core.Domain;
 
@@ -175,6 +176,9 @@ public class Tour : AggregateRoot
             Duration.Add(duration);
         }
     }
-
+    public KeyPoint? GetFirstKeyPoint()
+    {
+        return KeyPoints.FirstOrDefault();
+    }
 
 }
