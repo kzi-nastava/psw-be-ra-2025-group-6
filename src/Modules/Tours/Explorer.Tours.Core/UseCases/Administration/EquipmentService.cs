@@ -18,6 +18,13 @@ public class EquipmentService : IEquipmentService
         _mapper = mapper;
     }
 
+    public List<EquipmentDto> GetAll() {
+        var result = _equipmentRepository.GetAll();
+
+        var items=_mapper.Map<List<EquipmentDto>>(result);
+        return new List<EquipmentDto>(items);
+    }
+
     public PagedResult<EquipmentDto> GetPaged(int page, int pageSize)
     {
         var result = _equipmentRepository.GetPaged(page, pageSize);

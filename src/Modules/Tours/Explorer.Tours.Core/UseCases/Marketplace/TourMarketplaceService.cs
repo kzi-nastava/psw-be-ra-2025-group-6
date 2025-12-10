@@ -21,7 +21,7 @@ public class TourMarketplaceService : ITourMarketplaceService
     {
         Validate(request);
         var tours = _tourRepository.GetPublishedWithKeyPoints();
-        var matches = tours.Where(t => t.KeyPoints.Any(kp =>
+        var matches = tours.Where(t => t.KeyPoints != null && t.KeyPoints.Any(kp =>
             GeoDistanceCalculator.DistanceInKilometers(
                 request.Latitude, request.Longitude, kp.Latitude, kp.Longitude) <= request.DistanceInKm));
 

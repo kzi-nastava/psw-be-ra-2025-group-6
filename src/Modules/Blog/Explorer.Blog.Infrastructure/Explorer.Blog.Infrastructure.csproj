@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\Explorer.BuildingBlocks.Infrastructure\Explorer.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Stakeholders\Explorer.Stakeholders.Infrastructure\Explorer.Stakeholders.Infrastructure.csproj" />
     <ProjectReference Include="..\Explorer.Blog.Core\Explorer.Blog.Core.csproj" />
   </ItemGroup>
 

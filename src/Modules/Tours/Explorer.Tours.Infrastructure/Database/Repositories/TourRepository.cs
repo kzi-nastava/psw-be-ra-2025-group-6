@@ -3,16 +3,15 @@ using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace Explorer.Tours.Infrastructure.Database.Repositories;
 
-public class TourRepository<TDbContext> : ITourRepository where TDbContext : DbContext
+public class TourRepository : ITourRepository
 {
-    protected readonly TDbContext DbContext;
+    protected readonly ToursContext DbContext;
     private readonly DbSet<Tour> _dbSet;
 
-    public TourRepository(TDbContext dbContext)
+    public TourRepository(ToursContext dbContext)
     {
         DbContext = dbContext;
         _dbSet = DbContext.Set<Tour>();
@@ -20,7 +19,10 @@ public class TourRepository<TDbContext> : ITourRepository where TDbContext : DbC
 
     public List<Tour> GetAll()
     {
-        return _dbSet.ToList();
+        return DbContext.Tours
+            .Include(t => t.Equipment)
+            .Include(t => t.KeyPoints)
+            .ToList();
     }
 
     public List<Tour> GetAllWithKeyPoints()
@@ -37,20 +39,30 @@ public class TourRepository<TDbContext> : ITourRepository where TDbContext : DbC
 
     public PagedResult<Tour> GetPaged(int page, int pageSize)
     {
-        var totalCount = _dbSet.Count();
-        var items = _dbSet
-            .OrderBy(e => e.Id)
+        var query = DbContext.Tours
+            .Include(t => t.Equipment)
+            .Include(t => t.KeyPoints)
+            .OrderBy(t => t.Id);
+
+        var totalCount = query.Count();
+
+        var items = query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToList();
-
         return new PagedResult<Tour>(items, totalCount);
     }
 
     public Tour Get(long id)
     {
-        var entity = _dbSet.Find(id);
-        if (entity == null) throw new NotFoundException("Not found: " + id);
+        var entity = DbContext.Tours
+        .Include(t => t.Equipment)
+        .Include(t => t.KeyPoints)
+        .FirstOrDefault(t => t.Id == id);
+
+        if (entity == null)
+            throw new NotFoundException("Not found: " + id);
+
         return entity;
     }
 
@@ -63,16 +75,23 @@ public class TourRepository<TDbContext> : ITourRepository where TDbContext : DbC
 
     public Tour Update(Tour tour)
     {
+        var existingTour = Get(tour.Id);
+        if (existingTour == null)
+            throw new NotFoundException("Not found: " + tour.Id);
+
+        DbContext.Entry(existingTour).CurrentValues.SetValues(tour);
+        DbContext.Entry(existingTour).Property(t => t.Duration).IsModified = true;
+
+
         try
         {
-            DbContext.Update(tour);
             DbContext.SaveChanges();
         }
         catch (DbUpdateException e)
         {
             throw new NotFoundException(e.Message);
         }
-        return tour;
+        return existingTour;
     }
 
     public void Delete(long id)

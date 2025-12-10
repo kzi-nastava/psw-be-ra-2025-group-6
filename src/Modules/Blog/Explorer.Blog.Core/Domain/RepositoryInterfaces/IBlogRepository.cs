@@ -10,4 +10,5 @@ public interface IBlogRepository
     BlogPost Update(BlogPost map);
     BlogPost GetById(long id);
     void Delete(BlogPost blog);
+    List<BlogPost> GetAll();
 }

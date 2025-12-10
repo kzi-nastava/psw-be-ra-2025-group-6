@@ -2,21 +2,32 @@ using Explorer.BuildingBlocks.Core.Domain;
 
 namespace Explorer.Tours.Core.Domain;
 
-// TODO: Align with full KeyPoints implementation when available.
 public class KeyPoint : Entity
 {
     public long TourId { get; init; }
-    public double Latitude { get; init; }
+    public string Name { get; init; }
+
+    public string Description { get; init; }
     public double Longitude { get; init; }
+    public double Latitude { get; init; }
+    public string ImagePath { get; init; }
+    public string Secret { get; init; }
 
-    protected KeyPoint() { }
-
-    public KeyPoint(long tourId, double latitude, double longitude)
+    public KeyPoint(long tourId, string name, string description, double longitude, double latitude, string imagePath, string secret)
     {
-        if (latitude is < -90 or > 90) throw new ArgumentException("Latitude out of range.");
-        if (longitude is < -180 or > 180) throw new ArgumentException("Longitude out of range.");
+        if (tourId == 0) throw new ArgumentException("Invalid TourId");
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Invalid Name");
+        if (longitude < -180 || longitude > 180) throw new ArgumentException("Invalid Longitude");
+        if (latitude < -90 || latitude > 90) throw new ArgumentException("Invalid Latitude");
+        if (string.IsNullOrWhiteSpace(imagePath)) throw new ArgumentException("Invalid ImagePath");
+        if (string.IsNullOrWhiteSpace(secret)) throw new ArgumentException("Invalid Secret");
+
         TourId = tourId;
-        Latitude = latitude;
+        Name = name;
+        Description = description;
         Longitude = longitude;
+        Latitude = latitude;
+        ImagePath = imagePath;
+        Secret = secret;
     }
 }
