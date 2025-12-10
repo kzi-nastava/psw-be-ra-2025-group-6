@@ -4,10 +4,10 @@ using Explorer.Tours.API.Public.Administration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Explorer.API.Controllers.Administrator.Administration;
+namespace Explorer.API.Controllers.Author.Authoring;
 
-[Authorize(Policy = "administratorPolicy")]
-[Route("api/administration/equipment")]
+[Authorize(Policy = "authorPolicy")]
+[Route("api/authoring/tours/equipment")]
 [ApiController]
 public class EquipmentController : ControllerBase
 {
@@ -29,22 +29,4 @@ public class EquipmentController : ControllerBase
         return Ok(_equipmentService.GetAll());
     }
 
-    [HttpPost]
-    public ActionResult<EquipmentDto> Create([FromBody] EquipmentDto equipment)
-    {
-        return Ok(_equipmentService.Create(equipment));
-    }
-
-    [HttpPut("{id:long}")]
-    public ActionResult<EquipmentDto> Update([FromBody] EquipmentDto equipment)
-    {
-        return Ok(_equipmentService.Update(equipment));
-    }
-
-    [HttpDelete("{id:long}")]
-    public ActionResult Delete(long id)
-    {
-        _equipmentService.Delete(id);
-        return Ok();
-    }
 }

@@ -1,5 +1,6 @@
 ﻿using Explorer.Tours.Core.Domain;
 using Microsoft.EntityFrameworkCore;
+using Explorer.Tours.Infrastructure.Database.Entities;
 
 namespace Explorer.Tours.Infrastructure.Database;
 
@@ -20,6 +21,11 @@ public class ToursContext : DbContext
 
     public DbSet<Facility> Facility { get; set; }
 
+    // Added DbSet for executions
+    public DbSet<TourExecutionEntity> TourExecutions { get; set; }
+
+    public DbSet<KeyPoint> KeyPoints { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -27,6 +33,26 @@ public class ToursContext : DbContext
         modelBuilder.HasDefaultSchema("tours");
 
         ConfigureTouristEquipment(modelBuilder);
+
+        modelBuilder.Entity<Tour>()
+    .HasMany(t => t.Equipment)
+    .WithOne()
+    .HasForeignKey(e => e.TourId)
+    .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Tour>()
+    .HasMany(t => t.KeyPoints)
+    .WithOne()
+    .HasForeignKey(kp => kp.TourId)
+    .OnDelete(DeleteBehavior.Cascade);
+
+
+        modelBuilder.Entity<TourExecutionEntity>(b =>
+        {
+            b.HasKey(e => e.Id);
+            b.Property(e => e.InitialPositionJson).HasColumnType("jsonb");
+            b.Property(e => e.ExecutionKeyPointsJson).HasColumnType("jsonb");
+        });
     }
 
     private static void ConfigureTouristEquipment(ModelBuilder modelBuilder)

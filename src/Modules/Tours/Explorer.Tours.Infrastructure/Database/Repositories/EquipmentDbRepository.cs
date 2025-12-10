@@ -18,6 +18,10 @@ public class EquipmentDbRepository : IEquipmentRepository
         _dbSet = DbContext.Set<Equipment>();
     }
 
+    public List<Equipment> GetAll()
+    {
+        return _dbSet.ToList();
+    }
     public PagedResult<Equipment> GetPaged(int page, int pageSize)
     {
         var task = _dbSet.GetPagedById(page, pageSize);
