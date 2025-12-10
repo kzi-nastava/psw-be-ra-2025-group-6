@@ -6,6 +6,7 @@ using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -14,25 +15,39 @@ public class BlogService : IBlogService
     private readonly IBlogRepository _blogRepository;
     private readonly IMapper _mapper;
     private readonly IInternalStakeholderService _stakeholderService;
-
-    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper)
+    private readonly IUserRepository _userRepository;
+    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, IUserRepository userRepository)
     {
         _blogRepository = blogRepository;
         _stakeholderService = stakeholderService;
         _mapper = mapper;
+        _userRepository = userRepository;
     }
 
     public PagedResult<BlogDto> GetPaged(int page, int pageSize)
     {
         var result = _blogRepository.GetPaged(page, pageSize);
-        var items = result.Results.Select(_mapper.Map<BlogDto>).ToList();
+        var items = result.Results.Select(blog =>
+        {
+            var dto = _mapper.Map<BlogDto>(blog);
+            var user = _userRepository.GetById(blog.UserId);
+            dto.Username = user?.Username;
+            return dto;
+        }).ToList();
         return new PagedResult<BlogDto>(items, result.TotalCount);
     }
 
     public List<BlogDto> GetByUser(long userId)
     {
         var blogs = _blogRepository.GetByUser(userId);
-        return blogs.Select(blog => _mapper.Map<BlogDto>(blog)).ToList();
+        var blogDtos = blogs.Select(blog =>
+        {
+            var dto = _mapper.Map<BlogDto>(blog);
+            var user = _userRepository.GetById(blog.UserId);
+            dto.Username = user?.Username;
+            return dto;
+        }).ToList();
+        return blogDtos;
     }
 
     public BlogDto Create(BlogCreateDto dto, long userId)
@@ -74,7 +89,10 @@ public class BlogService : IBlogService
         var blog = _blogRepository.GetById(id);
         if (blog == null) return null;
 
-        return _mapper.Map<BlogDto>(blog);
+        var dto = _mapper.Map<BlogDto>(blog);
+        var user = _userRepository.GetById(blog.UserId);
+        dto.Username = user?.Username;
+        return dto;
     }
 
     public BlogDto Delete(long id)

@@ -1,8 +1,10 @@
-﻿using Explorer.Blog.Core.Domain;
+﻿using Explorer.Blog.API.Dtos;
+using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace Explorer.Blog.Infrastructure.Database.Repositories;
@@ -10,11 +12,13 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories;
 public class BlogDbRepository : IBlogRepository
 {
     protected readonly BlogContext DbContext;
+    private readonly StakeholdersContext _stakeholdersContext;
     private readonly DbSet<BlogPost> _dbSet;
 
-    public BlogDbRepository(BlogContext dbContext)
+    public BlogDbRepository(BlogContext dbContext, StakeholdersContext stakeholdersContext)
     {
         DbContext = dbContext;
+        _stakeholdersContext = stakeholdersContext;
         _dbSet = DbContext.Set<BlogPost>();
     }
 
@@ -71,5 +75,24 @@ public class BlogDbRepository : IBlogRepository
     {
         _dbSet.Remove(blog);
         DbContext.SaveChanges();
+    }
+
+    public List<BlogDto> GetAllWithUsernames()
+    {
+        var query =
+            from blog in DbContext.Blogs
+            join user in _stakeholdersContext.Users on blog.UserId equals user.Id
+            select new BlogDto
+            {
+                Id = (int)blog.Id,
+                UserId = blog.UserId,
+                Username = user.Username,
+                Title = blog.Title,
+                Description = blog.Description,
+                Images = blog.Images,
+                Status = (BlogStatusDto)blog.Status
+            };
+
+        return query.ToList();
     }
 }
