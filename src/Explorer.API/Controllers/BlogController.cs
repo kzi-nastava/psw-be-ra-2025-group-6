@@ -248,5 +248,17 @@ public class BlogController : ControllerBase
         }
     }
 
-    //[Http]
+    [HttpPatch("{id:long}/quality")]
+    public IActionResult RecalculateQualityStatus(long id)
+    {
+        try
+        {
+            var updated = _blogService.RecalculateQualityStatus(id);
+            return Ok(updated);
+        }
+        catch(Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }
