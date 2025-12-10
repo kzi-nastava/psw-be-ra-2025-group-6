@@ -1,5 +1,6 @@
 ﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
+using Explorer.Blog.Core.Domain;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
@@ -257,6 +258,20 @@ public class BlogController : ControllerBase
             return Ok(updated);
         }
         catch(Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("filter-by-quality")]
+    public ActionResult<List<BlogDto>> GetBlogsByQuality([FromQuery] BlogQualityStatusDto status)
+    {
+        try
+        {
+            var blogs = _blogService.GetBlogsByQualityStatus(status);
+            return Ok(blogs);
+        }
+        catch (Exception ex)
         {
             return BadRequest(ex.Message);
         }

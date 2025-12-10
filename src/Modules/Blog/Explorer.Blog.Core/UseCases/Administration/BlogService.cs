@@ -250,4 +250,31 @@ public class BlogService : IBlogService
         var updated = _blogRepository.Update(blog);
         return  _mapper.Map<BlogDto>(updated);
     }
+
+    public List<BlogDto> GetBlogsByQualityStatus(BlogQualityStatusDto statusDto)
+    {
+        // Mapiramo DTO na domen
+        BlogQualityStatus status = statusDto switch
+        {
+            BlogQualityStatusDto.None => BlogQualityStatus.None,
+            BlogQualityStatusDto.Active => BlogQualityStatus.Active,
+            BlogQualityStatusDto.Famous => BlogQualityStatus.Famous,
+            BlogQualityStatusDto.Closed => BlogQualityStatus.Closed,
+            _ => BlogQualityStatus.None
+        };
+
+        var blogs = _blogRepository.GetAll()
+            .Where(b => b.QualityStatus == status)
+            .ToList();
+
+        var blogDtos = blogs.Select(blog =>
+        {
+            var dto = _mapper.Map<BlogDto>(blog);
+            var user = _userRepository.GetById(blog.UserId);
+            dto.Username = user?.Username;
+            return dto;
+        }).ToList();
+
+        return blogDtos;
+    }
 }

@@ -95,4 +95,12 @@ public class BlogDbRepository : IBlogRepository
 
         return query.ToList();
     }
+
+    public List<BlogPost> GetAll()
+    {
+        return _dbSet
+            .Include(b => b.Votes)
+            .Include(b => b.Comments)
+            .ToList();
+    }
 }
