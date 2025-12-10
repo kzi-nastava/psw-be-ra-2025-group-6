@@ -8,6 +8,10 @@ public class BlogProfile : Profile
 {
     public BlogProfile()
     {
+        CreateMap<BlogPost, BlogDto>().ReverseMap()
+            .ForMember(d => d.Comments, opt => opt.MapFrom(s => s.Comments));
+        CreateMap<BlogDto, BlogPost>();
+        CreateMap<Comment, CommentDto>().ReverseMap();
         CreateMap<BlogDto, BlogPost>().ReverseMap();
         CreateMap<BlogStatus, BlogStatusDto>().ReverseMap();
         //CreateMap<BlogVoteDto, BlogVote>().ReverseMap();

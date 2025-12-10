@@ -146,6 +146,40 @@ public class BlogController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id:long}/comments")]
+    public IActionResult AddComment(long id, [FromBody] CommentCreateDto dto)
+    {
+        var userId = User.PersonId();
+        var created = _blogService.AddComment(id, userId, dto.Text);
+
+        return Ok(created);
+    }
+
+    [HttpPut("{id:long}/comments/{commentId:int}")]
+    public IActionResult EditComment(long id, int commentId, [FromBody] CommentCreateDto dto)
+    {
+        var userId = User.PersonId();
+        _blogService.EditComment(id, commentId, userId, dto.Text);
+
+        return Ok();
+    }
+
+    [HttpDelete("{id:long}/comments/{commentId:int}")]
+    public IActionResult DeleteComment(long id, int commentId)
+    {
+        var userId = User.PersonId();
+        _blogService.DeleteComment(id, commentId, userId);
+
+        return NoContent();
+    }
+
+    [HttpGet("{id:long}/comments")]
+    public IActionResult GetComment(long id)
+    {
+        var comments = _blogService.GetComments(id);
+        return Ok(comments);
+    }
+
     [HttpPost("{id:long}/vote")]
     public IActionResult VoteOnBlog(long id, [FromBody] VoteRequestDto request)
     {

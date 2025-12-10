@@ -1,4 +1,3 @@
-﻿using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Domain;
 
 namespace Explorer.Blog.Core.Domain;
@@ -10,6 +9,8 @@ public class BlogPost : AggregateRoot
     public string Description { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public List<string> Images { get; private set; }
+    public List<Comment> Comments { get; private set; } = new();
+
     public BlogStatus Status { get; set; }
     public DateTime? LastModifiedAt { get; private set; }
 
@@ -34,8 +35,8 @@ public class BlogPost : AggregateRoot
         Images = images ?? new List<string>();
         CreatedAt = DateTime.UtcNow;
         Status = status;
-    }
 
+    }
     public void AddImages(List<string> imagePaths)
     {
         if (imagePaths == null || !imagePaths.Any())
@@ -44,6 +45,48 @@ public class BlogPost : AggregateRoot
         Images = Images.Concat(imagePaths).ToList();
     }
 
+    public void AddComment(long userId, string authorName, string text)
+    {
+        if (Comments == null)
+        {
+            Comments = new List<Comment>();
+        }
+
+        var comment = new Comment(userId, authorName, text);
+        Comments.Add(comment);
+    }
+
+    public void EditComment(int id, long userId, string text)
+    {
+        if (Comments == null || id < 0 || id >= Comments.Count)
+            throw new InvalidOperationException("Comment does not exist.");
+
+        var comment = Comments[id];
+
+        if (comment.UserId != userId)
+            throw new InvalidOperationException("Only authors can edit their comments.");
+
+        if (DateTime.UtcNow - comment.CreatedAt > TimeSpan.FromMinutes(15))
+            throw new InvalidOperationException("Edit time expired.");
+
+        comment.Edit(text);
+    }
+
+    public void DeleteComment(int id, long userId)
+    {
+        if (Comments == null || id < 0 || id >= Comments.Count)
+            throw new InvalidOperationException("Comment does not exist.");
+
+        var comment = Comments[id];
+
+        if (comment.UserId != userId)
+            throw new InvalidOperationException("Only authors can delete their comments.");
+
+        if (DateTime.UtcNow - comment.CreatedAt > TimeSpan.FromMinutes(15))
+            throw new InvalidOperationException("Delete time expired.");
+
+        Comments.RemoveAt(id);
+    }
     public void UpdateDescription(string newDescription)
     {
         if (string.IsNullOrWhiteSpace(newDescription))
