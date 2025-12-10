@@ -22,4 +22,5 @@ public interface IBlogService
     public void RemoveVote(long userId, long blogId);
     (int upvotes, int downvotes) GetVotes(long blogId);
     BlogVoteDto? GetUserVote(long userId, long blogId);
+    BlogDto RecalculateQualityStatus(long blogId);
 }

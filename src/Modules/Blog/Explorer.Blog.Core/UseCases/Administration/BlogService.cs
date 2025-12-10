@@ -190,6 +190,7 @@ public class BlogService : IBlogService
 
         var type = _mapper.Map<VoteType>(voteType);
         blog.AddOrUpdateVote(userId, type);
+        blog.RecalculateQualityStatus();
         _blogRepository.Update(blog);
     }
 
@@ -200,6 +201,7 @@ public class BlogService : IBlogService
             throw new Exception("Blog not found");
 
         blog.RemoveVote(userId);
+        blog.RecalculateQualityStatus();
         _blogRepository.Update(blog);
     }
 
@@ -221,5 +223,13 @@ public class BlogService : IBlogService
             throw new Exception("Blog not found");
         var vote = blog.Votes.FirstOrDefault(v => v.UserId == userId);
         return vote == null ? null : _mapper.Map<BlogVoteDto>(vote);
+    }
+
+    public BlogDto RecalculateQualityStatus(long blogId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        blog.RecalculateQualityStatus();
+        var updated = _blogRepository.Update(blog);
+        return  _mapper.Map<BlogDto>(updated);
     }
 }

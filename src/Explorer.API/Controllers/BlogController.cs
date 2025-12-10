@@ -247,4 +247,6 @@ public class BlogController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    //[Http]
 }

@@ -19,5 +19,6 @@ public class BlogProfile : Profile
         CreateMap<VoteTypeDto, VoteType>().ConvertUsing(src => (VoteType)(int)src);
         CreateMap<BlogVote, BlogVoteDto>().ForMember(dest => dest.Type, opt => opt.MapFrom(src => (VoteTypeDto)(int)src.Type));
         CreateMap<BlogVoteDto, BlogVote>().ForMember(dest => dest.Type, opt => opt.MapFrom(src => (VoteType)(int)src.Type));
+        CreateMap<BlogQualityStatus, BlogQualityStatusDto>().ReverseMap();
     }
 }
