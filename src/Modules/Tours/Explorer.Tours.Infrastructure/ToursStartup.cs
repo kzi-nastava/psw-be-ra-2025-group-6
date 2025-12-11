@@ -12,7 +12,9 @@ using Explorer.Tours.Core.UseCases.Admin;
 using Explorer.Tours.Core.UseCases.Administration;
 using Explorer.Tours.Core.UseCases;
 using Explorer.Tours.Core.UseCases.Authoring;
+using Explorer.Tours.Core.UseCases.Shopping;
 using Explorer.Tours.API.Public.Authoring;
+using Explorer.Tours.API.Public.Shopping;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +46,7 @@ public static class ToursStartup
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IMeetupService, MeetupService>();
         services.AddScoped<IAdminMapService, AdminMapService>();
+        services.AddScoped<ITourShoppingService, TourShoppingService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
