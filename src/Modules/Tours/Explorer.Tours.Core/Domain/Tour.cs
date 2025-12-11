@@ -175,6 +175,33 @@ public class Tour : AggregateRoot
             Duration.Add(duration);
         }
     }
+    
 
+    public bool IsWithinRadius(double centerLat, double centerLon, double radiusInKm)
+    {
+        if (KeyPoints == null || !KeyPoints.Any()) return false;
 
+        foreach (var keyPoint in KeyPoints)
+        {
+            var distance = HaversineDistanceInKm(centerLat, centerLon, keyPoint.Latitude, keyPoint.Longitude);
+            if (distance <= radiusInKm) return true;
+        }
+
+        return false;
+    }
+
+    private static double HaversineDistanceInKm(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double R = 6371.0;
+        var dLat = ToRadians(lat2 - lat1);
+        var dLon = ToRadians(lon2 - lon1);
+        var a =
+            Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+            Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+            Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        return R * c;
+    }
+
+    private static double ToRadians(double angle) => Math.PI * angle / 180.0;
 }

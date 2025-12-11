@@ -45,3 +45,9 @@ VALUES
     0,
     '[]'::jsonb
 );
+
+INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "Longitude", "Latitude", "ImagePath", "Secret")
+VALUES (-101, -3, 'Paris Center', 'Central Paris starting point', 2.3522, 48.8566, 'paris.jpg', 'secret-paris');
+
+INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "Longitude", "Latitude", "ImagePath", "Secret")
+VALUES (-102, -1, 'Belgrade Center', 'Belgrade downtown point', 20.4489, 44.7866, 'belgrade.jpg', 'secret-belgrade');

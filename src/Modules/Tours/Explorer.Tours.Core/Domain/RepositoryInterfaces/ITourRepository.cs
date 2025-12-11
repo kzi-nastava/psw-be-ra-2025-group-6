@@ -12,4 +12,5 @@ public interface ITourRepository
     Tour Create(Tour tour);
     Tour Update(Tour tour);
     void Delete(long id);
+    List<Tour> GetPublishedWithKeyPoints();
 }
