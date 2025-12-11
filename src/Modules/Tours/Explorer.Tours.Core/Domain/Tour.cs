@@ -152,6 +152,15 @@ public class Tour : AggregateRoot
 
         KeyPoints.Add(keyPoint);
     }
+
+    /// <summary>
+    /// Returns the first key point as the reference point for distance calculations.
+    /// This keeps distance search consistent when tours only store coordinates on key points.
+    /// </summary>
+    public KeyPoint? GetReferenceKeyPoint()
+    {
+        return KeyPoints?.FirstOrDefault();
+    }
     public void SetDistance(double distance)
     {
         if (distance < 0) throw new ArgumentException("Distance cannot be negative.");
@@ -179,15 +188,19 @@ public class Tour : AggregateRoot
 
     public bool IsWithinRadius(double centerLat, double centerLon, double radiusInKm)
     {
-        if (KeyPoints == null || !KeyPoints.Any()) return false;
+        var referencePoint = GetReferenceKeyPoint();
+        if (referencePoint == null) return false;
 
-        foreach (var keyPoint in KeyPoints)
-        {
-            var distance = HaversineDistanceInKm(centerLat, centerLon, keyPoint.Latitude, keyPoint.Longitude);
-            if (distance <= radiusInKm) return true;
-        }
+        var distance = HaversineDistanceInKm(centerLat, centerLon, referencePoint.Latitude, referencePoint.Longitude);
+        return distance <= radiusInKm;
+    }
 
-        return false;
+    public double DistanceTo(double centerLat, double centerLon)
+    {
+        var referencePoint = GetReferenceKeyPoint();
+        if (referencePoint == null) return double.PositiveInfinity;
+
+        return HaversineDistanceInKm(centerLat, centerLon, referencePoint.Latitude, referencePoint.Longitude);
     }
 
     private static double HaversineDistanceInKm(double lat1, double lon1, double lat2, double lon2)

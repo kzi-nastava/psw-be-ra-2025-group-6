@@ -18,6 +18,7 @@ public class TourMarketplaceController : ControllerBase
     }
 
     [HttpGet("search/distance")]
+    [HttpGet("/api/marketplace/tours/search/distance")]
     public ActionResult<List<TourDto>> SearchByDistance(
         [FromQuery] double latitude,
         [FromQuery] double longitude,

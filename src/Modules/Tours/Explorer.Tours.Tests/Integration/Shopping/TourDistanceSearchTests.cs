@@ -18,12 +18,13 @@ public class TourDistanceSearchTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
 
-        var response = controller.SearchByDistance(48.8566, 2.3522, 5);
+        var response = controller.SearchByDistance(45.2671, 19.8335, 5);
         var okResult = response.Result.ShouldBeOfType<OkObjectResult>();
         var tours = okResult.Value.ShouldBeOfType<List<TourDto>>();
 
-        tours.Count.ShouldBe(1);
-        tours.First().Id.ShouldBe(-3);
+        tours.Count.ShouldBe(2);
+        tours[0].Id.ShouldBe(-10); // Closest (distance 0)
+        tours[1].Id.ShouldBe(-11);
     }
 
     [Fact]
@@ -32,11 +33,39 @@ public class TourDistanceSearchTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
 
-        var response = controller.SearchByDistance(44.7866, 20.4489, 3);
+        // Near draft tour (-1) but should not appear in marketplace search
+        var response = controller.SearchByDistance(44.7866, 20.4489, 0.5);
         var okResult = response.Result.ShouldBeOfType<OkObjectResult>();
         var tours = okResult.Value.ShouldBeOfType<List<TourDto>>();
 
         tours.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Returns_close_tour_for_small_radius()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+
+        var response = controller.SearchByDistance(45.2671, 19.8335, 0.5);
+        var okResult = response.Result.ShouldBeOfType<OkObjectResult>();
+        var tours = okResult.Value.ShouldBeOfType<List<TourDto>>();
+
+        tours.Count.ShouldBe(1);
+        tours[0].Id.ShouldBe(-10);
+    }
+
+    [Fact]
+    public void Returns_far_tour_for_large_radius()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+
+        var response = controller.SearchByDistance(45.2671, 19.8335, 120);
+        var okResult = response.Result.ShouldBeOfType<OkObjectResult>();
+        var tours = okResult.Value.ShouldBeOfType<List<TourDto>>();
+
+        tours.ShouldContain(t => t.Id == -12);
     }
 
     [Fact]

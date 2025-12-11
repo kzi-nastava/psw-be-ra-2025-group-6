@@ -22,10 +22,13 @@ public class TourShoppingService : ITourShoppingService
 
         var tours = _tourRepository.GetPublishedWithKeyPoints();
         var matchingTours = tours
-            .Where(t => t.IsWithinRadius(latitude, longitude, radiusInKm))
+            .Select(t => new { Tour = t, Distance = t.DistanceTo(latitude, longitude) })
+            .Where(t => t.Distance <= radiusInKm)
+            .OrderBy(t => t.Distance)
+            .Select(t => _mapper.Map<TourDto>(t.Tour))
             .ToList();
 
-        return matchingTours.Select(_mapper.Map<TourDto>).ToList();
+        return matchingTours;
     }
 
     private static void ValidateInputs(double latitude, double longitude, double radiusInKm)
