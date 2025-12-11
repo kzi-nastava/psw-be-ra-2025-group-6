@@ -6,6 +6,7 @@ using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using Explorer.BuildingBlocks.Core.Exceptions;
 
 namespace Explorer.Tours.Tests.Integration;
 
@@ -23,7 +24,7 @@ public class TourReviewTests : BaseToursIntegrationTest
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var newReview = new TourReviewDto
         {
-            TourId = 1,
+            TourId = -1,
             Rating = 5,
             Comment = "Excellent tour!",
             CompletedPercent = 100,
@@ -53,7 +54,7 @@ public class TourReviewTests : BaseToursIntegrationTest
         var controller = CreateController(scope);
         var invalidReview = new TourReviewDto
         {
-            TourId = 1,
+            TourId = -1,
             Rating = 6, // Invalid rating
             Comment = "Invalid",
             CompletedPercent = 100
@@ -87,7 +88,7 @@ public class TourReviewTests : BaseToursIntegrationTest
 
         var newReview = new TourReviewDto
         {
-            TourId = 2,
+            TourId = -2,
             Rating = 4,
             Comment = "Good tour",
             CompletedPercent = 80,
@@ -98,7 +99,7 @@ public class TourReviewTests : BaseToursIntegrationTest
         var reviewToUpdate = new TourReviewDto
         {
             Id = createdReview.Id,
-            TourId = 2,
+            TourId = -2,
             Rating = 3,
             Comment = "Updated comment",
             CompletedPercent = 85,
@@ -129,13 +130,13 @@ public class TourReviewTests : BaseToursIntegrationTest
         var updateReview = new TourReviewDto
         {
             Id = -100,
-            TourId = 1,
+            TourId = -1,
             Rating = 5,
             Comment = "Update",
             CompletedPercent = 100
         };
 
-        Should.Throw<KeyNotFoundException>(() => controller.Update(-100, updateReview));
+        Should.Throw<NotFoundException>(() => controller.Update(-100, updateReview));
     }
 
     [Fact]
@@ -148,7 +149,7 @@ public class TourReviewTests : BaseToursIntegrationTest
 
         var newReview = new TourReviewDto
         {
-            TourId = 3,
+            TourId = -3,
             Rating = 5,
             Comment = "To be deleted",
             CompletedPercent = 100,

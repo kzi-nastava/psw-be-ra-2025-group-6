@@ -24,6 +24,15 @@ public class TourReview : Entity
         Validate();
     }
 
+    public void Update(int rating, string? comment, int completedPercent)
+    {
+        Rating = rating;
+        Comment = comment;
+        CompletedPercent = completedPercent;
+        UpdatedAt = DateTime.UtcNow;
+        Validate();
+    }
+
     private void Validate()
     {
         if (UserId == 0) throw new ArgumentException("Invalid PersonId");

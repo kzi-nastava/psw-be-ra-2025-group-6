@@ -10,6 +10,12 @@ public class Tour : Entity
     public List<string>? Tags { get; init; }
     public float Price { get; init; }
     public TourStatus Status { get; init; }
+    public ICollection<TourReview> TourReviews { get; } = new List<TourReview>();
+
+    public void AddTourReview(TourReview review)
+    {
+        TourReviews.Add(review);
+    }
 
     public Tour(
         string name,

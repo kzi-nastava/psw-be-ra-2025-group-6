@@ -50,10 +50,9 @@ public static class ToursStartup
         services.AddScoped<IJournalRepository, JournalDbRepository>();
         services.AddScoped<IAnnualAwardRepository<AnnualAward>, AnnualAwardRepository<AnnualAward, ToursContext>>();
         services.AddScoped<ITouristEquipmentRepository, TouristEquipmentDbRepository>();
-        services.AddScoped<ITourRepository<Tour>, TourRepository<Tour, ToursContext>>();
+        services.AddScoped<ITourRepository, TourRepository>();
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<IMeetupRepository, MeetupRepository>();
-        services.AddScoped<ITourReviewRepository, TourReviewDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();

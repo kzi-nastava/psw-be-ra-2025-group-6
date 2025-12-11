@@ -9,10 +9,10 @@ namespace Explorer.Tours.Core.UseCases.Authoring;
 
 public class TourService : ITourService
 {
-    private readonly ITourRepository<Tour> _tourRepository;
+    private readonly ITourRepository _tourRepository;
     private readonly IMapper _mapper;
 
-    public TourService(ITourRepository<Tour> repository, IMapper mapper)
+    public TourService(ITourRepository repository, IMapper mapper)
     {
         _tourRepository = repository;
         _mapper = mapper;
