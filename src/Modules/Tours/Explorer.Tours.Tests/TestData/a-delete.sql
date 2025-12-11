@@ -1,8 +1,13 @@
+DELETE FROM tours."TourExecutions";
+DELETE FROM tours."TourPurchaseTokens";
+DELETE FROM tours."OrderItems";
+DELETE FROM tours."ShoppingCarts";
+DELETE FROM tours."KeyPoints";
+DELETE FROM tours."Equipment";
 DELETE FROM tours."TouristEquipment";
 DELETE FROM tours."Journals";
 DELETE FROM tours."Meetups";
 DELETE FROM tours."Facility";
-DELETE FROM tours."Equipment";
 DELETE FROM tours."AnnualAwards";
 DELETE FROM tours."Monuments";
 DELETE FROM tours."Tours";

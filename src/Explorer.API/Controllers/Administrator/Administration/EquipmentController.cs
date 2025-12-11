@@ -18,10 +18,15 @@ public class EquipmentController : ControllerBase
         _equipmentService = equipmentService;
     }
 
-    [HttpGet]
+    [HttpGet("paged")]
     public ActionResult<PagedResult<EquipmentDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
     {
         return Ok(_equipmentService.GetPaged(page, pageSize));
+    }
+    [HttpGet]
+    public ActionResult<List<EquipmentDto>> GetAll()
+    {
+        return Ok(_equipmentService.GetAll());
     }
 
     [HttpPost]

@@ -33,4 +33,11 @@ public class TouristPositionService : ITouristPositionService
             return _mapper.Map<TouristPositionDto>(result);
         }
     }
+
+    public TouristPositionDto? GetByTouristId(long touristId)
+    {
+        var existing = _touristPositionRepository.GetByTouristId(touristId);
+        if (existing == null) return null;
+        return _mapper.Map<TouristPositionDto>(existing);
+    }
 }

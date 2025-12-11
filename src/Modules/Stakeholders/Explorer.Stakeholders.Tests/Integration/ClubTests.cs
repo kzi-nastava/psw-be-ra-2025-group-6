@@ -13,7 +13,14 @@ namespace Explorer.Stakeholders.Tests.Integration
     [Collection("Sequential")]
     public class ClubTests : BaseStakeholdersIntegrationTest
     {
-        public ClubTests(StakeholdersTestFactory factory) : base(factory) { }
+        public ClubTests(StakeholdersTestFactory factory) : base(factory) 
+        {
+            using var scope = factory.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+
+            db.Clubs.RemoveRange(db.Clubs);
+            db.SaveChanges();
+        }
 
         [Fact]
         public void Creates_club()
@@ -63,11 +70,46 @@ namespace Explorer.Stakeholders.Tests.Integration
         [Fact]
         public void Retrieves_all_clubs()
         {
-            using var scope = Factory.Services.CreateScope();
+            /*using var scope = Factory.Services.CreateScope();
             var controller = CreateController(scope);
 
             var result = ((ObjectResult)controller.GetAll().Result)?.Value as List<ClubDto>;
 
+            result.ShouldNotBeNull();
+            result.Count.ShouldBe(3);*/
+            // Arrange
+            using var scope = Factory.Services.CreateScope();
+            var controller = CreateController(scope);
+
+            // Kreiramo 3 kluba kako bi test imao šta da vrati
+            controller.Create(new ClubDto
+            {
+                Name = "Klub A",
+                Description = "Opis A",
+                OwnerId = -21,
+                ImageUris = new List<string> { "slikaB.jpg" }
+            });
+
+            controller.Create(new ClubDto
+            {
+                Name = "Klub B",
+                Description = "Opis B",
+                OwnerId = -21,
+                ImageUris = new List<string> { "slikac.jpg" }
+            });
+
+            controller.Create(new ClubDto
+            {
+                Name = "Klub C",
+                Description = "Opis C",
+                OwnerId = -21,
+                ImageUris = new List<string> { "slikac.jpg" }
+            });
+
+            // Act
+            var result = ((ObjectResult)controller.GetAll().Result)?.Value as List<ClubDto>;
+
+            // Assert
             result.ShouldNotBeNull();
             result.Count.ShouldBe(3);
         }

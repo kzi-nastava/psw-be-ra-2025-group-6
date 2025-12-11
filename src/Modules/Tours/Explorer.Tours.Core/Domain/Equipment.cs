@@ -6,6 +6,11 @@ public class Equipment : Entity
 {
     public string Name { get; init; }
     public string? Description { get; init; }
+    public long? TourId { get; private set; }
+
+    private Equipment(){
+
+}
 
     public Equipment(string name, string? description)
     {

@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
+using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
@@ -32,19 +34,33 @@ public class BlogService : IBlogService
 
     public BlogDto Create(BlogCreateDto dto, long userId)
     {
-        var blog = new Explorer.Blog.Core.Domain.Blog(
+        var status = _mapper.Map<BlogStatus>(dto.Status);
+
+        var blog = new BlogPost(
             userId,
             dto.Title,
             dto.Description,
-            new List<string>()
+            new List<string>(),
+            status
         );
+
         var created = _blogRepository.Create(blog);
         return _mapper.Map<BlogDto>(created);
     }
 
     public BlogDto Update(BlogDto blogDto)
     {
-        var blog = _mapper.Map<Explorer.Blog.Core.Domain.Blog>(blogDto);
+        var blog = _blogRepository.GetById(blogDto.Id);
+        if (blog == null)
+            throw new NotFoundException("Blog not found");
+
+        if (blog.Status != BlogStatus.DRAFT)
+            throw new Exception("Only blogs POSTED blogs can be changed.");
+
+        blog.UpdateTitle(blogDto.Title);
+        blog.UpdateDescription(blogDto.Description);
+        blog.Status = (BlogStatus)blogDto.Status;
+
         var updated = _blogRepository.Update(blog);
         return _mapper.Map<BlogDto>(updated);
     }
@@ -73,5 +89,33 @@ public class BlogService : IBlogService
 
         blog.AddImages(imagePaths);
         _blogRepository.Update(blog);
+    }
+
+    public void Archive(long blogId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+
+        if (blog.Status != BlogStatus.POSTED)
+            throw new Exception("Only posted blogs can be archived.");
+
+        blog.Status = BlogStatus.ARCHIVED;
+
+        _blogRepository.Update(blog);
+    }
+
+    public BlogDto UpdateDescription(long blogId, string newDescription)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+
+        if (blog.Status != BlogStatus.POSTED)
+            throw new Exception("Only posted blogs can update description with this endpoint.");
+
+        blog.UpdateDescription(newDescription);
+        var updated = _blogRepository.Update(blog);
+        return _mapper.Map<BlogDto>(updated);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
@@ -10,11 +11,13 @@ namespace Explorer.Tours.Core.UseCases.Authoring;
 public class TourService : ITourService
 {
     private readonly ITourRepository _tourRepository;
+    private readonly IEquipmentRepository _equipmentRepository;
     private readonly IMapper _mapper;
 
-    public TourService(ITourRepository repository, IMapper mapper)
+    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper)
     {
         _tourRepository = repository;
+        _equipmentRepository = equipmentRepository;
         _mapper = mapper;
     }
 
@@ -41,8 +44,6 @@ public class TourService : ITourService
 
     public TourDto Create(TourDto entity)
     {
-        entity.Status = TourStatusDto.DRAFT;
-        entity.Price = 0;
         var result = _tourRepository.Create(_mapper.Map<Tour>(entity));
         return _mapper.Map<TourDto>(result);
     }
@@ -62,5 +63,72 @@ public class TourService : ITourService
         }
         else
             _tourRepository.Delete(id);
+    }
+    public TourDto Archive(long tourId, long authorId)
+    {
+        var tour = _tourRepository.Get(tourId);
+        tour.Archive(authorId);
+        _tourRepository.Update(tour);
+        return _mapper.Map<TourDto>(tour);
+    }
+
+    public TourDto Activate(long tourId, long authorId)
+    {
+        var tour = _tourRepository.Get(tourId);
+        tour.Activate(authorId);
+        _tourRepository.Update(tour);
+        return _mapper.Map<TourDto>(tour);
+    }
+
+
+    public void AddEquipmentToTour(long tourId, long equipmentId)
+    {
+        var tour = _tourRepository.Get(tourId);
+        var equipment = _equipmentRepository.Get(equipmentId);
+        if (tour == null)
+            throw new KeyNotFoundException($"Tour with id {tourId} not found.");
+        if (equipment == null)
+            throw new KeyNotFoundException($"Equipment with id {equipmentId} not found.");
+
+        tour.AddEquipment(equipment);
+
+        _tourRepository.Update(tour);
+    }
+
+    public void RemoveEquipmentFromTour(long tourId, long equipmentId)
+    {
+        var tour = _tourRepository.Get(tourId);
+        var equipment = _equipmentRepository.Get(equipmentId);
+        if (tour == null)
+            throw new KeyNotFoundException($"Tour with id {tourId} not found.");
+        if (equipment == null)
+            throw new KeyNotFoundException($"Equipment with id {equipmentId} not found.");
+
+        tour.RemoveEquipment(equipment);
+
+        _tourRepository.Update(tour);
+    }
+    public TourDto AddKeyPoint(long tourId, KeyPointDto keyPoint)
+    {
+        var tour = _tourRepository.Get(tourId);
+
+        keyPoint.TourId = tourId;
+        var domainKeyPoint = _mapper.Map<KeyPoint>(keyPoint);
+
+        tour.AddKeyPoint(domainKeyPoint);
+
+        var result = _tourRepository.Update(tour);
+
+        return _mapper.Map<TourDto>(result);
+    }
+    public TourDto UpdateTourDistance(long tourId, double distance)
+    {
+        var tour = _tourRepository.Get(tourId);
+
+        tour.SetDistance(distance);
+
+        var result = _tourRepository.Update(tour);
+
+        return _mapper.Map<TourDto>(result);
     }
 }
