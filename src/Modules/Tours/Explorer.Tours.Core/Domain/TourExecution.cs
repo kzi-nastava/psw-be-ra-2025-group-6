@@ -14,6 +14,9 @@ namespace Explorer.Tours.Core.Domain
         public TrackPoint InitialPosition { get; private set; }
         public List<long> ExecutionKeyPoints { get; private set; } = new();
         public DateTime LastActivity { get; private set; }
+        public List<CompletedKeyPoint> CompletedKeyPoints { get; private set; } = new();
+        public double ProgressPercentage { get; private set; }
+        public long? CurrentKeyPointId { get; private set; }
 
         private TourExecution() { }
 
@@ -28,6 +31,7 @@ namespace Explorer.Tours.Core.Domain
             Status = TourExecutionStatus.active;
             StartTime = DateTime.UtcNow;
             LastActivity = StartTime;
+            ProgressPercentage = 0;
         }
 
         public void Complete()
@@ -35,6 +39,7 @@ namespace Explorer.Tours.Core.Domain
             Status = TourExecutionStatus.completed;
             EndTime = DateTime.UtcNow;
             LastActivity = EndTime.Value;
+            ProgressPercentage = 100;
         }
 
         public void Abandon()
@@ -54,5 +59,35 @@ namespace Explorer.Tours.Core.Domain
             ExecutionKeyPoints.Add(keyPointId);
             UpdateLastActivity();
         }
+
+        public void CompleteKeyPoint(long keyPointId, string keyPointName, string secret)
+        {
+            if (CompletedKeyPoints.Any(kp => kp.KeyPointId == keyPointId))
+                return;
+
+            var completedKeyPoint = new CompletedKeyPoint(keyPointId, keyPointName, secret);
+            CompletedKeyPoints.Add(completedKeyPoint);
+            AddExecutionKeyPoint(keyPointId);
+        }
+
+        public void UpdateProgress(double newPercentage, long? nextKeyPointId)
+        {
+            if (newPercentage < 0 || newPercentage > 100)
+                throw new ArgumentException("Progress percentage must be between 0 and 100");
+
+            ProgressPercentage = newPercentage;
+            CurrentKeyPointId = nextKeyPointId;
+            UpdateLastActivity();
+        }
+
+        public bool CanLeaveReview()
+        {
+            return ProgressPercentage > 35
+                && (DateTime.UtcNow - LastActivity).TotalDays <= 7;
+        }
+
+        public double GetProgressPercentage() => ProgressPercentage;
+
+        public DateTime GetLastActivity() => LastActivity;
     }
 }

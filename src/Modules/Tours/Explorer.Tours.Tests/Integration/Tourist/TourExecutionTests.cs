@@ -164,6 +164,149 @@ public class TourExecutionTests : BaseToursIntegrationTest
     }
 
     [Fact]
+    public void Check_progress_updates_last_activity()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, TOURIST_ID);
+
+        var startDto = new TourExecutionStartDto
+        {
+            TourId = -3,
+            Latitude = 48.8566,
+            Longitude = 2.3522
+        };
+
+        var startResult = controller.Start(startDto).Result as CreatedAtActionResult;
+        var execution = startResult!.Value as TourExecutionStartResultDto;
+
+        var checkDto = new TrackPointDto
+        {
+            Latitude = 48.8566,
+            Longitude = 2.3522
+        };
+
+        // Act
+        var result = controller.CheckProgress(execution!.TourExecutionId, checkDto).Result as OkObjectResult;
+
+        // Assert
+        result.ShouldNotBeNull();
+        var progress = result.Value as ProgressResponseDto;
+        progress.ShouldNotBeNull();
+        progress.LastActivity.ShouldBeGreaterThan(DateTime.MinValue);
+        progress.ProgressPercentage.ShouldBeGreaterThanOrEqualTo(0);
+    }
+
+    [Fact]
+    public void Check_progress_completes_key_point_when_nearby()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, TOURIST_ID);
+
+        var startDto = new TourExecutionStartDto
+        {
+            TourId = -3,
+            Latitude = 48.8566,
+            Longitude = 2.3522
+        };
+
+        var startResult = controller.Start(startDto).Result as CreatedAtActionResult;
+        var execution = startResult!.Value as TourExecutionStartResultDto;
+
+        var checkDto = new TrackPointDto
+        {
+            Latitude = execution!.FirstKeyPoint!.Latitude,
+            Longitude = execution.FirstKeyPoint.Longitude
+        };
+
+        // Act
+        var result = controller.CheckProgress(execution.TourExecutionId, checkDto).Result as OkObjectResult;
+
+        // Assert
+        result.ShouldNotBeNull();
+        var progress = result.Value as ProgressResponseDto;
+        progress.ShouldNotBeNull();
+        progress.KeyPointCompleted.ShouldBeTrue();
+        progress.CompletedKeyPoint.ShouldNotBeNull();
+        progress.CompletedKeyPoint.KeyPointId.ShouldBe(execution.FirstKeyPoint.Id);
+        progress.CompletedKeyPoint.UnlockedSecret.ShouldNotBeNullOrEmpty();
+        progress.ProgressPercentage.ShouldBeGreaterThan(0);
+    }
+
+    [Fact]
+    public void Get_unlocked_secrets_returns_completed_key_points()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, TOURIST_ID);
+
+        var startDto = new TourExecutionStartDto
+        {
+            TourId = -3,
+            Latitude = 48.8566,
+            Longitude = 2.3522
+        };
+
+        var startResult = controller.Start(startDto).Result as CreatedAtActionResult;
+        var execution = startResult!.Value as TourExecutionStartResultDto;
+
+        var checkDto = new TrackPointDto
+        {
+            Latitude = execution!.FirstKeyPoint!.Latitude,
+            Longitude = execution.FirstKeyPoint.Longitude
+        };
+
+        controller.CheckProgress(execution.TourExecutionId, checkDto);
+
+        // Act
+        var result = controller.GetUnlockedSecrets(execution.TourExecutionId).Result as OkObjectResult;
+
+        // Assert
+        result.ShouldNotBeNull();
+        var secrets = result.Value as UnlockedSecretsDto;
+        secrets.ShouldNotBeNull();
+        secrets.Secrets.ShouldNotBeEmpty();
+        secrets.Secrets.Count.ShouldBe(1);
+        secrets.Secrets[0].KeyPointId.ShouldBe(execution.FirstKeyPoint.Id);
+        secrets.Secrets[0].Secret.ShouldNotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public void Check_progress_does_not_complete_key_point_when_far()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, TOURIST_ID);
+
+        var startDto = new TourExecutionStartDto
+        {
+            TourId = -3,
+            Latitude = 48.8566,
+            Longitude = 2.3522
+        };
+
+        var startResult = controller.Start(startDto).Result as CreatedAtActionResult;
+        var execution = startResult!.Value as TourExecutionStartResultDto;
+
+        var checkDto = new TrackPointDto
+        {
+            Latitude = 45.0,
+            Longitude = 19.0
+        };
+
+        // Act
+        var result = controller.CheckProgress(execution!.TourExecutionId, checkDto).Result as OkObjectResult;
+
+        // Assert
+        result.ShouldNotBeNull();
+        var progress = result.Value as ProgressResponseDto;
+        progress.ShouldNotBeNull();
+        progress.KeyPointCompleted.ShouldBeFalse();
+        progress.CompletedKeyPoint.ShouldBeNull();
+    }
+
+    [Fact]
     public void Completes_execution_successfully()
     {
         // Arrange

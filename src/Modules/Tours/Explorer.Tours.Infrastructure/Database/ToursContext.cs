@@ -22,7 +22,6 @@ public class ToursContext : DbContext
 
     public DbSet<Facility> Facility { get; set; }
 
-    // Added DbSet for executions
     public DbSet<TourExecutionEntity> TourExecutions { get; set; }
 
     public DbSet<KeyPoint> KeyPoints { get; set; }
@@ -53,6 +52,8 @@ public class ToursContext : DbContext
             b.HasKey(e => e.Id);
             b.Property(e => e.InitialPositionJson).HasColumnType("jsonb");
             b.Property(e => e.ExecutionKeyPointsJson).HasColumnType("jsonb");
+            b.Property(e => e.CompletedKeyPointsJson).HasColumnType("jsonb");
+            b.Property(e => e.ProgressPercentage).HasDefaultValue(0);
         });
         ConfigureShoppingCart(modelBuilder);
     }
