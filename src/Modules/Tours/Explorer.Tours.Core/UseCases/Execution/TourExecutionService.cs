@@ -11,13 +11,19 @@ public class TourExecutionService : ITourExecutionService
 {
     private readonly ITourRepository _tourRepository;
     private readonly ITourExecutionRepository _executionRepository;
+    private readonly ITourPurchaseTokenRepository _tokenRepository;
     private readonly IMapper _mapper;
     private const double ProximityThresholdMeters = 50.0;
 
-    public TourExecutionService(ITourRepository tourRepository, ITourExecutionRepository executionRepository, IMapper mapper)
+    public TourExecutionService(
+        ITourRepository tourRepository,
+        ITourExecutionRepository executionRepository,
+        ITourPurchaseTokenRepository tokenRepository,
+        IMapper mapper)
     {
         _tourRepository = tourRepository;
         _executionRepository = executionRepository;
+        _tokenRepository = tokenRepository;
         _mapper = mapper;
     }
 
@@ -28,6 +34,11 @@ public class TourExecutionService : ITourExecutionService
 
         if (tour.Status != TourStatus.CONFIRMED && tour.Status != TourStatus.ARCHIVED)
             throw new InvalidOperationException("Only published or archived tours can be started.");
+
+        var token = _tokenRepository.GetUnusedByTouristAndTour(touristId, dto.TourId);
+        if (token == null || token.IsUsed)
+            throw new InvalidOperationException("Tour must be purchased before starting. Please add it to your cart and checkout.");
+
 
         var initial = new TrackPoint(dto.Latitude, dto.Longitude);
 
@@ -239,6 +250,15 @@ public class TourExecutionService : ITourExecutionService
 
         execution.Complete();
         _executionRepository.Update(execution);
+
+        // Mark token as used ONLY when tour is completed (not abandoned)
+        var token = _tokenRepository.GetUnusedByTouristAndTour(touristId, execution.TourId);
+        
+        if (token != null)
+        {
+            token.MarkAsUsed();
+            _tokenRepository.Update(token);
+        }
 
         return new TourExecutionResultDto
         {
