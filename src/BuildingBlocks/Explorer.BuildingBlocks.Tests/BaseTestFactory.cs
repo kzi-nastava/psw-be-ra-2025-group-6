@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Explorer.API;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Explorer.API;
 
 namespace Explorer.BuildingBlocks.Tests;
 
@@ -16,7 +16,7 @@ public abstract class BaseTestFactory<TDbContext> : WebApplicationFactory<Progra
         builder.ConfigureServices(services =>
         {
             using var scope = BuildServiceProvider(services).CreateScope();
-            var scopedServices = scope.ServiceProvider;  
+            var scopedServices = scope.ServiceProvider;
             var db = scopedServices.GetRequiredService<TDbContext>();
             var logger = scopedServices.GetRequiredService<ILogger<BaseTestFactory<TDbContext>>>();
 

@@ -48,7 +48,7 @@ public abstract class ValueObject
     {
         var components = GetEqualityComponents().ToList();
         if (components.Count == 0) return 0;
-        
+
         return components
             .Select((x, i) => (x?.GetHashCode() ?? 0) * (i + 1))
             .Aggregate((x, y) => x ^ y);

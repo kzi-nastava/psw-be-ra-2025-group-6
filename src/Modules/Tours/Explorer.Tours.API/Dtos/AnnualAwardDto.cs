@@ -1,4 +1,5 @@
 ﻿namespace Explorer.Tours.API.Dtos;
+
 public class AnnualAwardDto
 {
     public int Id { get; set; }

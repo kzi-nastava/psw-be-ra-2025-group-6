@@ -48,7 +48,7 @@ public class UserDatabaseRepository : IUserRepository
         return user;
     }
 
-public void Update(User user)
+    public void Update(User user)
     {
         _dbContext.Users.Update(user);
         _dbContext.SaveChanges();

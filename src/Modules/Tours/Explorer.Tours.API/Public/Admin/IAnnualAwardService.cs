@@ -2,6 +2,7 @@
 using Explorer.Tours.API.Dtos;
 
 namespace Explorer.Tours.API.Public.Admin;
+
 public interface IAnnualAwardService
 {
     PagedResult<AnnualAwardDto> GetPaged(int page, int pageSize);

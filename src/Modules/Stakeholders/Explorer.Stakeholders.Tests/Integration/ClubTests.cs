@@ -2,13 +2,11 @@
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Infrastructure.Database;
-using Microsoft.AspNetCore.Http; 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims; 
+using System.Security.Claims;
 
 namespace Explorer.Stakeholders.Tests.Integration
 {
@@ -183,8 +181,8 @@ namespace Explorer.Stakeholders.Tests.Integration
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
-                new Claim("id", "-21"),       
-                new Claim("personId", "-21")  
+                new Claim("id", "-21"),
+                new Claim("personId", "-21")
             }, "test"));
 
             controller.ControllerContext = new ControllerContext

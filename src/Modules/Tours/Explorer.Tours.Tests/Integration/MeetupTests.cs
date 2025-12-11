@@ -1,15 +1,11 @@
 using Explorer.API.Controllers;
 using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.BuildingBlocks.Tests;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
-using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Explorer.Tours.Tests.Integration;
 
@@ -74,7 +70,7 @@ public class MeetupTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
         var newEntity = CreateDto(0, "", "New Description",
-            DateTime.UtcNow.AddDays(5), 45.3, 19.9, CREATOR_ID, DateTime.UtcNow); 
+            DateTime.UtcNow.AddDays(5), 45.3, 19.9, CREATOR_ID, DateTime.UtcNow);
 
         // Act & Assert
         Should.Throw<ArgumentException>(() => controller.Create(newEntity));
@@ -105,7 +101,7 @@ public class MeetupTests : BaseToursIntegrationTest
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, -999); 
+        var controller = CreateController(scope, -999);
 
         // Act
         var result = controller.Delete(-1);

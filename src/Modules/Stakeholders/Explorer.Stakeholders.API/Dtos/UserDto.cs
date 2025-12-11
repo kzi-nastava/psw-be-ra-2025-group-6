@@ -1,4 +1,5 @@
 ﻿namespace Explorer.Stakeholders.API.Dtos;
+
 public class UserDto
 {
     public long Id { get; set; }

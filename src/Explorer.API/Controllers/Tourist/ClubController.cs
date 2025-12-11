@@ -1,7 +1,5 @@
-﻿using Explorer.BuildingBlocks.Core.Domain;
-using Explorer.Stakeholders.API.Dtos;
+﻿using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
-using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -46,7 +44,7 @@ namespace Explorer.API.Controllers.Tourist
         public ActionResult<ClubDto> Update([FromBody] ClubDto club)
         {
             var userId = long.Parse(User.FindFirst("id").Value);
-           
+
             if (club.OwnerId != userId)
             {
                 return Forbid(); // Vraća 403 Forbidden ako niste vlasnik

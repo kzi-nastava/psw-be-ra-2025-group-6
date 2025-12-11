@@ -7,14 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers.Tourist
 {
-   [Authorize(Policy = "touristPolicy")] 
-    [Route("api/tours/journals")]        
+    [Authorize(Policy = "touristPolicy")]
+    [Route("api/tours/journals")]
     [ApiController]
     public class JournalController : ControllerBase
     {
         private readonly IJournalService _journalService;
 
-        
+
         public JournalController(IJournalService journalService)
         {
             _journalService = journalService;

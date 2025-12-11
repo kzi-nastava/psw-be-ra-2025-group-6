@@ -46,7 +46,7 @@ public class AnnualAwardRepository<AnnualAward, TDbContext> : IAnnualAwardReposi
             page = 1;
 
         var totalCount = _dbSet.Count();
-        var items = _dbSet.OrderBy(e => e.Id).Skip((page - 1)*pageSize).Take(pageSize).ToList();
+        var items = _dbSet.OrderBy(e => e.Id).Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
         return new PagedResult<AnnualAward>(items, totalCount);
     }
@@ -57,8 +57,8 @@ public class AnnualAwardRepository<AnnualAward, TDbContext> : IAnnualAwardReposi
         {
             DbContext.Update(award);
             DbContext.SaveChanges();
-        } 
-        catch(DbUpdateException e)
+        }
+        catch (DbUpdateException e)
         {
             throw new NotFoundException(e.Message);
         }

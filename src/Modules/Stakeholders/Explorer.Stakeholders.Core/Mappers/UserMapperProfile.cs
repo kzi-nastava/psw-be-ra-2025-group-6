@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.Core.Domain;
 
 namespace Explorer.Stakeholders.Core.Mappers
 {

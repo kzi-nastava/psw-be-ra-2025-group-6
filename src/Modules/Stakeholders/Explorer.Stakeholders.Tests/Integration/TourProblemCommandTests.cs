@@ -1,13 +1,11 @@
 ﻿using Explorer.API.Controllers.Tourist;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Infrastructure.Database;
-using Explorer.BuildingBlocks.Core.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using System;
-using System.Linq;
 
 namespace Explorer.Stakeholders.Tests.Integration;
 

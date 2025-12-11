@@ -1,16 +1,17 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
 
 namespace Explorer.Tours.Core.Domain;
+
 public class AnnualAward : Entity
 {
     public string Name { get; init; }
-    public string? Description {  get; init; }
+    public string? Description { get; init; }
     public int Year { get; init; }
     public AwardStatus Status { get; init; }
     public DateTime VotingStartDate { get; init; }
     public DateTime VotingEndDate { get; init; }
 
-    
+
     public AnnualAward(string name, string? description, int year, AwardStatus status, DateTime votingStartDate, DateTime votingEndDate)
     {
         if (string.IsNullOrWhiteSpace(name))

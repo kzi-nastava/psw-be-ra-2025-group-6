@@ -6,6 +6,7 @@ using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Tours.Core.UseCases.Administration;
+
 public class MonumentService : IMonumentService
 {
     private readonly IMonumentRepository _monumentRepository;

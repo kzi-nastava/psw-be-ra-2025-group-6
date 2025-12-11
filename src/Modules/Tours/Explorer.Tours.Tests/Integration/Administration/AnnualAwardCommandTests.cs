@@ -2,7 +2,6 @@
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Admin;
-using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -108,7 +107,7 @@ public class AnnualAwardCommandTests : BaseToursIntegrationTest
         storedEntity.Id.ShouldBe(result.Id);
         storedEntity.Name.ShouldBe(updatedEntity.Name);
         storedEntity.Description.ShouldBe(updatedEntity.Description);
-        storedEntity.Year.ShouldBe( updatedEntity.Year);
+        storedEntity.Year.ShouldBe(updatedEntity.Year);
         storedEntity.VotingStartDate.ShouldBe(updatedEntity.VotingStartDate);
         storedEntity.VotingEndDate.ShouldBe(updatedEntity.VotingEndDate);
 

@@ -1,10 +1,10 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using Explorer.API.Controllers;
+using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Public;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using Explorer.API.Controllers;
-using Explorer.Stakeholders.API.Dtos;
-using Explorer.Stakeholders.API.Public;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Explorer.Stakeholders.Tests.Integration.Authentication;
 

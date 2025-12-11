@@ -1,23 +1,18 @@
 ﻿using AutoMapper;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.Core.Domain.RepositoryInterfaces;
-using Explorer.Tours.Core.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Explorer.Tours.API.Public;
 using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public;
+using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Tours.Core.UseCases
 {
-    public class JournalService:IJournalService
+    public class JournalService : IJournalService
     {
         private readonly IJournalRepository _journalRepository;
         private readonly IMapper _mapper;
 
-       
+
         public JournalService(IJournalRepository repository, IMapper mapper)
         {
             _journalRepository = repository;
@@ -32,13 +27,13 @@ namespace Explorer.Tours.Core.UseCases
 
         public async Task<JournalDto> Update(JournalDto journalDto)
         {
-           
+
             var existingJournal = await _journalRepository.GetById(journalDto.Id);
 
             if (existingJournal == null)
                 throw new NotFoundException($"Journal not found: {journalDto.Id}");
 
-            
+
             var type = existingJournal.GetType();
 
             type.GetProperty("Name")?.SetValue(existingJournal, journalDto.Name);
@@ -50,10 +45,10 @@ namespace Explorer.Tours.Core.UseCases
 
             type.GetProperty("DateModified")?.SetValue(existingJournal, DateTime.UtcNow);
 
-            
+
             var result = await _journalRepository.Save(existingJournal);
 
-            
+
             return new JournalDto
             {
                 Id = result.Id,

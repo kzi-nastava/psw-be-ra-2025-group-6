@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using Explorer.Stakeholders.Core.Domain;
-
-namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
+﻿namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
 {
     public interface IClubRepository
     {

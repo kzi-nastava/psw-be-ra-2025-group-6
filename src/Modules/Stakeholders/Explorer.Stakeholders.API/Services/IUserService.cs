@@ -1,5 +1,4 @@
 ﻿using Explorer.Stakeholders.API.Dtos;
-using System.Collections.Generic;
 
 namespace Explorer.Stakeholders.API.Services
 {

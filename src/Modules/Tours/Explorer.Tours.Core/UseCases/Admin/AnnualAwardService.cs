@@ -6,11 +6,12 @@ using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Tours.Core.UseCases.Admin;
+
 public class AnnualAwardService : IAnnualAwardService
 {
     private readonly IAnnualAwardRepository<AnnualAward> _annualAwardRepository;
-    private readonly IMapper _mapper;   
-    
+    private readonly IMapper _mapper;
+
     public AnnualAwardService(IAnnualAwardRepository<AnnualAward> repository, IMapper mapper)
     {
         _mapper = mapper;
@@ -26,7 +27,7 @@ public class AnnualAwardService : IAnnualAwardService
     public void Delete(long id)
     {
         AnnualAwardDto item = Get(id);
-        if(item.Status != AwardStatusDto.DRAFT)
+        if (item.Status != AwardStatusDto.DRAFT)
         {
             throw new InvalidOperationException("Only awards with draft status can be deleted.");
         }

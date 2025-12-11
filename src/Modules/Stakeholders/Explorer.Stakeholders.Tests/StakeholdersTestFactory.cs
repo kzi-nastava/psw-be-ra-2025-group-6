@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Explorer.BuildingBlocks.Tests;
+﻿using Explorer.BuildingBlocks.Tests;
 using Explorer.Stakeholders.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Explorer.Stakeholders.Tests;
 
