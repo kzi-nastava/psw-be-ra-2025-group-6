@@ -18,10 +18,11 @@ public class TourService : ITourService
         _mapper = mapper;
     }
 
-    public List<TourDto> GetAll() {
+    public List<TourDto> GetAll()
+    {
         var result = _tourRepository.GetAll();
 
-        var items=_mapper.Map<List<TourDto>>(result);
+        var items = _mapper.Map<List<TourDto>>(result);
         return new List<TourDto>(items);
     }
 
@@ -55,7 +56,8 @@ public class TourService : ITourService
     public void Delete(long id)
     {
         TourDto item = Get(id);
-        if (item.Status != TourStatusDto.DRAFT) {
+        if (item.Status != TourStatusDto.DRAFT)
+        {
             throw new InvalidOperationException("Only tours in Draft status can be deleted.");
         }
         else

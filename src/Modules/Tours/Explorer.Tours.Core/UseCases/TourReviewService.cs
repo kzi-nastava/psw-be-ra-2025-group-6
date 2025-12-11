@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
-using Explorer.Stakeholders.API.Dtos;
-using Explorer.Stakeholders.API.Public;
-using Explorer.Stakeholders.Core.Domain;
-using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public;
+using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
-namespace Explorer.Stakeholders.Core.UseCases
+namespace Explorer.Tours.Core.UseCases
 {
     public class TourReviewService : ITourReviewService
     {

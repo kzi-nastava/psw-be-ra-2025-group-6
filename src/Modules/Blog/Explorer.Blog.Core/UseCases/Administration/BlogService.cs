@@ -36,7 +36,7 @@ public class BlogService : IBlogService
             userId,
             dto.Title,
             dto.Description,
-            new List<string>() 
+            new List<string>()
         );
         var created = _blogRepository.Create(blog);
         return _mapper.Map<BlogDto>(created);

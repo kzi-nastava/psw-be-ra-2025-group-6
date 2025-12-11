@@ -1,11 +1,11 @@
 ﻿using Explorer.API.Controllers.Author.Authoring;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using Explorer.Tours.API.Public.Authoring;
 
 namespace Explorer.Tours.Tests.Integration.Authoring;
 
@@ -20,14 +20,14 @@ public class TourCommandTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        
+
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var newEntity = new TourDto
         {
             Name = "Tura Italije",
             Description = "Obiđi gradove Italije",
-            Difficulty=0,
-            Tags=new List<string> { "Evropa", "Italija" }
+            Difficulty = 0,
+            Tags = new List<string> { "Evropa", "Italija" }
         };
 
         // Act
@@ -86,7 +86,7 @@ public class TourCommandTests : BaseToursIntegrationTest
             Difficulty = 0,
             Tags = new List<string> { "Amerika" }
         };
-        
+
 
         // Act
         var result = ((ObjectResult)controller.Update(updatedEntity).Result)?.Value as TourDto;
@@ -98,7 +98,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         result.Description.ShouldBe(updatedEntity.Description);
         result.Difficulty.ShouldBe(updatedEntity.Difficulty);
         result.Tags.ShouldBe(updatedEntity.Tags);
-        
+
 
         // Assert - Database
         var storedEntity = dbContext.Tours.FirstOrDefault(i => i.Name == "Tura Amerike");

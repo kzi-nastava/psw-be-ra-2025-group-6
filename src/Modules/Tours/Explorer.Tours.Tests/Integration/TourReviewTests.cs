@@ -1,17 +1,18 @@
 using Explorer.API.Controllers.Tourist;
-using Explorer.Stakeholders.API.Dtos;
-using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Infrastructure.Database;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public;
+using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
-namespace Explorer.Stakeholders.Tests.Integration;
+namespace Explorer.Tours.Tests.Integration;
 
 [Collection("Sequential")]
-public class TourReviewTests : BaseStakeholdersIntegrationTest
+public class TourReviewTests : BaseToursIntegrationTest
 {
-    public TourReviewTests(StakeholdersTestFactory factory) : base(factory) { }
+    public TourReviewTests(ToursTestFactory factory) : base(factory) { }
 
     [Fact]
     public void Creates_tour_review()
@@ -19,7 +20,7 @@ public class TourReviewTests : BaseStakeholdersIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var newReview = new TourReviewDto
         {
             TourId = 1,
@@ -68,7 +69,7 @@ public class TourReviewTests : BaseStakeholdersIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        
+
         // Act
         var result = ((ObjectResult)controller.GetMyReviews().Result)?.Value as List<TourReviewDto>;
 
@@ -82,7 +83,7 @@ public class TourReviewTests : BaseStakeholdersIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         var newReview = new TourReviewDto
         {
@@ -143,7 +144,7 @@ public class TourReviewTests : BaseStakeholdersIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         var newReview = new TourReviewDto
         {

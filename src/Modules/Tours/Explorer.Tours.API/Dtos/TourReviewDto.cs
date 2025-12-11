@@ -1,4 +1,4 @@
-﻿namespace Explorer.Stakeholders.API.Dtos
+﻿namespace Explorer.Tours.API.Dtos
 {
     public class TourReviewDto
     {

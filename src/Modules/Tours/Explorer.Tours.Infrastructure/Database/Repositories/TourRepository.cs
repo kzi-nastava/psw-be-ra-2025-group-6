@@ -26,15 +26,15 @@ public class TourRepository<Tour, TDbContext> : ITourRepository<Tour>
 
     public PagedResult<Tour> GetPaged(int page, int pageSize)
     {
-            var totalCount = _dbSet.Count();
-            var items = _dbSet
-                .OrderBy(e => e.Id)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+        var totalCount = _dbSet.Count();
+        var items = _dbSet
+            .OrderBy(e => e.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
 
-            return new PagedResult<Tour>(items, totalCount);
-        
+        return new PagedResult<Tour>(items, totalCount);
+
 
     }
 

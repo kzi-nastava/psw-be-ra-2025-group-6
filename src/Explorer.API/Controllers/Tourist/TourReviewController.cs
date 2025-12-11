@@ -1,8 +1,6 @@
-﻿using Explorer.Stakeholders.API.Dtos;
-using Explorer.Stakeholders.API.Public;
-using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using Explorer.Stakeholders.Core.UseCases;
-using Explorer.Stakeholders.Infrastructure.Authentication;
+﻿using Explorer.Stakeholders.Infrastructure.Authentication;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +9,10 @@ namespace Explorer.API.Controllers.Tourist
     [Authorize(Policy = "touristPolicy")]
     [Route("api/tourist/tour-reviews")]
     [ApiController]
-    public class TourReviewController: ControllerBase
+    public class TourReviewController : ControllerBase
     {
         private ITourReviewService _tourReviewService;
-        public TourReviewController(ITourReviewService service )
+        public TourReviewController(ITourReviewService service)
         {
             _tourReviewService = service;
         }
@@ -38,9 +36,9 @@ namespace Explorer.API.Controllers.Tourist
         public ActionResult<TourReviewDto> Update(long id, [FromBody] TourReviewDto reviewDto)
         {
             reviewDto.Id = id;
-         
-            if(IsMyReview(id) == false) return Forbid("You can not update someone elses review");
-            
+
+            if (IsMyReview(id) == false) return Forbid("You can not update someone elses review");
+
             var result = _tourReviewService.Update(reviewDto);
             return Ok(result);
         }

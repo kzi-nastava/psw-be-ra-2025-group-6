@@ -1,6 +1,6 @@
-﻿using Explorer.Stakeholders.API.Dtos;
+﻿using Explorer.Tours.API.Dtos;
 
-namespace Explorer.Stakeholders.API.Public
+namespace Explorer.Tours.API.Public
 {
     public interface ITourReviewService
     {

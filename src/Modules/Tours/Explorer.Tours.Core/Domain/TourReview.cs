@@ -1,6 +1,6 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
 
-namespace Explorer.Stakeholders.Core.Domain;
+namespace Explorer.Tours.Core.Domain;
 
 public class TourReview : Entity
 {

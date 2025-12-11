@@ -1,14 +1,14 @@
 ﻿using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Stakeholders.Core.Domain;
-using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
-namespace Explorer.Stakeholders.Infrastructure.Database.Repositories;
+namespace Explorer.Tours.Infrastructure.Database.Repositories;
 
 public class TourReviewDbRepository : ITourReviewRepository
 {
-    private readonly StakeholdersContext _dbContext;
+    private readonly ToursContext _dbContext;
 
-    public TourReviewDbRepository(StakeholdersContext dbContext)
+    public TourReviewDbRepository(ToursContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -14,9 +14,6 @@ public class StakeholdersContext : DbContext
     public DbSet<TouristPosition> TouristPositions { get; set; }
     public DbSet<TourProblem> TourProblems { get; set; }
 
-    public DbSet<TourReview> TourReviews { get; set; }
-
-
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,8 +23,6 @@ public class StakeholdersContext : DbContext
         modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
 
         modelBuilder.Entity<TouristPosition>().HasIndex(tp => tp.TouristId).IsUnique();
-
-        modelBuilder.Entity<TourReview>().HasIndex(tp => tp.Id).IsUnique();
 
         modelBuilder.Entity<User>()
        .Property(u => u.Role)

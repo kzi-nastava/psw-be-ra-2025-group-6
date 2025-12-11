@@ -16,7 +16,7 @@ public class ToursContext : DbContext
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Meetup> Meetups { get; set; }
 
-
+    public DbSet<TourReview> TourReviews { get; set; }
 
     public DbSet<Facility> Facility { get; set; }
 

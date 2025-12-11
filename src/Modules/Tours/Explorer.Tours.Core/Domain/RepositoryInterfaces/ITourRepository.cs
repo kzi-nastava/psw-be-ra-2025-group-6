@@ -3,7 +3,7 @@ using Explorer.BuildingBlocks.Core.UseCases;
 
 namespace Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
-public interface ITourRepository<Tour>  where Tour : Entity
+public interface ITourRepository<Tour> where Tour : Entity
 {
     PagedResult<Tour> GetPaged(int page, int pageSize);
 
