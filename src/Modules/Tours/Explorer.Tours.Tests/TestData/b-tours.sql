@@ -9,3 +9,6 @@ VALUES (-3, 'Tura Pariza', 'Pravo u Luvr', 0, ARRAY['europe', '7 days'], 100, 1)
 
 INSERT INTO tours."Tours"("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status")
 VALUES (-4, 'Arhivirana tura', 'Test arhivirana tura za shopping cart', 0, ARRAY['test', 'archived'], 150, 2);
+
+INSERT INTO tours."Tours" ("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status")
+VALUES (-5, 'Another Confirmed Tour', 'Another confirmed tour', 2, ARRAY['test'], 150, 1);

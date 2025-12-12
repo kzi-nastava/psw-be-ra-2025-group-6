@@ -20,5 +20,6 @@ public class ToursProfile : Profile
         CreateMap<MeetupDto, Meetup>().ReverseMap();
         CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
         CreateMap<OrderItem, OrderItemDto>().ReverseMap();
+        CreateMap<TourPurchaseToken, TourPurchaseTokenDto>().ReverseMap();
     }
 }
