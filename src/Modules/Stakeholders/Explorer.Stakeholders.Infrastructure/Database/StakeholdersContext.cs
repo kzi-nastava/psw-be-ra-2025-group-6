@@ -14,8 +14,7 @@ public class StakeholdersContext : DbContext
     public DbSet<TouristPosition> TouristPositions { get; set; }
     public DbSet<TourProblem> TourProblems { get; set; }
 
-
-    public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
+    public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,7 +29,7 @@ public class StakeholdersContext : DbContext
        .HasConversion<string>();
 
         ConfigureStakeholder(modelBuilder);
-        
+
         modelBuilder.Entity<UserProfile>()
             .HasOne<User>()
             .WithOne()

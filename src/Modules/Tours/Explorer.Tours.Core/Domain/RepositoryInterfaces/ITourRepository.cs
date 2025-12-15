@@ -13,4 +13,6 @@ public interface ITourRepository
     Tour Create(Tour tour);
     Tour Update(Tour tour);
     void Delete(long id);
+    Tour? GetByReviewId(long reviewId);
+    List<Tour> GetByReviewUserId(long userId);
 }

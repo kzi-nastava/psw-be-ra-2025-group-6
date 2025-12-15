@@ -1,5 +1,4 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
-using System;
 
 namespace Explorer.Stakeholders.Core.Domain
 {
@@ -12,7 +11,7 @@ namespace Explorer.Stakeholders.Core.Domain
         public string Description { get; private set; }
         public DateTime ReportedAt { get; private set; }
 
-        
+
         private TourProblem() { }
 
         public TourProblem(long tourId, long touristId, ProblemCategory category,

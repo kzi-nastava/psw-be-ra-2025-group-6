@@ -1,12 +1,10 @@
 ﻿using Explorer.API.Controllers.Tourist;
-using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using System.Threading.Tasks;
 
 namespace Explorer.Tours.Tests.Integration.Tourist;
 
@@ -33,7 +31,7 @@ public class JournalCommandTests : BaseToursIntegrationTest
             Status = "Draft"
         };
 
-        
+
         var result = (await controller.Create(newEntity)).Result.ShouldBeOfType<CreatedAtActionResult>().Value as JournalDto;
         result.ShouldNotBeNull();
         result.Id.ShouldNotBe(0);
@@ -46,7 +44,7 @@ public class JournalCommandTests : BaseToursIntegrationTest
     [Fact]
     public async void Updates()
     {
-        
+
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
@@ -74,7 +72,7 @@ public class JournalCommandTests : BaseToursIntegrationTest
     public void Update_fails_not_owned()
     {
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, 3); 
+        var controller = CreateController(scope, 3);
         var updatedEntity = new JournalDto
         {
             Id = -3,
@@ -85,7 +83,7 @@ public class JournalCommandTests : BaseToursIntegrationTest
             Status = "Draft"
         };
 
-        
+
         var result = controller.Update(-3, updatedEntity).Result;
         result.Result.ShouldBeOfType<ForbidResult>();
     }
@@ -94,12 +92,12 @@ public class JournalCommandTests : BaseToursIntegrationTest
     [Fact]
     public async void Deletes()
     {
-        
+
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        
+
         var result = await controller.Delete(-2);
 
         result.ShouldNotBeNull();
