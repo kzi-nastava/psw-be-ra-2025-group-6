@@ -10,10 +10,10 @@ namespace Explorer.Tours.Core.UseCases
     public class ShoppingCartService : IShoppingCartService
     {
         private readonly IShoppingCartRepository _shoppingCartRepository;
-        private readonly ITourRepository<Tour> _tourRepository;
+        private readonly ITourRepository _tourRepository;
         private readonly IMapper _mapper;
 
-        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, ITourRepository<Tour> tourRepository, IMapper mapper)
+        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, ITourRepository tourRepository, IMapper mapper)
         {
             _shoppingCartRepository = shoppingCartRepository;
             _tourRepository = tourRepository;
