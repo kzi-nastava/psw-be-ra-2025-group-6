@@ -44,4 +44,19 @@ public class ShoppingCart : Entity
             LastModified = DateTime.UtcNow;
         }
     }
+
+    public List<TourPurchaseToken> Checkout()
+    {
+        if (_items.Count == 0)
+            throw new InvalidOperationException("Cannot checkout an empty cart.");
+
+        var tokens = _items
+            .Select(item => new TourPurchaseToken(TouristId, item.TourId, item.TourName, item.Price))
+            .ToList();
+
+        _items.Clear();
+        LastModified = DateTime.UtcNow;
+
+        return tokens;
+    }
 }
