@@ -1,9 +1,9 @@
 ﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
+using Explorer.Blog.Core.Domain;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
-using Explorer.Tours.API.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -147,6 +147,74 @@ public class BlogController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id:long}/comments")]
+    public IActionResult AddComment(long id, [FromBody] CommentCreateDto dto)
+    {
+        var userId = User.PersonId();
+        var created = _blogService.AddComment(id, userId, dto.Text);
+
+        return Ok(created);
+    }
+
+    [HttpPut("{id:long}/comments/{commentId:int}")]
+    public IActionResult EditComment(long id, int commentId, [FromBody] CommentCreateDto dto)
+    {
+        var userId = User.PersonId();
+        _blogService.EditComment(id, commentId, userId, dto.Text);
+
+        return Ok();
+    }
+
+    [HttpDelete("{id:long}/comments/{commentId:int}")]
+    public IActionResult DeleteComment(long id, int commentId)
+    {
+        var userId = User.PersonId();
+        _blogService.DeleteComment(id, commentId, userId);
+
+        return NoContent();
+    }
+
+    [HttpGet("{id:long}/comments")]
+    public IActionResult GetComment(long id)
+    {
+        var comments = _blogService.GetComments(id);
+        return Ok(comments);
+    }
+
+    [HttpPost("{id:long}/vote")]
+    public IActionResult VoteOnBlog(long id, [FromBody] VoteRequestDto request)
+    {
+        var userId = User.PersonId();
+
+        if (request.VoteType == null)
+            _blogService.RemoveVote(userId, id);
+        else
+            _blogService.Vote(userId, id, request.VoteType.Value);
+
+        var votes = _blogService.GetVotes(id);
+        var userVote = _blogService.GetUserVote(userId, id);
+        return Ok(new { votes.upvotes, votes.downvotes, userVote });
+    }
+
+    [HttpDelete("{id:long}/vote")]
+    public IActionResult RemoveVote(long id)
+    {
+        var userId = User.PersonId();
+        _blogService.RemoveVote(userId, id);
+        var votes = _blogService.GetVotes(id);
+        var userVote = _blogService.GetUserVote(userId, id);
+        return Ok(new { votes.upvotes, votes.downvotes, userVote });
+    }
+
+    [HttpGet("{id:long}/votes")]
+    public IActionResult GetVotes(long id)
+    {
+        var votes = _blogService.GetVotes(id);
+        var userId = User.PersonId();
+        var userVote = _blogService.GetUserVote(userId, id);
+        return Ok(new { votes.upvotes, votes.downvotes, userVote });
+    }
+
     [HttpPatch("{id:long}/archive")]
     public IActionResult ArchiveBlog(long id)
     {
@@ -174,6 +242,34 @@ public class BlogController : ControllerBase
         {
             var updated = _blogService.UpdateDescription(id, dto.NewDescription);
             return Ok(updated);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPatch("{id:long}/quality")]
+    public IActionResult RecalculateQualityStatus(long id)
+    {
+        try
+        {
+            var updated = _blogService.RecalculateQualityStatus(id);
+            return Ok(updated);
+        }
+        catch(Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("filter-by-quality")]
+    public ActionResult<List<BlogDto>> GetBlogsByQuality([FromQuery] BlogQualityStatusDto status)
+    {
+        try
+        {
+            var blogs = _blogService.GetBlogsByQualityStatus(status);
+            return Ok(blogs);
         }
         catch (Exception ex)
         {
