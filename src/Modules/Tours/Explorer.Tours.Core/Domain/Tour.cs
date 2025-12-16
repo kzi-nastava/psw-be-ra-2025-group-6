@@ -76,7 +76,7 @@ public class Tour : AggregateRoot
 
         if (!Enum.IsDefined(typeof(TourDifficulty), difficulty))
             throw new ArgumentException("Invalid Difficulty.");
-        if (AuthorId <= 0)
+        if (AuthorId == 0)
             throw new ArgumentException("Invalid AuthorId.");
 
    

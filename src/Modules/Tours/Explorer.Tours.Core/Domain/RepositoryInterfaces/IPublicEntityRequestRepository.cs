@@ -10,4 +10,5 @@ public interface IPublicEntityRequestRepository
     PublicEntityRequest Update(PublicEntityRequest request);
     List<PublicEntityRequest> GetByAuthor(long authorId);
     List<PublicEntityRequest> GetPending();
+    List<PublicEntityRequest> GetAll();
 }

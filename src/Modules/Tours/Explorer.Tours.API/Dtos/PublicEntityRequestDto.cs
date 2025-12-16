@@ -36,3 +36,8 @@ public class ProcessRequestDto
 {
     public string? AdminComment { get; set; }
 }
+
+public class RejectRequestDto
+{
+    public string Comment { get; set; }
+}
