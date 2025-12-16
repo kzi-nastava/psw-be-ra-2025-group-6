@@ -153,6 +153,16 @@ public class TourService : ITourService
     }
     private TouristTourDto MapToTouristView(Tour tour)
     {
+    public TourDto Publish(long tourId, long authorId)
+    {
+        var tour = _tourRepository.Get(tourId);
+
+        tour.Publish(authorId);
+
+        _tourRepository.Update(tour);
+
+        return _mapper.Map<TourDto>(tour);
+    }
 
         return new TouristTourDto
         {

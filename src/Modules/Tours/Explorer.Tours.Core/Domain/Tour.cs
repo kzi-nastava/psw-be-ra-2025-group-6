@@ -22,6 +22,7 @@ public class Tour : AggregateRoot
     public double DistanceInKm { get; private set; }
 
     public List<TourDuration>? Duration { get; private set; }
+    public DateTime? PublishedTime { get; private set; }
 
     private Tour() {
     }
@@ -179,6 +180,26 @@ public class Tour : AggregateRoot
     public KeyPoint? GetFirstKeyPoint()
     {
         return KeyPoints.FirstOrDefault();
+    }
+    public void Publish(long authorId)
+    {
+        if (AuthorId != authorId)
+            throw new ForbiddenException("Only the owner can publish the tour.");
+
+        if (Status != TourStatus.DRAFT)
+            throw new InvalidOperationException("Only draft tours can be published.");
+
+        if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Description) || Price < 0)
+            throw new InvalidOperationException("Tour must have all basic fields filled.");
+
+        if (Tags == null || Tags.Count == 0)
+            throw new InvalidOperationException("Tour must have at least one tag.");
+
+        if (KeyPoints == null || KeyPoints.Count < 2)
+            throw new InvalidOperationException("Tour must have at least two key points.");
+
+        Status = TourStatus.CONFIRMED; 
+        PublishedTime = DateTime.UtcNow;
     }
 
 }
