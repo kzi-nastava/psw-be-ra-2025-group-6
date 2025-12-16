@@ -62,4 +62,9 @@ public class PublicEntityRequestDbRepository : IPublicEntityRequestRepository
     {
         return _dbSet.Where(r => r.Status == RequestStatus.Pending).ToList();
     }
+
+    public List<PublicEntityRequest> GetAll()
+    {
+        return _dbSet.ToList();
+    }
 }
