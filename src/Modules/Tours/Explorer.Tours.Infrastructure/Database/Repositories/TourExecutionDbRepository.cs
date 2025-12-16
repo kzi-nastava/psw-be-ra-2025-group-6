@@ -64,6 +64,15 @@ public class TourExecutionDbRepository : ITourExecutionRepository
         return MapToDomain(entity);
     }
 
+    public List<TourExecution> GetAll(long touristId)
+    {
+        var entities = _dbContext.Set<TourExecutionEntity>()
+            .Where(e => e.TouristId == touristId)
+            .ToList();
+
+        return entities.Select(MapToDomain).ToList();
+    }
+
     public TourExecution? GetById(long executionId)
     {
         var entity = _dbContext.Set<TourExecutionEntity>().Find(executionId);

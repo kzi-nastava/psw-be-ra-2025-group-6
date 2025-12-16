@@ -29,6 +29,7 @@ public class TourExecutionResultDto
     public DateTime StartTime { get; set; }
     public DateTime? EndTime { get; set; }
     public DateTime LastActivity { get; set; }
+    public double ProgressPercentage { get; set; }
 }
 
 public class TrackPointDto
