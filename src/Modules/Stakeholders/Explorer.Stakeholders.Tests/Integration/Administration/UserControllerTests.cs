@@ -63,7 +63,7 @@ namespace Explorer.Stakeholders.Tests.Integration.AdminUsers
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResp.AccessToken);
         }
 
-        private record LoginResponse(int Id = 0, string AccessToken = "");
+        private record LoginResponse(long Id = 0, string AccessToken = "");
 
         // ---------------- TESTS ----------------
 

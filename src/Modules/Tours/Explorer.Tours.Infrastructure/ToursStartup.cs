@@ -4,6 +4,8 @@ using Explorer.Tours.API.Public.Admin;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Core.Domain;
+using Explorer.Tours.API.Public;
+using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
 using Explorer.Tours.Core.UseCases;
@@ -43,6 +45,7 @@ public static class ToursStartup
         services.AddScoped<IAdminMapService, AdminMapService>();
         services.AddScoped<ITourReviewService, TourReviewService>();
         services.AddScoped<IShoppingCartService, ShoppingCartService>();
+        services.AddScoped<IQuizService, QuizService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -58,6 +61,7 @@ public static class ToursStartup
         services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
         services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
 
+        services.AddScoped<IQuizRepository, QuizDbRepository>();
         // Repo for executions
         services.AddScoped<Core.Domain.RepositoryInterfaces.ITourExecutionRepository, Tours.Infrastructure.Database.Repositories.TourExecutionDbRepository>();
 

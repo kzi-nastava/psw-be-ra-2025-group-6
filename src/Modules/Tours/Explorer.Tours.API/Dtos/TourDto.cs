@@ -14,4 +14,5 @@ public class TourDto
     public List<EquipmentDto>? Equipment { get; set; }
     public List<KeyPointDto>? KeyPoints { get; set; } = new List<KeyPointDto>();
     public double DistanceInKm { get; set; }
+    public List<TourDurationDto>? Duration { get; set;  }
 }

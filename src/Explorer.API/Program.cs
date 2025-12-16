@@ -4,6 +4,7 @@ using Explorer.API.Startup;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.ConfigureSwagger(builder.Configuration);
 const string corsPolicy = "_corsPolicy";
 builder.Services.ConfigureCors(corsPolicy);
@@ -15,15 +16,13 @@ var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-else
-{
-    app.UseHsts();
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Explorer API v1");
+});
+
+if (!app.Environment.IsDevelopment()) app.UseHsts();
 
 app.UseRouting();
 app.UseCors(corsPolicy);
