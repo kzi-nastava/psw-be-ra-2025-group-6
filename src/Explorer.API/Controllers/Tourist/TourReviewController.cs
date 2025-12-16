@@ -28,7 +28,8 @@ namespace Explorer.API.Controllers.Tourist
         [HttpGet]
         public ActionResult<List<TourReviewDto>> GetMyReviews()
         {
-            var result = _tourReviewService.GetByUser(-21);
+            var userid= User.PersonId();
+            var result = _tourReviewService.GetByUser(userid);
             return Ok(result);
         }
 
