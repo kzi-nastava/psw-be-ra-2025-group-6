@@ -24,6 +24,6 @@ public class StakeholderProfile : Profile
 
         CreateMap<ProfilePostDto, ProfilePost>()
             .ReverseMap();
-
+        CreateMap<ClubPost, ClubPostDto>();
     }
 }
