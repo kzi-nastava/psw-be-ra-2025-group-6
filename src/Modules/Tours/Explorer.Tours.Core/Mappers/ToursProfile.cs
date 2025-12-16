@@ -17,9 +17,16 @@ public class ToursProfile : Profile
         CreateMap<TourStatus, TourStatusDto>().ReverseMap();
         CreateMap<TravelType, TravelTypeDto>().ReverseMap();
         CreateMap<TourDuration, TourDurationDto>().ReverseMap();
-        CreateMap<Tour, TourDto>().ReverseMap();
+        CreateMap<TourDto, Tour>()
+            .ForMember(dest => dest.PublishedTime, opt => opt.Ignore())
+            .ReverseMap(); 
         CreateMap<MonumentDto, Monument>().ReverseMap();
         CreateMap<MeetupDto, Meetup>().ReverseMap();
         CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
+        
+        // Public entity request mappings
+        CreateMap<PublicEntityRequest, PublicEntityRequestDto>().ReverseMap();
+        CreateMap<PublicEntityType, PublicEntityTypeDto>().ReverseMap();
+        CreateMap<RequestStatus, RequestStatusDto>().ReverseMap();
     }
 }
