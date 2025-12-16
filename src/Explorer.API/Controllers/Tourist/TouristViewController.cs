@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.Core.UseCases.Tourist;
-using System.Collections.Generic;
-using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+﻿using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.Core.UseCases.Tourist;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace Explorer.Tours.API.Controllers.Tourist
 {
+    [Authorize(Policy = "touristPolicy")]
     [ApiController]
     [Route("api/tourist/tours")]
     public class TouristViewController : ControllerBase
