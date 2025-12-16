@@ -15,6 +15,7 @@ public class StakeholdersContext : DbContext
     public DbSet<TourProblem> TourProblems { get; set; }
     public DbSet<TourProblemMessage> TourProblemMessages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<ProfilePost> ProfilePosts { get; set; }
 
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
@@ -41,6 +42,7 @@ public class StakeholdersContext : DbContext
         ConfigureTourProblemMessage(modelBuilder);
         ConfigureNotification(modelBuilder);
         ConfigureTourProblems(modelBuilder);
+        ConfigureProfilePosts(modelBuilder);
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)
@@ -100,5 +102,22 @@ public class StakeholdersContext : DbContext
         modelBuilder.Entity<Notification>()
             .Property(n => n.Status)
             .HasConversion<string>();
+    }
+
+    private static void ConfigureProfilePosts(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ProfilePost>(builder =>
+        {
+            builder.ToTable("ProfilePosts");
+            builder.HasKey(p => p.Id);
+            builder.Property(p => p.AuthorId).IsRequired();
+            builder.Property(p => p.Text).IsRequired().HasMaxLength(280);
+            builder.Property(p => p.CreatedAt).IsRequired();
+            builder.Property(p => p.UpdatedAt).IsRequired();
+            builder.Property(p => p.ResourceType)
+                .HasConversion<string?>()
+                .HasMaxLength(20);
+            builder.HasIndex(p => p.AuthorId);
+        });
     }
 }
