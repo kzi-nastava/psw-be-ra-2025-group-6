@@ -13,8 +13,6 @@ namespace Explorer.Stakeholders.Core.Mappers
 
             CreateMap<CreateUserDto, User>()
                 .ForMember(dest => dest.Role, opt => opt.MapFrom(src => Enum.Parse<UserRole>(src.Role, true)));
-
-            CreateMap<CreateUserDto, Person>();
         }
     }
 }

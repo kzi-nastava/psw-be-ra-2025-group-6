@@ -1,5 +1,4 @@
 ﻿using Explorer.Stakeholders.API.Dtos;
-
 namespace Explorer.Stakeholders.API.Services
 {
     public interface IUserService

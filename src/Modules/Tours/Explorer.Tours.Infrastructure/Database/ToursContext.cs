@@ -1,12 +1,18 @@
 ﻿using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.Quiz;
 using Microsoft.EntityFrameworkCore;
 using Explorer.Tours.Infrastructure.Database.Entities;
+using System.Text.Json;
+
 
 namespace Explorer.Tours.Infrastructure.Database;
 
 public class ToursContext : DbContext
 {
     public DbSet<Equipment> Equipment { get; set; }
+    public DbSet<Quiz> Quizzes { get; set; }
+    public DbSet<QuizQuestion> QuizQuestions { get; set; }
+    public DbSet<QuizAnswerOption> QuizAnswerOptions { get; set; }
     public DbSet<Journal> Journals { get; set; }
 
     public DbSet<AnnualAward> AnnualAwards { get; set; }
@@ -63,6 +69,17 @@ public class ToursContext : DbContext
     {
         modelBuilder.Entity<ShoppingCart>()
             .OwnsMany(s => s.Items);
+
+        modelBuilder.Entity<Tour>()
+    .Property(t => t.Duration)
+    .HasConversion(
+        v => JsonSerializer.Serialize(v, new JsonSerializerOptions()),
+        v => JsonSerializer.Deserialize<List<TourDuration>>(v, new JsonSerializerOptions())!
+    )
+    .HasColumnType("jsonb");
+
+
+
     }
 
     private static void ConfigureTouristEquipment(ModelBuilder modelBuilder)
@@ -73,5 +90,30 @@ public class ToursContext : DbContext
             b.HasIndex(te => te.PersonId);
             b.HasIndex(te => new { te.PersonId, te.EquipmentId }).IsUnique();
         });
+
+        modelBuilder.Entity<Quiz>()
+            .HasMany(q => q.Questions)
+            .WithOne()
+            .HasForeignKey(q => q.QuizId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<QuizQuestion>()
+            .HasMany(q => q.Options)
+            .WithOne()
+            .HasForeignKey(o => o.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<QuizAnswerOption>()
+            .Property(o => o.Text)
+            .IsRequired();
+        modelBuilder.Entity<QuizAnswerOption>()
+            .Property(o => o.Feedback)
+            .IsRequired();
+        modelBuilder.Entity<QuizQuestion>()
+            .Property(q => q.Text)
+            .IsRequired();
+        modelBuilder.Entity<Quiz>()
+            .Property(q => q.Title)
+            .IsRequired();
     }
 }

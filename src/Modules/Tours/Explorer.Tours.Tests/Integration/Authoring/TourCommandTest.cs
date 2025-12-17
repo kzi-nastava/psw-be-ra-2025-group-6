@@ -24,6 +24,19 @@ public class TourCommandTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
 
+        var claims = new List<Claim>
+{
+        new Claim("personId", "3")
+};
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var user = new ClaimsPrincipal(identity);
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var newEntity = new TourDto
         {
@@ -31,7 +44,15 @@ public class TourCommandTests : BaseToursIntegrationTest
             Description = "Obiđi gradove Italije",
             Difficulty=0,
             Tags=new List<string> { "Evropa", "Italija" },
-            AuthorId= 6
+            Duration= new List<TourDurationDto>
+            {
+                new TourDurationDto
+                {
+                    TravelType=TravelTypeDto.CAR,
+                    Minutes=15
+                },
+                
+            }
         };
 
         // Act

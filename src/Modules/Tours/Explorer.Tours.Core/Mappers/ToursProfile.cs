@@ -1,6 +1,7 @@
-﻿using AutoMapper;
+﻿﻿using AutoMapper;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.Quiz;
 
 namespace Explorer.Tours.Core.Mappers;
 
@@ -16,6 +17,8 @@ public class ToursProfile : Profile
         CreateMap<TouristEquipmentDto, TouristEquipment>().ReverseMap();
         CreateMap<TourDifficulty, TourDifficultyDto>().ReverseMap();
         CreateMap<TourStatus, TourStatusDto>().ReverseMap();
+        CreateMap<TravelType, TravelTypeDto>().ReverseMap();
+        CreateMap<TourDuration, TourDurationDto>().ReverseMap();
         CreateMap<Tour, TourDto>().ReverseMap();
         CreateMap<MonumentDto, Monument>().ReverseMap();
         CreateMap<MeetupDto, Meetup>().ReverseMap();
@@ -24,5 +27,8 @@ public class ToursProfile : Profile
         CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
         CreateMap<OrderItem, OrderItemDto>().ReverseMap();
         CreateMap<TourPurchaseToken, TourPurchaseTokenDto>().ReverseMap();
+        CreateMap<Quiz, QuizDto>().ReverseMap();
+        CreateMap<QuizQuestion, QuizQuestionDto>().ReverseMap();
+        CreateMap<QuizAnswerOption, QuizAnswerOptionDto>().ReverseMap();
     }
 }

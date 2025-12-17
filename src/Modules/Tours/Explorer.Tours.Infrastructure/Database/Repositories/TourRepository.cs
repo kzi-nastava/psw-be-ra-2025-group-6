@@ -86,6 +86,8 @@ public class TourRepository : ITourRepository
             throw new NotFoundException("Not found: " + tour.Id);
 
         DbContext.Entry(existingTour).CurrentValues.SetValues(tour);
+        DbContext.Entry(existingTour).Property(t => t.Duration).IsModified = true;
+
 
         try
         {
