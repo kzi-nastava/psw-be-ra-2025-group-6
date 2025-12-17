@@ -38,6 +38,14 @@ public class TourExecutionController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("all")]
+    public ActionResult<List<TourExecutionResultDto>> GetExecutedTours()
+    {
+        var touristId = GetTouristId();
+        var result = _executionService.GetExecutedTours(touristId);
+        return Ok(result);
+    }
+
 
     [HttpPut("{executionId}/complete")]
     public ActionResult<TourExecutionResultDto> Complete(long executionId)

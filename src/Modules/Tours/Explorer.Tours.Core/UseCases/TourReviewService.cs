@@ -25,7 +25,8 @@ namespace Explorer.Tours.Core.UseCases
                tourRev.TourId,
                tourRev.Rating,
                tourRev.Comment,
-               tourRev.CompletedPercent
+               tourRev.CompletedPercent,
+               tourRev.PictureUrl
            );
             var tour = _tourRepository.Get(tourRev.TourId);
             tour.AddTourReview(review);
@@ -39,7 +40,7 @@ namespace Explorer.Tours.Core.UseCases
             if (tour == null) throw new NotFoundException("Tour review not found: " + tourRev.Id);
 
             var rev = tour.TourReviews.FirstOrDefault(r => r.Id == tourRev.Id);
-            rev.Update(tourRev.Rating, tourRev.Comment, tourRev.CompletedPercent);
+            rev.Update(tourRev.Rating, tourRev.Comment, tourRev.CompletedPercent, tourRev.PictureUrl);
 
             _tourRepository.Update(tour);
             return _mapper.Map<TourReviewDto>(rev);

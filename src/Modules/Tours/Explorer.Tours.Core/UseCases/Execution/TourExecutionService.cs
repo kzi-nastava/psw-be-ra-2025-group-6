@@ -291,6 +291,22 @@ public class TourExecutionService : ITourExecutionService
         };
     }
 
+    public List<TourExecutionResultDto> GetExecutedTours(long touristId) 
+    {
+        var executions = _executionRepository.GetAll(touristId);
+        return executions.Select(execution => new TourExecutionResultDto
+        {
+            TourExecutionId = execution.Id,
+            TourId = execution.TourId,
+            TouristId = execution.TouristId,
+            Status = execution.Status.ToString(),
+            StartTime = execution.StartTime,
+            EndTime = execution.EndTime,
+            LastActivity = execution.LastActivity,
+            ProgressPercentage = execution.ProgressPercentage
+        }).ToList();
+    }
+
     private double CalculateProgress(List<KeyPoint> orderedKeyPoints, List<CompletedKeyPoint> completedKeyPoints)
     {
         if (orderedKeyPoints.Count == 0) return 0;

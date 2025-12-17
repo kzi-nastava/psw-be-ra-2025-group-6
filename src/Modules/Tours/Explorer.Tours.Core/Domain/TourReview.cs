@@ -9,10 +9,11 @@ public class TourReview : Entity
     public int Rating { get; private set; }
     public string? Comment { get; private set; }
     public int CompletedPercent { get; private set; }
+    public string PictureUrl { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
 
-    public TourReview(long userId, long tourId, int rating, string? comment, int completedPercent)
+    public TourReview(long userId, long tourId, int rating, string? comment, int completedPercent, string pictureUrl)
     {
         UserId = userId;
         TourId = tourId;
@@ -21,14 +22,16 @@ public class TourReview : Entity
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = null;
         CompletedPercent = completedPercent;
+        PictureUrl = pictureUrl;
         Validate();
     }
 
-    public void Update(int rating, string? comment, int completedPercent)
+    public void Update(int rating, string? comment, int completedPercent, string pictureurl)
     {
         Rating = rating;
         Comment = comment;
         CompletedPercent = completedPercent;
+        PictureUrl = pictureurl;
         UpdatedAt = DateTime.UtcNow;
         Validate();
     }

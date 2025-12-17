@@ -6,6 +6,7 @@ public interface ITourExecutionRepository
 {
     TourExecution Create(TourExecution execution);
     TourExecution? GetActiveForTourist(long touristId, long? tourId = null);
+    List<TourExecution> GetAll(long touristId);
     TourExecution? GetById(long executionId);
 
     TourExecution Get(long id);
