@@ -11,11 +11,15 @@ public class Tour : AggregateRoot
     public TourDifficulty Difficulty { get; init; }
     public List<string>? Tags { get; init; }
     public float Price { get; init; }
+    
     public TourStatus Status { get; private set; }
 
     public long AuthorId { get; init; }
 
     public List<Equipment>? Equipment { get; private set; }
+
+    
+    public ICollection<TourReview> TourReviews { get; } = new List<TourReview>();
 
     public List<KeyPoint>? KeyPoints { get; private set; }
 
@@ -168,6 +172,14 @@ public class Tour : AggregateRoot
         if (distance < 0) throw new ArgumentException("Distance cannot be negative.");
         DistanceInKm = distance;
     }
+
+    
+
+    public void AddTourReview(TourReview review)
+    {
+        TourReviews.Add(review);
+    }
+
     public void SetDuration(TourDuration duration)
     {
         if (Status == TourStatus.ARCHIVED)
@@ -243,4 +255,5 @@ public class Tour : AggregateRoot
     }
 
     private static double ToRadians(double angle) => Math.PI * angle / 180.0;
+
 }

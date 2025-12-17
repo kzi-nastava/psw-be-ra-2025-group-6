@@ -1,9 +1,4 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Explorer.Tours.Core.Domain
 {
@@ -27,13 +22,13 @@ namespace Explorer.Tours.Core.Domain
 
         public Journal(long turistId, string name, string? location, DateTime travelDate)
         {
-            if (turistId <=0)
+            if (turistId <= 0)
                 throw new ArgumentException("Turist ID cannot be empty.", nameof(turistId));
 
             if (string.IsNullOrWhiteSpace(name) || name.Length > 100)
                 throw new ArgumentException("Name is required and must be max 100 characters.", nameof(name));
 
-            if (travelDate > DateTime.Now.Date) 
+            if (travelDate > DateTime.Now.Date)
                 throw new ArgumentException("Travel date cannot be in the future.", nameof(travelDate));
 
 
@@ -41,7 +36,7 @@ namespace Explorer.Tours.Core.Domain
             Name = name;
             Location = location;
             TravelDate = travelDate;
-            Status = JournalStatus.Draft; 
+            Status = JournalStatus.Draft;
             DateCreated = DateTime.UtcNow;
             DateModified = DateTime.UtcNow;
         }

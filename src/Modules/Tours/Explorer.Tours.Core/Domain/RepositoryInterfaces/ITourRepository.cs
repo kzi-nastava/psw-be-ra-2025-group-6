@@ -9,9 +9,12 @@ public interface ITourRepository
 
     List<Tour> GetAll();
     Tour Get(long id);
+    Tour GetWithKeyPoints(long id);
     Tour Create(Tour tour);
     Tour Update(Tour tour);
     void Delete(long id);
+    Tour? GetByReviewId(long reviewId);
+    List<Tour> GetByReviewUserId(long userId);
     List<Tour> GetPublishedWithKeyPoints();
     List<Tour> GetPublishedTours();
 }
