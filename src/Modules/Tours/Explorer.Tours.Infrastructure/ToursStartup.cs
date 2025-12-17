@@ -15,6 +15,7 @@ using Explorer.Tours.Infrastructure.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Explorer.Tours.Core.UseCases.Tourist;
 
 namespace Explorer.Tours.Infrastructure;
 
@@ -44,6 +45,7 @@ public static class ToursStartup
         services.AddScoped<ITourReviewService, TourReviewService>();
         services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
+        services.AddScoped<ITouristViewService, TouristViewService>();
         services.AddScoped<IQuizService, QuizService>();
     }
 

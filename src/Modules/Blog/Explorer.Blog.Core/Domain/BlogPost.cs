@@ -55,6 +55,8 @@ public class BlogPost : AggregateRoot
 
         var comment = new Comment(userId, authorName, text);
         Comments.Add(comment);
+
+        RecalculateQualityStatus();
     }
 
     public void EditComment(int id, long userId, string text)

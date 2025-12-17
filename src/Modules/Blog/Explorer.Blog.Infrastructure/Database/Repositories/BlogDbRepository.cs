@@ -66,6 +66,7 @@ public class BlogDbRepository : IBlogRepository
     {
         return _dbSet
             .Include(b => b.Votes)
+            .Include(b => b.Comments)
             .FirstOrDefault(b => b.Id == id);
     }
 

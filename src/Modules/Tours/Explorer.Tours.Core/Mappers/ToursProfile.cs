@@ -19,7 +19,9 @@ public class ToursProfile : Profile
         CreateMap<TourStatus, TourStatusDto>().ReverseMap();
         CreateMap<TravelType, TravelTypeDto>().ReverseMap();
         CreateMap<TourDuration, TourDurationDto>().ReverseMap();
-        CreateMap<Tour, TourDto>().ReverseMap();
+        CreateMap<TourDto, Tour>()
+            .ForMember(dest => dest.PublishedTime, opt => opt.Ignore())
+            .ReverseMap(); 
         CreateMap<MonumentDto, Monument>().ReverseMap();
         CreateMap<MeetupDto, Meetup>().ReverseMap();
         CreateMap<TourReview, TourReviewDto>().ReverseMap();
@@ -30,5 +32,8 @@ public class ToursProfile : Profile
         CreateMap<Quiz, QuizDto>().ReverseMap();
         CreateMap<QuizQuestion, QuizQuestionDto>().ReverseMap();
         CreateMap<QuizAnswerOption, QuizAnswerOptionDto>().ReverseMap();
+        CreateMap<Tour, TouristTourDto>()
+           .ForMember(dest => dest.FirstKeyPoint, opt => opt.MapFrom(src => src.GetFirstKeyPoint()))
+           .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.Duration));
     }
 }
