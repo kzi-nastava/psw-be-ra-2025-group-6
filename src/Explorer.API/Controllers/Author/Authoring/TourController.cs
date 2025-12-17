@@ -148,6 +148,12 @@ public class TourController : ControllerBase
         var result = _tourService.UpdateDuration(tourId, durations);
         return Ok(result);
     }
+    [HttpPut("{id:long}/publish")]
+    public ActionResult<TourDto> Publish(long id)
+    {
+        var result = _tourService.Publish(id, User.PersonId());
+        return Ok(result);
+    }
 
 
 
