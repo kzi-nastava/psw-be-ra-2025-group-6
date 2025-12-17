@@ -8,5 +8,6 @@ public interface IFacilityService
     FacilityDto Create(FacilityDto facility);
     FacilityDto Update(FacilityDto faciclity);
     void Delete(long Id);
+    FacilityDto Get(long id);
 }
 
