@@ -32,21 +32,63 @@ namespace Explorer.Tours.Core.UseCases;
             };
         }
 
-        public PublicEntityDto SearchEntities(double minLon, double minLat, double maxLon, double maxLat)
+        public PublicEntityDto SearchEntities(
+            double? minLon, 
+            double? minLat, 
+            double? maxLon,
+            double? maxLat,
+            string? query,
+            PublicEntityTypeDto? entityType,
+            FacilityType? facilityType)
         {
             var all = GetAllPublic();
 
-            all.Facilities = all.Facilities
-                .Where(f => f.Longitude >= minLon && f.Longitude <= maxLon)
-                .Where(f => f.Latitude >= minLat && f.Latitude <= maxLat)
-                .ToList();
+            if (entityType.HasValue)
+            {
+                if (entityType == PublicEntityTypeDto.Facility)
+                {
+                    all.KeyPoints.Clear();
+                }
+                else if (entityType == PublicEntityTypeDto.KeyPoint)
+                {
+                    all.Facilities.Clear();
+                }
+            }
 
-            all.KeyPoints = all.KeyPoints
-                .Where(kp => kp.Longitude >= minLon && kp.Longitude <= maxLon)
-                .Where(kp => kp.Latitude >= minLat && kp.Latitude <= maxLat)
-                .ToList();
+            if (facilityType.HasValue)
+            {
+                all.Facilities = all.Facilities.Where(f => f.Type == facilityType.Value).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                var q = query.Trim();
+
+                all.Facilities = all.Facilities
+                    .Where(f =>
+                        (f.Name ?? "").Contains(q, StringComparison.OrdinalIgnoreCase)).ToList();
+
+                all.KeyPoints = all.KeyPoints
+                    .Where(kp =>
+                        (kp.Name ?? "").Contains(q, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            var hasBounds = minLon.HasValue && minLat.HasValue && maxLon.HasValue && maxLat.HasValue;
+
+            if (hasBounds)
+            {
+                all.Facilities = all.Facilities
+                    .Where(f => f.Longitude >= minLon && f.Longitude <= maxLon)
+                    .Where(f => f.Latitude >= minLat && f.Latitude <= maxLat)
+                    .ToList();
+
+                all.KeyPoints = all.KeyPoints
+                    .Where(kp => kp.Longitude >= minLon && kp.Longitude <= maxLon)
+                    .Where(kp => kp.Latitude >= minLat && kp.Latitude <= maxLat)
+                    .ToList();
+            }
 
             return all;
-    }
+        }
     }
 

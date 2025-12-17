@@ -26,10 +26,16 @@ public class PublicEntityController : ControllerBase
     }
 
     [HttpGet("search")]
-    public ActionResult<PublicEntityDto> Search([FromQuery] double minLon, [FromQuery] double minLat,
-        [FromQuery] double maxLon, [FromQuery] double maxLat)
+    public ActionResult<PublicEntityDto> Search(
+        [FromQuery] double? minLon, 
+        [FromQuery] double? minLat,
+        [FromQuery] double? maxLon, 
+        [FromQuery] double? maxLat,
+        [FromQuery] string? query,
+        [FromQuery] PublicEntityTypeDto? entityType,
+        [FromQuery] FacilityType? facilityType)
     {
-        return Ok(_service.SearchEntities(minLon, minLat, maxLon, maxLat));
+        return Ok(_service.SearchEntities(minLon, minLat, maxLon, maxLat, query, entityType, facilityType));
     }
 }
 
