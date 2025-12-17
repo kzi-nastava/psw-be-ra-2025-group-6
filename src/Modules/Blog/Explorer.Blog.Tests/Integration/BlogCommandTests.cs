@@ -170,6 +170,13 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         var controller = CreateController(scope);
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
 
+        var existing = dbContext.Blogs.FirstOrDefault(b => b.Id == -6);
+        if (existing != null)
+        {
+            dbContext.Blogs.Remove(existing);
+            dbContext.SaveChanges();
+        }
+
         var blog = new DomainBlog(-11, "Blog za brisanje", "Opis", new List<string>(), BlogStatus.POSTED);
         typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, -6);
         dbContext.Blogs.Add(blog);

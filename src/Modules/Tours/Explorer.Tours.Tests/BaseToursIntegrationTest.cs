@@ -25,6 +25,9 @@ public class BaseToursIntegrationTest : BaseWebIntegrationTest<ToursTestFactory>
 
     private static void ReseedDatabase(ToursContext context)
     {
+        // Tests rely on EF model being the source of truth. Since we use EnsureCreated/CreateTables
+        // (not migrations), we need a clean schema each run to avoid stale columns.
+        context.Database.ExecuteSqlRaw("DROP SCHEMA IF EXISTS tours CASCADE;");
         context.Database.ExecuteSqlRaw("CREATE SCHEMA IF NOT EXISTS tours;");
         context.Database.EnsureCreated();
         try
@@ -46,6 +49,7 @@ public class BaseToursIntegrationTest : BaseWebIntegrationTest<ToursTestFactory>
 
     private static void ReseedStakeholders(StakeholdersContext context)
     {
+        context.Database.ExecuteSqlRaw("DROP SCHEMA IF EXISTS stakeholders CASCADE;");
         context.Database.ExecuteSqlRaw("CREATE SCHEMA IF NOT EXISTS stakeholders;");
         context.Database.EnsureCreated();
         try
