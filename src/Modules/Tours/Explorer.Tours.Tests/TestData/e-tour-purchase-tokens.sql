@@ -10,6 +10,12 @@ CREATE TABLE IF NOT EXISTS tours."TourPurchaseTokens" (
     CONSTRAINT "PK_TourPurchaseTokens" PRIMARY KEY ("Id")
 );
 
--- Obriši postojeæe test podatke
+-- Obriši postoje?e test podatke
 DELETE FROM tours."TourPurchaseTokens";
+
+-- Insert test purchase tokens for integration tests
+INSERT INTO tours."TourPurchaseTokens" 
+("Id", "TouristId", "TourId", "TourName", "Price", "PurchaseDate", "IsUsed")
+VALUES 
+(-1, 1, -3, 'Tura Pariza', 100, '2024-01-10 00:00:00+00', FALSE);
 

@@ -41,7 +41,7 @@ public class TourQueryTests : BaseToursIntegrationTest
 
         // Assert
         result.ShouldNotBeNull();
-        result.Count.ShouldBe(3);
+        result.Count.ShouldBe(5);
     }
 
     private static TourController CreateController(IServiceScope scope)
