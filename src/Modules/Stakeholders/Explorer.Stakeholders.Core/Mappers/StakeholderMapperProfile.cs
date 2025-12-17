@@ -15,5 +15,7 @@ public class StakeholderMapperProfile : Profile
         CreateMap<NotificationDto, Notification>().ReverseMap();
         CreateMap<PagedResult<Notification>, PagedResult<NotificationDto>>().ReverseMap();
         CreateMap<CreateUserDto, Person>();
+        CreateMap<FollowerDto, Follower>().ReverseMap();
+        CreateMap<ClubMemberDto, ClubMember>().ReverseMap();
     }
 }
