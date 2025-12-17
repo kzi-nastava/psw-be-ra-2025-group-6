@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
 using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Tours.Core.UseCases;
-    public class PublicEntityService
+    public class PublicEntityService : IPublicEntityService
     {
         private readonly ITourRepository _tourRepository;
         private readonly IFacilityRepository _facilityRepository;
@@ -31,7 +32,7 @@ namespace Explorer.Tours.Core.UseCases;
             };
         }
 
-        public PublicEntityDto SearchEntity(double minLon, double minLat, double maxLon, double maxLat)
+        public PublicEntityDto SearchEntities(double minLon, double minLat, double maxLon, double maxLat)
         {
             var all = GetAllPublic();
 
