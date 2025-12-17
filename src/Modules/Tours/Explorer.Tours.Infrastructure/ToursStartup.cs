@@ -45,6 +45,7 @@ public static class ToursStartup
         services.AddScoped<IMeetupService, MeetupService>();
         services.AddScoped<IAdminMapService, AdminMapService>();
         services.AddScoped<IPublicEntityRequestService, PublicEntityRequestService>();
+        services.AddScoped<IKeyPointService, KeyPointService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -58,6 +59,7 @@ public static class ToursStartup
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<IMeetupRepository, MeetupRepository>();
         services.AddScoped<IPublicEntityRequestRepository, PublicEntityRequestDbRepository>();
+        services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
 
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
