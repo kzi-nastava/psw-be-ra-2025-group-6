@@ -20,7 +20,8 @@ public abstract class BaseTestFactory<TDbContext> : WebApplicationFactory<Progra
             var db = scopedServices.GetRequiredService<TDbContext>();
             var logger = scopedServices.GetRequiredService<ILogger<BaseTestFactory<TDbContext>>>();
 
-            var path = Path.Combine(".", "..", "..", "..", "TestData");
+            // Resolve TestData relative to the test project's output directory so it works regardless of content root
+            var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "TestData"));
             InitializeDatabase(db, path, logger);
         });
     }

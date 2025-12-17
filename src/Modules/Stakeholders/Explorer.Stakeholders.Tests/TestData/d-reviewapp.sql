@@ -1,4 +1,4 @@
-﻿INSERT INTO stakeholders."ReviewApp"("Id", "UserId", "Rating", "Comment", "CreatedAt", "UpdatedAt")
+INSERT INTO stakeholders."ReviewApp"("Id", "UserId", "Rating", "Comment", "CreatedAt", "UpdatedAt")
 VALUES (-101, -11, 4, 'Seed author review', '2024-01-01 00:00:00', null);
 
 INSERT INTO stakeholders."ReviewApp"("Id", "UserId", "Rating", "Comment", "CreatedAt", "UpdatedAt")
