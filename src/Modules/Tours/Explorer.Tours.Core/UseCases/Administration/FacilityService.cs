@@ -41,7 +41,6 @@ public class FacilityService : IFacilityService
     {
         _facilityRepository.Delete(Id);
     }
-
     public FacilityDto Get(long id)
     {
         var entity = _facilityRepository.Get(id);

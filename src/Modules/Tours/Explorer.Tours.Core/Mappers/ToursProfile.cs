@@ -28,5 +28,8 @@ public class ToursProfile : Profile
         CreateMap<PublicEntityRequest, PublicEntityRequestDto>().ReverseMap();
         CreateMap<PublicEntityType, PublicEntityTypeDto>().ReverseMap();
         CreateMap<RequestStatus, RequestStatusDto>().ReverseMap();
+
+        CreateMap<KeyPoint, PublicKeyPointDto>().ReverseMap();
+        CreateMap<Facility, PublicFacilityDto>().ReverseMap();
     }
 }

@@ -1,23 +1,19 @@
-using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Admin;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.Core.Domain;
-using Explorer.Tours.API.Public;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
 using Explorer.Tours.Core.UseCases;
 using Explorer.Tours.Core.UseCases.Admin;
 using Explorer.Tours.Core.UseCases.Administration;
-using Explorer.Tours.Core.UseCases;
 using Explorer.Tours.Core.UseCases.Authoring;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Explorer.Tours.Core.Domain;
 using Npgsql;
 
 namespace Explorer.Tours.Infrastructure;
@@ -45,6 +41,7 @@ public static class ToursStartup
         services.AddScoped<IMeetupService, MeetupService>();
         services.AddScoped<IAdminMapService, AdminMapService>();
         services.AddScoped<IPublicEntityRequestService, PublicEntityRequestService>();
+        services.AddScoped<IPublicEntityService, PublicEntityService>();
         services.AddScoped<IKeyPointService, KeyPointService>();
     }
 
@@ -60,7 +57,6 @@ public static class ToursStartup
         services.AddScoped<IMeetupRepository, MeetupRepository>();
         services.AddScoped<IPublicEntityRequestRepository, PublicEntityRequestDbRepository>();
         services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
-
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();
