@@ -1,7 +1,7 @@
+﻿namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 
 public interface ITourProblemRepository
 {

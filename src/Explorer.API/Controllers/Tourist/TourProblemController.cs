@@ -4,8 +4,6 @@ using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Explorer.API.Controllers.Tourist
 {
@@ -74,5 +72,6 @@ namespace Explorer.API.Controllers.Tourist
                 return BadRequest(ex.Message);
             }
         }
+
     }
 }

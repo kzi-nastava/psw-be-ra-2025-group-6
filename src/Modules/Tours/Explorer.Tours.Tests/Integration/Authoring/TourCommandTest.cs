@@ -1,6 +1,7 @@
 ﻿using Explorer.API.Controllers.Author.Authoring;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +35,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         {
             HttpContext = new DefaultHttpContext { User = user }
         };
+
 
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var newEntity = new TourDto
@@ -135,7 +137,7 @@ public class TourCommandTests : BaseToursIntegrationTest
             Status = TourStatusDto.DRAFT,
             AuthorId=3
         };
-        
+
 
         // Act
         var result = ((ObjectResult)controller.Update(-1,updatedEntity).Result)?.Value as TourDto;

@@ -1,6 +1,6 @@
-using System.Text.RegularExpressions;
 using ArchUnitNET.Domain;
 using ArchUnitNET.Loader;
+using System.Text.RegularExpressions;
 using Assembly = System.Reflection.Assembly;
 
 namespace Explorer.Architecture.Tests;
