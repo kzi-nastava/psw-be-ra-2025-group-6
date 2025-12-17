@@ -1,10 +1,10 @@
-﻿using Explorer.Blog.Core.Domain;
+﻿using Explorer.Blog.API.Dtos;
+using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using Explorer.Blog.Core.Domain;
 
 namespace Explorer.Blog.Infrastructure.Database.Repositories;
 
@@ -37,6 +37,10 @@ public class BlogDbRepository : IBlogRepository
         if (existingBlog == null)
             throw new NotFoundException($"Blog with Id {blog.Id} not found.");
 
+        //DbContext.Entry(existingBlog).State = EntityState.Detached;
+
+        //DbContext.Entry(blog).State = EntityState.Modified;
+        _dbSet.Update(blog);
         DbContext.Entry(existingBlog).CurrentValues.SetValues(blog);
 
         var existingVotes = existingBlog.Votes.ToList();
@@ -68,5 +72,13 @@ public class BlogDbRepository : IBlogRepository
     {
         _dbSet.Remove(blog);
         DbContext.SaveChanges();
+    }
+
+    public List<BlogPost> GetAll()
+    {
+        return _dbSet
+            .Include(b => b.Votes)
+            .Include(b => b.Comments)
+            .ToList();
     }
 }
