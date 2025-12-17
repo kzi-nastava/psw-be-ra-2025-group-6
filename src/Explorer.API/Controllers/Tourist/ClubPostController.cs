@@ -27,7 +27,18 @@ namespace Explorer.API.Controllers.Tourist
         [HttpPost]
         public ActionResult<ClubPostDto> Create(long clubId, [FromBody] ClubPostDto post)
         {
-            var userId = long.Parse(User.FindFirst("id").Value);
+            if (post == null)
+            {
+                return BadRequest("Invalid request body.");
+            }
+
+            var idClaim = User.FindFirst("id");
+            if (idClaim == null)
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+
+            var userId = long.Parse(idClaim.Value);
             post.ClubId = clubId;
             var result = _clubPostService.Create(post, userId);
             return Ok(result);
