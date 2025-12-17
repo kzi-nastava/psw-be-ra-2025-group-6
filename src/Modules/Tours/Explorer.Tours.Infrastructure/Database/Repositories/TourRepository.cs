@@ -95,14 +95,18 @@ public class TourRepository: ITourRepository
     public List<Tour> GetPublishedWithKeyPoints()
     {
         return DbContext.Tours
-    public List<Tour> GetPublishedTours()
-    {
-        return DbContext.Tours
-            .Include(t => t.Equipment)
             .Include(t => t.KeyPoints)
             .Where(t => t.Status == TourStatus.CONFIRMED)
             .ToList();
     }
 
+    public List<Tour> GetPublishedTours()
+    {
+        return DbContext.Tours
+            .Include(t => t.Equipment)
+            .Include(t => t.KeyPoints)
+            .Where(t => t.Status == TourStatus.CONFIRMED && t.PublishedTime != null)
+            .ToList();
+    }
 
 }

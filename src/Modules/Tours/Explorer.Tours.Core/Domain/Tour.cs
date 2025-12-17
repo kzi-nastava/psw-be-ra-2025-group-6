@@ -216,6 +216,7 @@ public class Tour : AggregateRoot
             Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
         var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
         return R * c;
+    }
     public KeyPoint? GetFirstKeyPoint()
     {
         return KeyPoints.FirstOrDefault();

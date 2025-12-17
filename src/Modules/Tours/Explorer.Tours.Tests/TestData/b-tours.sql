@@ -46,6 +46,9 @@ VALUES
     '[]'::jsonb
 );
 
+-- Mark as published for tourist view tests (Status=CONFIRMED and PublishedTime set)
+UPDATE tours."Tours" SET "PublishedTime" = NOW() WHERE "Id" = -3;
+
 INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "Longitude", "Latitude", "ImagePath", "Secret")
 VALUES (-101, -3, 'Paris Center', 'Central Paris starting point', 2.3522, 48.8566, 'paris.jpg', 'secret-paris');
 
