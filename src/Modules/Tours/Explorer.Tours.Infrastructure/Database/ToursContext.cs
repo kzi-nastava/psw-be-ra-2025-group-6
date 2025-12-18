@@ -1,4 +1,4 @@
-﻿using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.Quiz;
 using Microsoft.EntityFrameworkCore;
 using Explorer.Tours.Infrastructure.Database.Entities;
@@ -41,6 +41,7 @@ public class ToursContext : DbContext
 
         ConfigureTouristEquipment(modelBuilder);
         ConfigureShoppingCart(modelBuilder);
+        ConfigureTourExecution(modelBuilder);
     }
 
     private static void ConfigureShoppingCart(ModelBuilder modelBuilder)
@@ -49,17 +50,27 @@ public class ToursContext : DbContext
             .OwnsMany(s => s.Items);
 
         modelBuilder.Entity<Tour>()
-    .HasMany(t => t.Equipment)
-    .WithOne()
-    .HasForeignKey(e => e.TourId)
-    .OnDelete(DeleteBehavior.SetNull);
+            .Property(t => t.Duration)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, new JsonSerializerOptions()),
+                v => JsonSerializer.Deserialize<List<TourDuration>>(v, new JsonSerializerOptions())!
+            )
+            .HasColumnType("jsonb");
+    }
+
+    private static void ConfigureTourExecution(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Tour>()
+            .HasMany(t => t.Equipment)
+            .WithOne()
+            .HasForeignKey(e => e.TourId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<Tour>()
-    .HasMany(t => t.KeyPoints)
-    .WithOne()
-    .HasForeignKey(kp => kp.TourId)
-    .OnDelete(DeleteBehavior.Cascade);
-
+            .HasMany(t => t.KeyPoints)
+            .WithOne()
+            .HasForeignKey(kp => kp.TourId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<TourExecutionEntity>(b =>
         {
@@ -69,24 +80,6 @@ public class ToursContext : DbContext
             b.Property(e => e.CompletedKeyPointsJson).HasColumnType("jsonb");
             b.Property(e => e.ProgressPercentage).HasDefaultValue(0);
         });
-        ConfigureShoppingCart(modelBuilder);
-    }
-
-    private static void ConfigureShoppingCart(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<ShoppingCart>()
-            .OwnsMany(s => s.Items);
-
-        modelBuilder.Entity<Tour>()
-    .Property(t => t.Duration)
-    .HasConversion(
-        v => JsonSerializer.Serialize(v, new JsonSerializerOptions()),
-        v => JsonSerializer.Deserialize<List<TourDuration>>(v, new JsonSerializerOptions())!
-    )
-    .HasColumnType("jsonb");
-
-
-
     }
 
     private static void ConfigureTouristEquipment(ModelBuilder modelBuilder)
