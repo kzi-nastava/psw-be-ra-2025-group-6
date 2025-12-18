@@ -170,7 +170,7 @@ public class FacilityCommandTests : BaseToursIntegrationTest
     {
         return new FacilityController(scope.ServiceProvider.GetRequiredService<IFacilityService>())
         {
-            ControllerContext = BuildContext("-1")
+            ControllerContext = BuildContext("1")
         };
     }
 }

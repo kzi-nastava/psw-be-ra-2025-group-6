@@ -1,5 +1,6 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
 using Explorer.BuildingBlocks.Core.Exceptions;
+using System.Collections.Specialized;
 
 namespace Explorer.Tours.Core.Domain;
 
@@ -10,11 +11,15 @@ public class Tour : AggregateRoot
     public TourDifficulty Difficulty { get; init; }
     public List<string>? Tags { get; init; }
     public float Price { get; init; }
+    
     public TourStatus Status { get; private set; }
 
     public long AuthorId { get; init; }
 
     public List<Equipment>? Equipment { get; private set; }
+
+    
+    public ICollection<TourReview> TourReviews { get; } = new List<TourReview>();
 
     public List<KeyPoint>? KeyPoints { get; private set; }
 
@@ -158,6 +163,14 @@ public class Tour : AggregateRoot
         if (distance < 0) throw new ArgumentException("Distance cannot be negative.");
         DistanceInKm = distance;
     }
+
+    
+
+    public void AddTourReview(TourReview review)
+    {
+        TourReviews.Add(review);
+    }
+
     public void SetDuration(TourDuration duration)
     {
         if (Status == TourStatus.ARCHIVED)
@@ -175,6 +188,10 @@ public class Tour : AggregateRoot
         {
             Duration.Add(duration);
         }
+    }
+    public KeyPoint? GetFirstKeyPoint()
+    {
+        return KeyPoints.FirstOrDefault();
     }
     public void Publish(long authorId)
     {

@@ -45,3 +45,36 @@ VALUES
     0,
     '[]'::jsonb
 );
+
+INSERT INTO tours."Tours"
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
+VALUES 
+(
+    -4,
+    'Arhivirana tura',
+    'Test arhivirana tura za shopping cart',
+    0,
+    ARRAY['test', 'archived'],
+    150,
+    2,
+    3,
+    0,
+    '[]'::jsonb
+);
+
+INSERT INTO tours."Tours"
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
+VALUES 
+(
+    -5,
+    'Another Confirmed Tour',
+    'Another confirmed tour',
+    2,
+    ARRAY['test'],
+    150,
+    1,
+    4,
+    0,
+    '[]'::jsonb
+);
+
