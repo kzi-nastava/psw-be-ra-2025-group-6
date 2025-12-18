@@ -40,6 +40,13 @@ public class ToursContext : DbContext
         modelBuilder.HasDefaultSchema("tours");
 
         ConfigureTouristEquipment(modelBuilder);
+        ConfigureShoppingCart(modelBuilder);
+    }
+
+    private static void ConfigureShoppingCart(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ShoppingCart>()
+            .OwnsMany(s => s.Items);
 
         modelBuilder.Entity<Tour>()
     .HasMany(t => t.Equipment)

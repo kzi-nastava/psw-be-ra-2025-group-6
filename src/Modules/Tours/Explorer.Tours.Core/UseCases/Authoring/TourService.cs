@@ -10,15 +10,18 @@ namespace Explorer.Tours.Core.UseCases.Authoring;
 
 public class TourService : ITourService
 {
+    private readonly ITourPurchaseTokenRepository _tokenRepository;
     private readonly ITourRepository _tourRepository;
     private readonly IEquipmentRepository _equipmentRepository;
     private readonly IMapper _mapper;
 
-    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper)
+
+    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper, ITourPurchaseTokenRepository tokenRepository)
     {
         _tourRepository = repository;
         _equipmentRepository = equipmentRepository;
         _mapper = mapper;
+        _tokenRepository = tokenRepository;
     }
 
     public List<TourDto> GetAll()
@@ -175,7 +178,51 @@ public class TourService : ITourService
         tour.Publish(authorId);
 
         _tourRepository.Update(tour);
-
         return _mapper.Map<TourDto>(tour);
     }
+
+    public List<TourDto> GetAvailableForTourist(long touristId)
+    {
+        var confirmedTours = _tourRepository.GetAll()
+            .Where(t => t.Status == TourStatus.CONFIRMED)
+            .ToList();
+
+        var purchasedTourIds = _tokenRepository.GetByTouristId(touristId)
+            .Select(t => t.TourId)
+            .ToHashSet();
+
+        return _mapper.Map<List<TourDto>>(
+            confirmedTours.Where(t => !purchasedTourIds.Contains(t.Id)).ToList()
+        );
+    }
+
+    public PagedResult<TourDto> GetAvailableForTouristPaged(long touristId, int page, int pageSize)
+    {
+        
+        var confirmedTours = _tourRepository.GetAll()
+            .Where(t => t.Status == TourStatus.CONFIRMED)
+            .ToList();
+
+        
+        var purchasedTourIds = _tokenRepository.GetByTouristId(touristId)
+            .Select(t => t.TourId)
+            .ToHashSet();
+
+        
+        var availableTours = confirmedTours
+            .Where(t => !purchasedTourIds.Contains(t.Id))
+            .ToList();
+
+
+        var totalCount = availableTours.Count;
+        var pagedTours = availableTours
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        
+        var items = _mapper.Map<List<TourDto>>(pagedTours);
+        return new PagedResult<TourDto>(items, totalCount);
+    }
+        
 }

@@ -90,6 +90,7 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
         tour2.Tags.ShouldContain("7 days");
         tour2.Difficulty.ShouldBe(TourDifficultyDto.EASY); // Difficulty = 0
         tour2.DistanceInKm.ShouldBe(0);
+
     }
 
     [Fact]

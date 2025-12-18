@@ -34,8 +34,8 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             }
 
             // Dodaj dve ture u korpu
-            controller.AddItem(-3); // Confirmed tour 
-            controller.AddItem(-5); // Another confirmed tour 
+            controller.AddItem(-3); // Confirmed tour
+            controller.AddItem(-5); // Another confirmed tour
 
             // Act
             var response = controller.Checkout();
@@ -48,7 +48,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             result.All(t => t.TouristId == TOURIST_ID).ShouldBeTrue();
             result.All(t => t.IsUsed == false).ShouldBeTrue();
             result[0].TourId.ShouldBe(-3);
-            result[1].TourId.ShouldBe(-5); 
+            result[1].TourId.ShouldBe(-5);
 
             // Assert - Korpa je prazna
             dbContext.ChangeTracker.Clear();
@@ -67,7 +67,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
 
             tokens.Count.ShouldBeGreaterThanOrEqualTo(2);
             tokens.Any(t => t.TourId == -3 && !t.IsUsed).ShouldBeTrue();
-            tokens.Any(t => t.TourId == -5 && !t.IsUsed).ShouldBeTrue(); 
+            tokens.Any(t => t.TourId == -5 && !t.IsUsed).ShouldBeTrue();
         }
 
         [Fact]
@@ -237,7 +237,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
                 cartService.RemoveItem(TOURIST_ID, item.TourId);
             }
 
-            controller.AddItem(-3);
+            controller.AddItem(-5);
 
             // Act
             var response = controller.Checkout();
@@ -247,7 +247,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             // Assert - TourName je sačuvan
             result.ShouldNotBeNull();
             result[0].TourName.ShouldNotBeNullOrEmpty();
-            result[0].TourName.ShouldBe("Tura Pariza"); // From b-tours.sql
+            result[0].TourName.ShouldBe("Another Confirmed Tour"); // Iz test podataka
         }
 
         private static ShoppingCartController CreateController(IServiceScope scope, string personId = "-1")
