@@ -24,7 +24,7 @@ public class TourService : ITourService
     public List<TourDto> GetAll() {
         var result = _tourRepository.GetAll();
 
-        var items=_mapper.Map<List<TourDto>>(result);
+        var items = _mapper.Map<List<TourDto>>(result);
         return new List<TourDto>(items);
     }
 
@@ -136,7 +136,7 @@ public class TourService : ITourService
 
         foreach (var dto in durations)
         {
-            var duration=_mapper.Map<TourDuration>(dto);
+            var duration = _mapper.Map<TourDuration>(dto);
             var existing = tour.Duration.FirstOrDefault(d => d.TravelType == duration.TravelType);
             if (existing != null)
             {
@@ -144,7 +144,7 @@ public class TourService : ITourService
             }
             else
             {
-                tour.SetDuration(duration); 
+                tour.SetDuration(duration);
             }
         }
 
@@ -161,7 +161,6 @@ public class TourService : ITourService
 
         return _mapper.Map<TourDto>(tour);
     }
-
 
 
 }
