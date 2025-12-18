@@ -1,0 +1,2 @@
+INSERT INTO tours."KeyPoints"("Id","TourId","Name","Description","Longitude","Latitude","ImagePath","Secret") VALUES (-11, -3, 'Start', 'Starting point of the tour', 2.3522, 48.8566, '/images/start.jpg', 'secret-start');
+INSERT INTO tours."KeyPoints"("Id","TourId","Name","Description","Longitude","Latitude","ImagePath","Secret") VALUES (-10, -3, 'Eiffel', 'Eiffel monument', 2.2945, 48.8584, '/images/eiffel.jpg', 'secret-eiffel');

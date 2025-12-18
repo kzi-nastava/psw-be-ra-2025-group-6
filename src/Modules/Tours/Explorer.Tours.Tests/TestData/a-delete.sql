@@ -1,11 +1,19 @@
+DELETE FROM tours."QuizAnswerOptions";
+DELETE FROM tours."QuizQuestions";
+DELETE FROM tours."Quizzes";
+DELETE FROM tours."TourReviews";
+DELETE FROM tours."TourExecutions";
+DELETE FROM tours."TourPurchaseTokens";
+DELETE FROM tours."OrderItems";
+DELETE FROM tours."ShoppingCarts";
 DELETE FROM tours."PublicEntityRequests";
 DELETE FROM tours."TouristEquipment";
 DELETE FROM tours."Journals";
 DELETE FROM tours."Meetups";
-DELETE FROM tours."KeyPoints";  -- KeyPoints has FK to Tours
-DELETE FROM tours."Equipment";  -- Equipment has FK to Tours
-DELETE FROM tours."Facility";
 DELETE FROM tours."AnnualAwards";
+DELETE FROM tours."KeyPoints";
+DELETE FROM tours."Equipment";
+DELETE FROM tours."Facility";
 DELETE FROM tours."Monuments";
-DELETE FROM tours."Tours";  -- Delete Tours last
+DELETE FROM tours."Tours";
 ALTER SEQUENCE tours."Facility_Id_seq" RESTART WITH 100;

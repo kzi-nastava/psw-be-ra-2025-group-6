@@ -7,7 +7,7 @@ namespace Explorer.Stakeholders.Core.Domain
         public string Name { get; private set; }
         public string Description { get; private set; }
         public List<string> ImageUris { get; private set; }
-        public long OwnerId { get; private set; } 
+        public long OwnerId { get; private set; }
 
         public Club(string name, string description, List<string> imageUris, long ownerId)
         {

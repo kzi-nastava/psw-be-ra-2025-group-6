@@ -1,4 +1,4 @@
-﻿INSERT INTO stakeholders."Users"("Id","Username","Password","Role","IsActive")
+INSERT INTO stakeholders."Users"("Id","Username","Password","Role","IsActive")
 VALUES (-1, 'admin@gmail.com', 'admin123', 'Administrator', true);
 
 INSERT INTO stakeholders."Users"("Id", "Username", "Password", "Role", "IsActive")

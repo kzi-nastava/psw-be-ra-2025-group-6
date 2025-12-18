@@ -2,6 +2,7 @@
 using Explorer.BuildingBlocks.Core.UseCases;
 
 namespace Explorer.Tours.Core.Domain.RepositoryInterfaces;
+
 public interface IAnnualAwardRepository<AnnualAward> where AnnualAward : Entity
 {
     PagedResult<AnnualAward> GetPaged(int page, int pageSize);
