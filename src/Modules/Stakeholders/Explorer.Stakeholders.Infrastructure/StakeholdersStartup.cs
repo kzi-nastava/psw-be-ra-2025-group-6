@@ -1,3 +1,4 @@
+using Explorer.BuildingBlocks.Core.Integration;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Stakeholders.API.Internal;
@@ -45,6 +46,9 @@ public static class StakeholdersStartup
         services.AddScoped<INotificationService, NotificationService>();
 
         services.AddScoped<IInternalStakeholderService, InternalStakeholdersService>();
+
+        // Register integration adapter
+        services.AddScoped<INotificationPublisher, StakeholdersNotificationPublisher>();
 
     }
 

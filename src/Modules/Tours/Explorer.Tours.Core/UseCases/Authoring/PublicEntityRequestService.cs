@@ -1,5 +1,6 @@
 using AutoMapper;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.BuildingBlocks.Core.Integration;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Core.Domain;
@@ -13,16 +14,19 @@ public class PublicEntityRequestService : IPublicEntityRequestService
     private readonly IMapper _mapper;
     private readonly ITourRepository _tourRepository;
     private readonly IFacilityRepository _facilityRepository;
+    private readonly INotificationPublisher _notificationPublisher;
 
     public PublicEntityRequestService(
         IPublicEntityRequestRepository requestRepository,
         ITourRepository tourRepository,
         IFacilityRepository facilityRepository,
+        INotificationPublisher notificationPublisher,
         IMapper mapper)
     {
         _requestRepository = requestRepository;
         _tourRepository = tourRepository;
         _facilityRepository = facilityRepository;
+        _notificationPublisher = notificationPublisher;
         _mapper = mapper;
     }
 
@@ -41,7 +45,6 @@ public class PublicEntityRequestService : IPublicEntityRequestService
 
     public PublicEntityRequestDto CreateRequest(CreatePublicEntityRequestDto dto, long authorId)
     {
-        // Check if request already exists for this entity
         var existingRequests = _requestRepository.GetAll();
         var hasPendingOrApprovedRequest = existingRequests.Any(r => 
             r.EntityType == _mapper.Map<PublicEntityType>(dto.EntityType) && 
@@ -51,7 +54,6 @@ public class PublicEntityRequestService : IPublicEntityRequestService
         if (hasPendingOrApprovedRequest)
             throw new InvalidOperationException("Public request already exists for this entity.");
 
-        // Validate entity exists
         if (dto.EntityType == PublicEntityTypeDto.KeyPoint)
         {
             var tours = _tourRepository.GetAll();
@@ -76,7 +78,6 @@ public class PublicEntityRequestService : IPublicEntityRequestService
 
         var createdRequest = _requestRepository.Create(request);
 
-        // Mark entity as having a public request
         if (dto.EntityType == PublicEntityTypeDto.Facility)
         {
             var facility = _facilityRepository.Get(dto.EntityId);
@@ -85,7 +86,6 @@ public class PublicEntityRequestService : IPublicEntityRequestService
         }
         else if (dto.EntityType == PublicEntityTypeDto.KeyPoint)
         {
-            // Find the tour containing this KeyPoint
             var tours = _tourRepository.GetAll();
             var tour = tours.FirstOrDefault(t => t.KeyPoints != null && 
                                                   t.KeyPoints.Any(kp => kp.Id == dto.EntityId));
@@ -93,11 +93,8 @@ public class PublicEntityRequestService : IPublicEntityRequestService
             if (tour == null)
                 throw new KeyNotFoundException($"Tour containing KeyPoint {dto.EntityId} not found.");
 
-            // Find and mark the KeyPoint
             var keyPoint = tour.KeyPoints.First(kp => kp.Id == dto.EntityId);
             keyPoint.MarkAsPublicRequested(createdRequest.Id);
-            
-            // Save the tour (EF Core will serialize JSONB automatically)
             _tourRepository.Update(tour);
         }
 
@@ -120,21 +117,20 @@ public class PublicEntityRequestService : IPublicEntityRequestService
     public PublicEntityRequestDto ApproveRequest(long requestId, long adminId)
     {
         var request = _requestRepository.Get(requestId);
-        
-        // Approve the request
         request.Approve(adminId);
         _requestRepository.Update(request);
 
-        // Mark entity as public based on type
         if (request.EntityType == PublicEntityType.Facility)
         {
             var facility = _facilityRepository.Get(request.EntityId);
             facility.ApprovePublic();
             _facilityRepository.Update(facility);
+
+            // Publish notification via integration abstraction
+            _notificationPublisher.PublishNotification(request.AuthorId, adminId, $"Your facility '{facility.Name}' public request has been approved!", facility.Id);
         }
         else if (request.EntityType == PublicEntityType.KeyPoint)
         {
-            // Find the tour containing this KeyPoint
             var tours = _tourRepository.GetAll();
             var tour = tours.FirstOrDefault(t => t.KeyPoints != null && 
                                                   t.KeyPoints.Any(kp => kp.Id == request.EntityId));
@@ -142,20 +138,13 @@ public class PublicEntityRequestService : IPublicEntityRequestService
             if (tour == null)
                 throw new KeyNotFoundException($"Tour containing KeyPoint {request.EntityId} not found.");
 
-            // Find and update the KeyPoint
             var keyPoint = tour.KeyPoints.First(kp => kp.Id == request.EntityId);
             keyPoint.ApprovePublic();
-            
-            // Save the tour (EF Core will serialize JSONB automatically)
             _tourRepository.Update(tour);
-        }
 
-        // TODO: Send notification to author
-        // _notificationService.Send(new NotificationDto {
-        //     UserId = request.AuthorId,
-        //     Message = $"Your {request.EntityType} request has been approved!",
-        //     Type = "PublicRequestApproved"
-        // });
+            // publish notification referencing the tour id so frontend can open the tour directly
+            _notificationPublisher.PublishNotification(request.AuthorId, adminId, $"Your key point '{keyPoint.Name}' has been approved and is now public.", tour.Id);
+        }
 
         return _mapper.Map<PublicEntityRequestDto>(request);
     }
@@ -163,17 +152,25 @@ public class PublicEntityRequestService : IPublicEntityRequestService
     public PublicEntityRequestDto RejectRequest(long requestId, long adminId, string comment)
     {
         var request = _requestRepository.Get(requestId);
-        
-        // Reject the request
         request.Reject(adminId, comment);
         _requestRepository.Update(request);
 
-        // TODO: Send notification to author with rejection reason
-        // _notificationService.Send(new NotificationDto {
-        //     UserId = request.AuthorId,
-        //     Message = $"Your {request.EntityType} request has been rejected: {comment}",
-        //     Type = "PublicRequestRejected"
-        // });
+        if (request.EntityType == PublicEntityType.Facility)
+        {
+            var facility = _facilityRepository.Get(request.EntityId);
+            _notificationPublisher.PublishNotification(request.AuthorId, adminId, $"Your facility '{facility.Name}' public request has been rejected: {comment}", facility.Id);
+        }
+        else if (request.EntityType == PublicEntityType.KeyPoint)
+        {
+            var tours = _tourRepository.GetAll();
+            var tour = tours.FirstOrDefault(t => t.KeyPoints != null && 
+                                                  t.KeyPoints.Any(kp => kp.Id == request.EntityId));
+            if (tour != null)
+            {
+                var keyPoint = tour.KeyPoints.First(kp => kp.Id == request.EntityId);
+                _notificationPublisher.PublishNotification(request.AuthorId, adminId, $"Your key point '{keyPoint.Name}' public request has been rejected: {comment}", tour.Id);
+            }
+        }
 
         return _mapper.Map<PublicEntityRequestDto>(request);
     }
