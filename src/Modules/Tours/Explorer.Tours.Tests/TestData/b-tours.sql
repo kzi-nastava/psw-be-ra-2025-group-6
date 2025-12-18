@@ -72,7 +72,7 @@ VALUES
     2,
     ARRAY['test'],
     150,
-    1,
+    0,
     4,
     0,
     '[]'::jsonb
