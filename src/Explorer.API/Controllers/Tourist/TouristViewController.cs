@@ -1,10 +1,15 @@
-﻿using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public;
-using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+﻿using Microsoft.AspNetCore.Mvc;
+using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.UseCases.Tourist;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.API.Public;
+
+
+
+using Microsoft.AspNetCore.Authorization;
+
+
 
 namespace Explorer.Tours.API.Controllers.Tourist
 {

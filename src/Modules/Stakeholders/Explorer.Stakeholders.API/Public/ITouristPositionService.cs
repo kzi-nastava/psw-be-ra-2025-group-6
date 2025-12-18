@@ -4,4 +4,5 @@ namespace Explorer.Stakeholders.API.Public;
 public interface ITouristPositionService
 {
     TouristPositionDto CreateOrUpdate(TouristPositionDto touristPosition);
+    TouristPositionDto? GetByTouristId(long touristId);
 }

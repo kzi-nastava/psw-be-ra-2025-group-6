@@ -11,4 +11,6 @@ public interface ITourPurchaseTokenRepository
     TourPurchaseToken Create(TourPurchaseToken token);
     List<TourPurchaseToken> CreateBulk(List<TourPurchaseToken> tokens);
     TourPurchaseToken GetByTouristAndTour(long touristId, long tourId);
+    TourPurchaseToken? GetUnusedByTouristAndTour(long touristId, long tourId);
+    TourPurchaseToken Update(TourPurchaseToken token);
 }

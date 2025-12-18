@@ -1,5 +1,4 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
-using System;
 
 namespace Explorer.Stakeholders.Core.Domain
 {
@@ -20,6 +19,7 @@ namespace Explorer.Stakeholders.Core.Domain
 
         
         private TourProblem() { Description = string.Empty; }
+
 
         public TourProblem(long tourId, long touristId, ProblemCategory category,
                           ProblemPriority priority, string description)
