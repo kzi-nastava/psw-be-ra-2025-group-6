@@ -1,25 +1,19 @@
-using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Admin;
 using Explorer.Tours.API.Public.Administration;
-using Explorer.Tours.Core.Domain;
-using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Authoring;
+using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
 using Explorer.Tours.Core.UseCases;
 using Explorer.Tours.Core.UseCases.Admin;
 using Explorer.Tours.Core.UseCases.Administration;
-using Explorer.Tours.Core.UseCases;
-using Explorer.Tours.Core.UseCases.Authoring;
-using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Core.UseCases.Authoring;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Explorer.Tours.Core.Domain;
 using Npgsql;
 using Explorer.Tours.Core.UseCases.Tourist;
 
@@ -46,7 +40,11 @@ public static class ToursStartup
         services.AddScoped<ITourService, TourService>();
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IMeetupService, MeetupService>();
+        services.AddScoped<Explorer.Tours.API.Public.Execution.ITourExecutionService, Explorer.Tours.Core.UseCases.Execution.TourExecutionService>();
         services.AddScoped<IAdminMapService, AdminMapService>();
+        services.AddScoped<ITourReviewService, TourReviewService>();
+        services.AddScoped<IShoppingCartService, ShoppingCartService>();
+
         services.AddScoped<ITouristViewService, TouristViewService>();
         services.AddScoped<IQuizService, QuizService>();
     }
@@ -61,8 +59,15 @@ public static class ToursStartup
         services.AddScoped<ITourRepository, TourRepository>();
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<IMeetupRepository, MeetupRepository>();
+        services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
+        services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
+
+
+        // Repo for executions
+        services.AddScoped<Core.Domain.RepositoryInterfaces.ITourExecutionRepository, Tours.Infrastructure.Database.Repositories.TourExecutionDbRepository>();
 
         services.AddScoped<IQuizRepository, QuizDbRepository>();
+
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();
