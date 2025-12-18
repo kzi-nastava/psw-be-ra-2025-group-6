@@ -29,8 +29,9 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Assert
         tours.ShouldNotBeNull();
-        tours.Count.ShouldBe(1); // Samo -3 "Tura Pariza" ima Status = 1 (PUBLISHED/CONFIRMED)
-        tours[0].Name.ShouldBe("Tura Pariza");
+        tours.Count.ShouldBe(2); // Samo -3 "Tura Pariza" ima Status = 1 (PUBLISHED/CONFIRMED)
+        tours.ShouldContain(t => t.Name == "Tura Pariza");
+        tours.ShouldContain(t => t.Name == "Another Confirmed Tour");
     }
 
     [Fact]
@@ -67,9 +68,9 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Assert
         tours.ShouldNotBeNull();
-        tours.Count.ShouldBe(1);
+        tours.Count.ShouldBe(2);
 
-        var tour = tours[0];
+        var tour = tours.FirstOrDefault(t => t.Name == "Tura Pariza");
         tour.Name.ShouldBe("Tura Pariza");
         tour.Description.ShouldBe("Pravo u Luvr");
         tour.Price.ShouldBe(100);
@@ -79,6 +80,16 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
         tour.Tags.ShouldContain("7 days");
         tour.Difficulty.ShouldBe(TourDifficultyDto.EASY); // Difficulty = 0
         tour.DistanceInKm.ShouldBe(0);
+        var tour2 = tours.FirstOrDefault(t => t.Name == "Another Confirmed Tour");
+        tour2.Name.ShouldBe("Another Confirmed Tour");
+        tour2.Description.ShouldBe("Konfirmovana tura");
+        tour2.Price.ShouldBe(100);
+        tour2.Tags.ShouldNotBeNull();
+        tour2.Tags.Count.ShouldBe(2);
+        tour2.Tags.ShouldContain("Confirmed Tour");
+        tour2.Tags.ShouldContain("7 days");
+        tour2.Difficulty.ShouldBe(TourDifficultyDto.EASY); // Difficulty = 0
+        tour2.DistanceInKm.ShouldBe(0);
     }
 
     [Fact]
