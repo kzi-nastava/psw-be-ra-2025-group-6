@@ -1,8 +1,11 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 ﻿using Microsoft.AspNetCore.Mvc;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.UseCases.Tourist;
 =======
+=======
+>>>>>>> Stashed changes
 ﻿using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
