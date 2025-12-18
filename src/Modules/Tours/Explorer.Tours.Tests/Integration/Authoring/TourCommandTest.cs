@@ -1,11 +1,14 @@
 ﻿using Explorer.API.Controllers.Author.Authoring;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Explorer.Tours.API.Public.Authoring;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace Explorer.Tours.Tests.Integration.Authoring;
 
@@ -20,14 +23,36 @@ public class TourCommandTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        
+
+        var claims = new List<Claim>
+{
+        new Claim("personId", "3")
+};
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var user = new ClaimsPrincipal(identity);
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var newEntity = new TourDto
         {
             Name = "Tura Italije",
             Description = "Obiđi gradove Italije",
             Difficulty=0,
-            Tags=new List<string> { "Evropa", "Italija" }
+            Tags=new List<string> { "Evropa", "Italija" },
+            Duration= new List<TourDurationDto>
+            {
+                new TourDurationDto
+                {
+                    TravelType=TravelTypeDto.CAR,
+                    Minutes=15
+                },
+                
+            }
         };
 
         // Act
@@ -42,6 +67,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         result.Difficulty.ShouldBe(newEntity.Difficulty);
         result.Status.ShouldBe(TourStatusDto.DRAFT);
         result.Price.ShouldBe(0);
+        result.AuthorId.ShouldBe(newEntity.AuthorId);
 
         // Assert - Database
         var storedEntity = dbContext.Tours.FirstOrDefault(i => i.Name == newEntity.Name);
@@ -52,6 +78,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         storedEntity.Description.ShouldBe(newEntity.Description);
         ((int)storedEntity.Difficulty).ShouldBe((int)newEntity.Difficulty);
         ((int)storedEntity.Status).ShouldBe((int)TourStatusDto.DRAFT);
+        storedEntity.AuthorId.ShouldBe(newEntity.AuthorId);
 
         storedEntity.Price.ShouldBe(0);
     }
@@ -66,6 +93,13 @@ public class TourCommandTests : BaseToursIntegrationTest
         {
             Description = "Test"
         };
+        var createdEntity1 = new TourDto
+        {
+            Name = "Tura Italije",
+            Description = "Obiđi gradove Italije",
+            Difficulty = 0,
+            Tags = new List<string> { "Evropa", "Italija" }
+        };
 
         // Act & Assert
         Should.Throw<ArgumentException>(() => controller.Create(createdEntity));
@@ -77,19 +111,36 @@ public class TourCommandTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
+
+        var claims = new List<Claim>
+{
+        new Claim("personId", "3")
+};
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var user = new ClaimsPrincipal(identity);
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+
+
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var updatedEntity = new TourDto
         {
-            Id = -1,
             Name = "Tura Amerike",
             Description = "Obiđi sve Amerike",
             Difficulty = 0,
-            Tags = new List<string> { "Amerika" }
+            Tags = new List<string> { "Amerika" },
+            Price=1000,
+            Status = TourStatusDto.DRAFT,
+            AuthorId=3
         };
-        
+
 
         // Act
-        var result = ((ObjectResult)controller.Update(updatedEntity).Result)?.Value as TourDto;
+        var result = ((ObjectResult)controller.Update(-1,updatedEntity).Result)?.Value as TourDto;
 
         // Assert - Response
         result.ShouldNotBeNull();
@@ -98,6 +149,9 @@ public class TourCommandTests : BaseToursIntegrationTest
         result.Description.ShouldBe(updatedEntity.Description);
         result.Difficulty.ShouldBe(updatedEntity.Difficulty);
         result.Tags.ShouldBe(updatedEntity.Tags);
+        result.Price.ShouldBe(updatedEntity.Price);
+        result.Status.ShouldBe(updatedEntity.Status);
+        result.AuthorId.ShouldBe(3);
         
 
         // Assert - Database
@@ -110,6 +164,9 @@ public class TourCommandTests : BaseToursIntegrationTest
         ((int)storedEntity.Difficulty).ShouldBe((int)updatedEntity.Difficulty);
         var oldEntity = dbContext.Equipment.FirstOrDefault(i => i.Name == "Tura Londona");
         oldEntity.ShouldBeNull();
+        storedEntity.Price.ShouldBe(updatedEntity.Price);
+        ((int)storedEntity.Status).ShouldBe((int)updatedEntity.Status);
+        storedEntity.AuthorId.ShouldBe(3);
     }
 
     [Fact]
@@ -128,8 +185,9 @@ public class TourCommandTests : BaseToursIntegrationTest
         };
 
         // Act & Assert
-        Should.Throw<NotFoundException>(() => controller.Update(updatedEntity));
+        Should.Throw<NotFoundException>(() => controller.Update(updatedEntity.Id,updatedEntity));
     }
+
 
     [Fact]
     public void Deletes()
@@ -137,6 +195,20 @@ public class TourCommandTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
+
+        var claims = new List<Claim>
+{
+        new Claim("personId", "3") 
+};
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var user = new ClaimsPrincipal(identity);
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         // Act
@@ -158,9 +230,22 @@ public class TourCommandTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
 
+        var claims = new List<Claim>
+{
+        new Claim("personId", "3")
+};
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var user = new ClaimsPrincipal(identity);
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => controller.Delete(-3));
+        Should.Throw<NotFoundException>(() => controller.Delete(-1000));
     }
+
 
     [Fact]
     public void Delete_fails_confirmed_tour()
@@ -169,8 +254,43 @@ public class TourCommandTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
 
+        var claims = new List<Claim>
+{
+        new Claim("personId", "4")
+};
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var user = new ClaimsPrincipal(identity);
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
         // Act & Assert
-        Should.Throw<NotFoundException>(() => controller.Delete(-1000));
+        Should.Throw<InvalidOperationException>(() => controller.Delete(-3));
+    }
+
+    [Fact]
+    public void Delete_fails_invalid_AuthorId()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+
+        var claims = new List<Claim>
+{
+        new Claim("personId", "2")
+};
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var user = new ClaimsPrincipal(identity);
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        // Act & Assert
+        Should.Throw<ForbiddenException>(() => controller.Delete(-3));
     }
 
     private static TourController CreateController(IServiceScope scope)

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.Core.Domain;
 
 namespace Explorer.Stakeholders.Core.Mappers
 {
@@ -13,8 +13,6 @@ namespace Explorer.Stakeholders.Core.Mappers
 
             CreateMap<CreateUserDto, User>()
                 .ForMember(dest => dest.Role, opt => opt.MapFrom(src => Enum.Parse<UserRole>(src.Role, true)));
-
-            CreateMap<CreateUserDto, Person>();
         }
     }
 }

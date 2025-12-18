@@ -1,10 +1,9 @@
-﻿using Explorer.Stakeholders.API.Dtos;
+using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Explorer.API.Controllers.Tourist
 {
@@ -50,6 +49,29 @@ namespace Explorer.API.Controllers.Tourist
             return NoContent();
         }
 
-        
+        [HttpPost("{id}/resolution")]
+        public async Task<ActionResult<TourProblemDto>> SetResolution(long id, [FromBody] TourProblemResolutionDto resolutionDto)
+        {
+            if (resolutionDto == null) return BadRequest("Resolution payload is required.");
+
+            try
+            {
+                var result = await _tourProblemService.SetResolutionFeedback(id, resolutionDto, User.PersonId());
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ForbiddenException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (System.ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

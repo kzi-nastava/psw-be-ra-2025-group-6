@@ -14,7 +14,7 @@ public class TourQueryTests : BaseToursIntegrationTest
     public TourQueryTests(ToursTestFactory factory) : base(factory) { }
 
     [Fact]
-    public void Retrieves_all()
+    public void Retrieves_all_paged()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
@@ -25,8 +25,23 @@ public class TourQueryTests : BaseToursIntegrationTest
 
         // Assert
         result.ShouldNotBeNull();
-        result.Results.Count.ShouldBe(3);
-        result.TotalCount.ShouldBe(3);
+        result.Results.Count.ShouldBe(5); 
+        result.TotalCount.ShouldBe(5);
+    }
+
+    [Fact]
+    public void Retrieves_all()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+
+        // Act
+        var result = ((ObjectResult)controller.GetAll().Result)?.Value as List<TourDto>;
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Count.ShouldBe(5);
     }
 
     private static TourController CreateController(IServiceScope scope)

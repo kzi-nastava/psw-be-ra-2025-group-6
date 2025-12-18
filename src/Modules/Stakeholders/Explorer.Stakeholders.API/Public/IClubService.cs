@@ -6,7 +6,7 @@ namespace Explorer.Stakeholders.API.Public
     {
         ClubDto Create(ClubDto club);
         ClubDto Update(ClubDto club);
-        void Delete(long id); 
+        void Delete(long id);
         ClubDto Get(long id);
         List<ClubDto> GetAll();
     }

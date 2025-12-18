@@ -13,9 +13,10 @@ public class StakeholdersContext : DbContext
 
     public DbSet<TouristPosition> TouristPositions { get; set; }
     public DbSet<TourProblem> TourProblems { get; set; }
+    public DbSet<TourProblemMessage> TourProblemMessages { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
-
-    public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
+    public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,12 +31,15 @@ public class StakeholdersContext : DbContext
        .HasConversion<string>();
 
         ConfigureStakeholder(modelBuilder);
-        
+
         modelBuilder.Entity<UserProfile>()
             .HasOne<User>()
             .WithOne()
             .HasForeignKey<UserProfile>(s => s.UserId);
         ConfigureReview(modelBuilder);
+        ConfigureTourProblemMessage(modelBuilder);
+        ConfigureNotification(modelBuilder);
+        ConfigureTourProblems(modelBuilder);
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)
@@ -44,6 +48,20 @@ public class StakeholdersContext : DbContext
             .HasOne<User>()
             .WithOne()
             .HasForeignKey<Person>(s => s.UserId);
+    }
+
+    private static void ConfigureTourProblems(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TourProblem>(builder =>
+        {
+            builder.Property(p => p.Status).IsRequired();
+            builder.Property(p => p.ReportedAt).IsRequired();
+            builder.Property(p => p.DeadlineAt).IsRequired(false);
+            builder.Property(p => p.ResolvedAt).IsRequired(false);
+            builder.Property(p => p.ResolutionFeedback).IsRequired();
+            builder.Property(p => p.ResolutionComment).HasMaxLength(1000).IsRequired(false);
+            builder.Property(p => p.ResolutionAt).IsRequired(false);
+        });
     }
 
     private static void ConfigureReview(ModelBuilder modelBuilder)
@@ -66,5 +84,20 @@ public class StakeholdersContext : DbContext
                 .HasForeignKey<ReviewApp>(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+    }
+
+    private static void ConfigureTourProblemMessage(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TourProblemMessage>()
+            .HasOne<TourProblem>()
+            .WithMany()
+            .HasForeignKey(s => s.TourProblemId);
+    }
+
+    private static void ConfigureNotification(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Notification>()
+            .Property(n => n.Status)
+            .HasConversion<string>();
     }
 }

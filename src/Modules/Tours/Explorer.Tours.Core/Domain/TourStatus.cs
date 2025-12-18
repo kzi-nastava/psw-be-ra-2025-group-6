@@ -3,6 +3,8 @@
 public enum TourStatus
 {
     DRAFT,
-    CONFIRMED
+    CONFIRMED,
+    ARCHIVED,
+    SUSPENDED
 }
 
