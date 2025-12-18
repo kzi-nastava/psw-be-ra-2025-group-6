@@ -15,11 +15,9 @@ namespace Explorer.Tours.Core.UseCases.Tourist
         {
             _tourRepository = tourRepository;
         }
-
         public List<TouristTourDto> GetPublishedTours()
         {
             var tours = _tourRepository.GetPublishedTours();
-
             var touristViews = tours.Select(tour => new TouristTourDto
             {
                 Name = tour.Name,

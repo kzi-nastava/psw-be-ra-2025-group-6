@@ -19,7 +19,7 @@ public class ShoppingCart : Entity
 
     private void Validate()
     {
-        if (TouristId == 0) throw new ArgumentException("Invalid TouristId");
+        // if (TouristId == 0) throw new ArgumentException("Invalid TouristId");
     }
 
     public void AddItem(Tour tour)

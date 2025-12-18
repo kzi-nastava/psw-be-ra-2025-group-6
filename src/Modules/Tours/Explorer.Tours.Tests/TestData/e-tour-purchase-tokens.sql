@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS tours."TourPurchaseTokens" (
     CONSTRAINT "PK_TourPurchaseTokens" PRIMARY KEY ("Id")
 );
 
--- Obri≈°i postoje?e test podatke
+-- Obriöi postoje?e test podatke
 DELETE FROM tours."TourPurchaseTokens";
 
 -- Insert test purchase tokens for integration tests

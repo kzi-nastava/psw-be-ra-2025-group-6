@@ -214,17 +214,5 @@ public class Tour : AggregateRoot
         PublishedTime = DateTime.UtcNow;
     }
 
-        if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Description) || Price < 0)
-            throw new InvalidOperationException("Tour must have all basic fields filled.");
-
-        if (Tags == null || Tags.Count == 0)
-            throw new InvalidOperationException("Tour must have at least one tag.");
-
-        if (KeyPoints == null || KeyPoints.Count < 2)
-            throw new InvalidOperationException("Tour must have at least two key points.");
-
-        Status = TourStatus.CONFIRMED; 
-        PublishedTime = DateTime.UtcNow;
-    }
 
 }

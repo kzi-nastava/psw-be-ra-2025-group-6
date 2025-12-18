@@ -5,15 +5,8 @@ using System.Collections.Generic;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.API.Public;
 
-
-
-using Microsoft.AspNetCore.Authorization;
-
-
-
 namespace Explorer.Tours.API.Controllers.Tourist
 {
-    [Authorize(Policy = "touristPolicy")]
     [ApiController]
     [Route("api/tourist/tours")]
     public class TouristViewController : ControllerBase

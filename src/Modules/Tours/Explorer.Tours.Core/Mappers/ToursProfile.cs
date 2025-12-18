@@ -35,6 +35,5 @@ public class ToursProfile : Profile
         CreateMap<Tour, TouristTourDto>()
            .ForMember(dest => dest.FirstKeyPoint, opt => opt.MapFrom(src => src.GetFirstKeyPoint()))
            .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.Duration));
-
     }
 }

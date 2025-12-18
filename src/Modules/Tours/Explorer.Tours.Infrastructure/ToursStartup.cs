@@ -47,7 +47,6 @@ public static class ToursStartup
 
         services.AddScoped<ITouristViewService, TouristViewService>();
         services.AddScoped<IQuizService, QuizService>();
-
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
