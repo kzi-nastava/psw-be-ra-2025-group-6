@@ -26,7 +26,7 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Act
         var result = controller.GetPublishedTours().Result.ShouldBeOfType<OkObjectResult>();
-        var tours = result.Value as List<TouristTourDto>;
+        var tours = result.Value as List<TourDto>;
 
         // Assert
         tours.ShouldNotBeNull();
@@ -44,7 +44,7 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Act
         var result = controller.GetPublishedTours().Result.ShouldBeOfType<OkObjectResult>();
-        var tours = result.Value as List<TouristTourDto>;
+        var tours = result.Value as List<TourDto>;
 
         // Assert
         tours.ShouldNotBeNull();
@@ -65,7 +65,7 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Act
         var result = controller.GetPublishedTours().Result.ShouldBeOfType<OkObjectResult>();
-        var tours = result.Value as List<TouristTourDto>;
+        var tours = result.Value as List<TourDto>;
 
         // Assert
         tours.ShouldNotBeNull();
@@ -103,7 +103,7 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Act
         var result = controller.GetPublishedTours().Result.ShouldBeOfType<OkObjectResult>();
-        var tours = result.Value as List<TouristTourDto>;
+        var tours = result.Value as List<TourDto>;
 
         // Assert
         tours.ShouldNotBeNull();
@@ -115,7 +115,7 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
     {
         return new TouristViewController(scope.ServiceProvider.GetRequiredService<ITouristViewService>(), scope.ServiceProvider.GetRequiredService<ITourService>())
         {
-            ControllerContext = BuildContext("1")
+            ControllerContext = BuildContext("-21")
         };
     }
 }
