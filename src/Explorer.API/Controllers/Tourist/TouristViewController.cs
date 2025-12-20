@@ -34,7 +34,7 @@ namespace Explorer.Tours.API.Controllers.Tourist
             _touristService = touristService;
             _tourService = tourService;
         }
-
+        //Za commit
         [HttpGet("published")]
         public ActionResult<List<TourDto>> GetPublishedTours()
         {
