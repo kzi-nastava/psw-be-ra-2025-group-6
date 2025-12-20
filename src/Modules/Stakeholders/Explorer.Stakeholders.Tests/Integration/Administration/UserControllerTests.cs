@@ -1,16 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using Explorer.Stakeholders.API.Dtos; // adjust if needed
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using Shouldly;
-using Xunit;
-using Explorer.Stakeholders.API.Dtos; // adjust if needed
 
 namespace Explorer.Stakeholders.Tests.Integration.AdminUsers
 {
@@ -69,7 +63,7 @@ namespace Explorer.Stakeholders.Tests.Integration.AdminUsers
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResp.AccessToken);
         }
 
-        private record LoginResponse(int Id = 0, string AccessToken = "");
+        private record LoginResponse(long Id = 0, string AccessToken = "");
 
         // ---------------- TESTS ----------------
 

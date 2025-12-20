@@ -38,4 +38,17 @@ public class TourPurchaseTokenDbRepository : ITourPurchaseTokenRepository
     {
         return _dbSet.FirstOrDefault(t => t.TouristId == touristId && t.TourId == tourId);
     }
+
+    public TourPurchaseToken? GetUnusedByTouristAndTour(long touristId, long tourId)
+    {
+        // Return first unused token 
+        return _dbSet.FirstOrDefault(t => t.TouristId == touristId && t.TourId == tourId && !t.IsUsed);
+    }
+
+    public TourPurchaseToken Update(TourPurchaseToken token)
+    {
+        _dbSet.Update(token);
+        _dbContext.SaveChanges();
+        return token;
+    }
 }

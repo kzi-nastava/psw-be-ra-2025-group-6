@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Explorer.Stakeholders.API.Dtos
+﻿namespace Explorer.Stakeholders.API.Dtos
 {
     public class TourProblemDto
     {

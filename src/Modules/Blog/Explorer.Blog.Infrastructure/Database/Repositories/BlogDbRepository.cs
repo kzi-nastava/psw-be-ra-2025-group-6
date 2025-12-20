@@ -1,3 +1,4 @@
+﻿using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 ﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
@@ -65,6 +66,7 @@ public class BlogDbRepository : IBlogRepository
     {
         return _dbSet
             .Include(b => b.Votes)
+            .Include(b => b.Comments)
             .FirstOrDefault(b => b.Id == id);
     }
 
