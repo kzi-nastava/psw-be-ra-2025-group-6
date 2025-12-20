@@ -7,6 +7,7 @@ using Explorer.Tours.Core.UseCases.Tourist;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Explorer.Tours.API.Public.Authoring;
 using Shouldly;
 
 namespace Explorer.Tours.Tests.Integration.Tourist;
@@ -25,7 +26,7 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Act
         var result = controller.GetPublishedTours().Result.ShouldBeOfType<OkObjectResult>();
-        var tours = result.Value as List<TouristTourDto>;
+        var tours = result.Value as List<TourDto>;
 
         // Assert
         tours.ShouldNotBeNull();
@@ -43,7 +44,7 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Act
         var result = controller.GetPublishedTours().Result.ShouldBeOfType<OkObjectResult>();
-        var tours = result.Value as List<TouristTourDto>;
+        var tours = result.Value as List<TourDto>;
 
         // Assert
         tours.ShouldNotBeNull();
@@ -64,7 +65,7 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Act
         var result = controller.GetPublishedTours().Result.ShouldBeOfType<OkObjectResult>();
-        var tours = result.Value as List<TouristTourDto>;
+        var tours = result.Value as List<TourDto>;
 
         // Assert
         tours.ShouldNotBeNull();
@@ -101,7 +102,7 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Act
         var result = controller.GetPublishedTours().Result.ShouldBeOfType<OkObjectResult>();
-        var tours = result.Value as List<TouristTourDto>;
+        var tours = result.Value as List<TourDto>;
 
         // Assert
         tours.ShouldNotBeNull();
@@ -111,9 +112,9 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
     private static TouristViewController CreateController(IServiceScope scope)
     {
-        return new TouristViewController(scope.ServiceProvider.GetRequiredService<ITouristViewService>())
+        return new TouristViewController(scope.ServiceProvider.GetRequiredService<ITouristViewService>(), scope.ServiceProvider.GetRequiredService<ITourService>())
         {
-            ControllerContext = BuildContext("1")
+            ControllerContext = BuildContext("-21")
         };
     }
 }
