@@ -11,12 +11,12 @@ namespace Explorer.Stakeholders.Core.UseCases;
 public class FollowService : IFollowService
 {
     private readonly IFollowRepository _followRepository;
-    private readonly ICrudRepository<User> _userRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
 
     public FollowService(
         IFollowRepository followRepository,
-        ICrudRepository<User> userRepository,
+        IUserRepository userRepository,
         IMapper mapper)
     {
         _followRepository = followRepository;
