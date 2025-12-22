@@ -40,6 +40,7 @@ public class StakeholdersContext : DbContext
         ConfigureTourProblemMessage(modelBuilder);
         ConfigureNotification(modelBuilder);
         ConfigureTourProblems(modelBuilder);
+        ConfigureFollowing(modelBuilder);
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)
@@ -99,5 +100,31 @@ public class StakeholdersContext : DbContext
         modelBuilder.Entity<Notification>()
             .Property(n => n.Status)
             .HasConversion<string>();
+    }
+
+    private static void ConfigureFollowing(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Follow>(builder =>
+        {
+            builder.ToTable("Following");
+
+            builder.HasKey(f => f.Id);
+
+            builder.HasIndex(f => new { f.FollowerId, f.FollowedId })
+                   .IsUnique();
+
+            builder.HasOne<User>()
+                   .WithMany()
+                   .HasForeignKey(f => f.FollowerId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne<User>()
+                   .WithMany()
+                   .HasForeignKey(f => f.FollowedId)
+                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<User>()
+            .HasQueryFilter(u => u.IsActive);
     }
 }
