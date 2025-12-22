@@ -63,20 +63,6 @@ VALUES
     );
 
 INSERT INTO tours."Tours"
-("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
-VALUES 
-(
-    -5,
-    'Another Confirmed Tour',
-    'Another confirmed tour',
-    2,
-    ARRAY['test'],
-    150,
-    0,
-    4,
-    0,
-    '[]'::jsonb
-);
 VALUES
     (
         -5,
