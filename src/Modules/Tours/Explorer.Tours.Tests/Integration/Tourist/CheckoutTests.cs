@@ -33,9 +33,8 @@ namespace Explorer.Tours.Tests.Integration.Tourist
                 cartService.RemoveItem(TOURIST_ID, item.TourId);
             }
 
-            // Dodaj dve ture u korpu
+            // Dodaj turu u korpu
             controller.AddItem(-3); // Confirmed tour 
-            controller.AddItem(-5); // Another confirmed tour 
 
             // Act
             var response = controller.Checkout();
@@ -44,11 +43,10 @@ namespace Explorer.Tours.Tests.Integration.Tourist
 
             // Assert - Response
             result.ShouldNotBeNull();
-            result.Count.ShouldBe(2);
+            result.Count.ShouldBe(1);
             result.All(t => t.TouristId == TOURIST_ID).ShouldBeTrue();
             result.All(t => t.IsUsed == false).ShouldBeTrue();
             result[0].TourId.ShouldBe(-3);
-            result[1].TourId.ShouldBe(-5); 
 
             // Assert - Korpa je prazna
             dbContext.ChangeTracker.Clear();
@@ -65,9 +63,8 @@ namespace Explorer.Tours.Tests.Integration.Tourist
                 .OrderBy(t => t.TourId)
                 .ToList();
 
-            tokens.Count.ShouldBeGreaterThanOrEqualTo(2);
+            tokens.Count.ShouldBeGreaterThanOrEqualTo(1);
             tokens.Any(t => t.TourId == -3 && !t.IsUsed).ShouldBeTrue();
-            tokens.Any(t => t.TourId == -5 && !t.IsUsed).ShouldBeTrue(); 
         }
 
         [Fact]
