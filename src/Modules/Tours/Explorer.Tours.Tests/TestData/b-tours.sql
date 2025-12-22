@@ -64,7 +64,6 @@ VALUES
 
 INSERT INTO tours."Tours"
 ("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
-<<<<<<< HEAD
 VALUES 
 (
     -5,
@@ -78,8 +77,6 @@ VALUES
     0,
     '[]'::jsonb
 );
-
-=======
 VALUES
     (
         -5,
@@ -93,4 +90,3 @@ VALUES
         0,
         '[]'::jsonb
     );
->>>>>>> development-new
