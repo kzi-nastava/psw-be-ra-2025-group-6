@@ -7,6 +7,7 @@ using Explorer.Tours.Core.UseCases.Tourist;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Explorer.Tours.API.Public.Authoring;
 using Shouldly;
 
 namespace Explorer.Tours.Tests.Integration.Tourist;
@@ -25,12 +26,13 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Act
         var result = controller.GetPublishedTours().Result.ShouldBeOfType<OkObjectResult>();
-        var tours = result.Value as List<TouristTourDto>;
+        var tours = result.Value as List<TourDto>;
 
         // Assert
         tours.ShouldNotBeNull();
-        tours.Count.ShouldBe(1); // Samo -3 "Tura Pariza" ima Status = 1 (PUBLISHED/CONFIRMED)
-        tours[0].Name.ShouldBe("Tura Pariza");
+        tours.Count.ShouldBe(2); // Samo -3 "Tura Pariza" ima Status = 1 (PUBLISHED/CONFIRMED)
+        tours.ShouldContain(t => t.Name == "Tura Pariza");
+        tours.ShouldContain(t => t.Name == "Another Confirmed Tour");
     }
 
     [Fact]
@@ -42,7 +44,7 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Act
         var result = controller.GetPublishedTours().Result.ShouldBeOfType<OkObjectResult>();
-        var tours = result.Value as List<TouristTourDto>;
+        var tours = result.Value as List<TourDto>;
 
         // Assert
         tours.ShouldNotBeNull();
@@ -63,13 +65,13 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Act
         var result = controller.GetPublishedTours().Result.ShouldBeOfType<OkObjectResult>();
-        var tours = result.Value as List<TouristTourDto>;
+        var tours = result.Value as List<TourDto>;
 
         // Assert
         tours.ShouldNotBeNull();
-        tours.Count.ShouldBe(1);
+        tours.Count.ShouldBe(2);
 
-        var tour = tours[0];
+        var tour = tours.FirstOrDefault(t => t.Name == "Tura Pariza");
         tour.Name.ShouldBe("Tura Pariza");
         tour.Description.ShouldBe("Pravo u Luvr");
         tour.Price.ShouldBe(100);
@@ -79,6 +81,17 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
         tour.Tags.ShouldContain("7 days");
         tour.Difficulty.ShouldBe(TourDifficultyDto.EASY); // Difficulty = 0
         tour.DistanceInKm.ShouldBe(0);
+        var tour2 = tours.FirstOrDefault(t => t.Name == "Another Confirmed Tour");
+        tour2.Name.ShouldBe("Another Confirmed Tour");
+        tour2.Description.ShouldBe("Konfirmovana tura");
+        tour2.Price.ShouldBe(100);
+        tour2.Tags.ShouldNotBeNull();
+        tour2.Tags.Count.ShouldBe(2);
+        tour2.Tags.ShouldContain("Confirmed Tour");
+        tour2.Tags.ShouldContain("7 days");
+        tour2.Difficulty.ShouldBe(TourDifficultyDto.EASY); // Difficulty = 0
+        tour2.DistanceInKm.ShouldBe(0);
+
     }
 
     [Fact]
@@ -90,7 +103,7 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
         // Act
         var result = controller.GetPublishedTours().Result.ShouldBeOfType<OkObjectResult>();
-        var tours = result.Value as List<TouristTourDto>;
+        var tours = result.Value as List<TourDto>;
 
         // Assert
         tours.ShouldNotBeNull();
@@ -100,9 +113,9 @@ public class TouristViewOnToursTests : BaseToursIntegrationTest
 
     private static TouristViewController CreateController(IServiceScope scope)
     {
-        return new TouristViewController(scope.ServiceProvider.GetRequiredService<ITouristViewService>())
+        return new TouristViewController(scope.ServiceProvider.GetRequiredService<ITouristViewService>(), scope.ServiceProvider.GetRequiredService<ITourService>())
         {
-            ControllerContext = BuildContext("1")
+            ControllerContext = BuildContext("-21")
         };
     }
 }
