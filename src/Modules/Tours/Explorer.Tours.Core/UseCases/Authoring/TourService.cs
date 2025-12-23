@@ -140,7 +140,7 @@ public class TourService : ITourService
 
         foreach (var dto in durations)
         {
-            var duration=_mapper.Map<TourDuration>(dto);
+            var duration = _mapper.Map<TourDuration>(dto);
             var existing = tour.Duration.FirstOrDefault(d => d.TravelType == duration.TravelType);
             if (existing != null)
             {
@@ -148,13 +148,14 @@ public class TourService : ITourService
             }
             else
             {
-                tour.SetDuration(duration); 
+                tour.SetDuration(duration);
             }
         }
 
         _tourRepository.Update(tour);
         return _mapper.Map<TourDto>(tour);
     }
+   
     private TouristTourDto MapToTouristView(Tour tour)
     {
         return new TouristTourDto
@@ -180,7 +181,6 @@ public class TourService : ITourService
 
         return _mapper.Map<TourDto>(tour);
     }
-
     public List<TourDto> GetAvailableForTourist(long touristId)
     {
         var confirmedTours = _tourRepository.GetAll()
