@@ -116,15 +116,12 @@ public class StakeholdersContext : DbContext
             builder.HasOne<User>()
                    .WithMany()
                    .HasForeignKey(f => f.FollowerId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne<User>()
                    .WithMany()
                    .HasForeignKey(f => f.FollowedId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.Cascade);
         });
-
-        modelBuilder.Entity<User>()
-            .HasQueryFilter(u => u.IsActive);
     }
 }
