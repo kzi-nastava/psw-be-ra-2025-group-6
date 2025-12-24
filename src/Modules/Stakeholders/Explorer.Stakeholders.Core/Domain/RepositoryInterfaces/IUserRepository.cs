@@ -9,4 +9,5 @@ public interface IUserRepository
     IEnumerable<User> GetAll();
     User GetById(long userId);
     void Update(User user);
+    User? Get(long userId);
 }
