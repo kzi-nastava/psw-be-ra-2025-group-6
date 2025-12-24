@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.API", "Explorer.API\Explorer.API.csproj", "{09748A4E-D6AB-41B0-A577-CB56F6CCB326}"
+	ProjectSection(ProjectDependencies) = postProject
+		{22C76D80-75E5-4DC7-9AFF-55A8EF78AF2F} = {22C76D80-75E5-4DC7-9AFF-55A8EF78AF2F}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.BuildingBlocks.Core", "BuildingBlocks\Explorer.BuildingBlocks.Core\Explorer.BuildingBlocks.Core.csproj", "{967EFC78-59BC-48DC-B18C-BB66F46B01A3}"
 EndProject
@@ -22,16 +25,29 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Stakeholders", "Stakeholders", "{C112C1F7-8B7E-48A9-BAA6-A09BE0ECAC3A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Stakeholders.Core", "Modules\Stakeholders\Explorer.Stakeholders.Core\Explorer.Stakeholders.Core.csproj", "{965EAFCE-C069-4A22-A2D6-F2795DF6EF13}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B} = {7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Stakeholders.API", "Modules\Stakeholders\Explorer.Stakeholders.API\Explorer.Stakeholders.API.csproj", "{253D25ED-B813-4492-A6E7-E5D112013616}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B} = {7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Stakeholders.Infrastructure", "Modules\Stakeholders\Explorer.Stakeholders.Infrastructure\Explorer.Stakeholders.Infrastructure.csproj", "{FBD95BC8-27D6-4071-807D-55F2F8318BEA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Stakeholders.Tests", "Modules\Stakeholders\Explorer.Stakeholders.Tests\Explorer.Stakeholders.Tests.csproj", "{63ECE080-ACAB-4719-8BED-281B877E084D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Tours.Core", "Modules\Tours\Explorer.Tours.Core\Explorer.Tours.Core.csproj", "{97FFFAD1-71C8-4E9A-93DE-D5CE60E87FA5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B} = {7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}
+		{965EAFCE-C069-4A22-A2D6-F2795DF6EF13} = {965EAFCE-C069-4A22-A2D6-F2795DF6EF13}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Tours.API", "Modules\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj", "{1EC26004-9BCF-4E9C-8700-4E58F79757E8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B} = {7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Tours.Infrastructure", "Modules\Tours\Explorer.Tours.Infrastructure\Explorer.Tours.Infrastructure.csproj", "{E7B9D2F1-1DCE-4498-B806-4987C5594625}"
 EndProject
@@ -40,12 +56,25 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blog", "Blog", "{5590906A-4397-4E5D-AFBF-EAC492F1FB73}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Blog.API", "Modules\Blog\Explorer.Blog.API\Explorer.Blog.API.csproj", "{BEEEC979-6422-4AE8-9B5F-6F8D48831FE2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B} = {7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Blog.Core", "Modules\Blog\Explorer.Blog.Core\Explorer.Blog.Core.csproj", "{C0122F54-15DC-4D5F-AC23-97D3D061EAAE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Blog.Infrastructure", "Modules\Blog\Explorer.Blog.Infrastructure\Explorer.Blog.Infrastructure.csproj", "{3FC3329F-16D5-4B61-9AF9-C08731DCDD78}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Blog.Tests", "Modules\Blog\Explorer.Blog.Tests\Explorer.Blog.Tests.csproj", "{DF1A942F-E72F-4C8F-9E92-21C35A98087D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Search", "Search\Search.csproj", "{22C76D80-75E5-4DC7-9AFF-55A8EF78AF2F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1EC26004-9BCF-4E9C-8700-4E58F79757E8} = {1EC26004-9BCF-4E9C-8700-4E58F79757E8}
+		{253D25ED-B813-4492-A6E7-E5D112013616} = {253D25ED-B813-4492-A6E7-E5D112013616}
+		{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B} = {7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}
+		{BEEEC979-6422-4AE8-9B5F-6F8D48831FE2} = {BEEEC979-6422-4AE8-9B5F-6F8D48831FE2}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -121,6 +150,14 @@ Global
 		{DF1A942F-E72F-4C8F-9E92-21C35A98087D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF1A942F-E72F-4C8F-9E92-21C35A98087D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF1A942F-E72F-4C8F-9E92-21C35A98087D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22C76D80-75E5-4DC7-9AFF-55A8EF78AF2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22C76D80-75E5-4DC7-9AFF-55A8EF78AF2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22C76D80-75E5-4DC7-9AFF-55A8EF78AF2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22C76D80-75E5-4DC7-9AFF-55A8EF78AF2F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
