@@ -26,6 +26,7 @@ public static class BlogStartup
     {
         services.AddScoped<IBlogService, BlogService>();
         services.AddScoped<IBlogSearchService, BlogSearchService>();
+        services.AddScoped<IBlogLocationService, BlogLocationService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -39,5 +40,10 @@ public static class BlogStartup
         services.AddDbContext<BlogContext>(opt =>
             opt.UseNpgsql(dataSource,
                 x => x.MigrationsHistoryTable("__EFMigrationsHistory", "blog")));
+
+        services.AddScoped<IBlogLocationRepository, BlogLocationDbRepository>();
+        services.AddDbContext<BlogLocationContext>(opt =>
+            opt.UseNpgsql(dataSource,
+                x => x.MigrationsHistoryTable("__EFMigrationsHistory", "blog_location")));
     }
 }
