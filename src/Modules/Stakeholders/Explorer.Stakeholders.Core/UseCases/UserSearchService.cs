@@ -36,7 +36,7 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             var users = _userRepository.GetAll()
             .Where(u =>
-                u.Username.Contains(query) &&
+    (string.IsNullOrWhiteSpace(query) || u.Username.Contains(query)) &&
                 (isAdmin || u.IsActive) &&
                 u.Id != personId
                 )
@@ -50,7 +50,7 @@ namespace Explorer.Stakeholders.Core.UseCases
                 {
                     Id = u.Id,
                     Title = u.Username,
-                    Description = u.Role.ToString(),
+                    Description = profile.Quote,
                     Photo = profile.ProfilePicture,
                     Type = SearchEntityType.User,
                     Url = $"/users/{u.Id}"

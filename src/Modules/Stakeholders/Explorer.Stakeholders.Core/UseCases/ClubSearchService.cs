@@ -32,9 +32,8 @@ namespace Explorer.Stakeholders.Core.UseCases;
             var isAdmin = userRole == UserRole.Administrator.ToString();
 
             var clubs = _clubRepository.GetAll()
-                .Where(b =>
-                    b.Name.Contains(query)
-                );
+                .Where(c =>
+    (string.IsNullOrWhiteSpace(query)) || c.Name.Contains(query));
         var clubList = clubs
         .Select(c =>
         {

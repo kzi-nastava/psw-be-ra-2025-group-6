@@ -20,7 +20,7 @@ namespace Explorer.API.Controllers
 
         [HttpGet]
         public async Task<IActionResult> Search(
-            [FromQuery] string query,
+            [FromQuery] string? query,
             [FromQuery] SearchEntityType[] types)
         {
             var personId = User.PersonId();

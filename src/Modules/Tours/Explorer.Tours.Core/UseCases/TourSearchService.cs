@@ -28,7 +28,7 @@ namespace Explorer.Tours.Core.UseCases
 
             return _tourRepository.GetAll()
                 .Where(t =>
-                    t.Name.Contains(query) &&
+    (string.IsNullOrWhiteSpace(query) || t.Name.Contains(query)) &&
                     (t.Status == TourStatus.CONFIRMED || isAdmin || (isAuthor && t.AuthorId == personId && t.Status!= TourStatus.SUSPENDED))
                 )
                 .Select(t => new SearchItemDto

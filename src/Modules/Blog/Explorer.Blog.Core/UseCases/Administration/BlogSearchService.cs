@@ -28,7 +28,7 @@ public class BlogSearchService : IBlogSearchService
 
         var blogs = _blogRepository.GetAll()
             .Where(b =>
-                b.Title.Contains(query) &&
+    (string.IsNullOrWhiteSpace(query) || b.Title.Contains(query)) &&
                 (
                     b.Status == BlogStatus.POSTED ||
                     isAdmin ||
