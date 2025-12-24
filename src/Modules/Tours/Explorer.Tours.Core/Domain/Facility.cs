@@ -10,6 +10,8 @@ namespace Explorer.Tours.Core.Domain
         public double Longitude { get; set; }
         public double Latitude { get; set; }
         public FacilityType Type { get; set; }
+        public bool IsPublic { get; private set; }
+        public long? PublicRequestId { get; private set; }
 
         public Facility(string name, string? comment, double longitude, double latitude, FacilityType type)
         {
@@ -23,6 +25,23 @@ namespace Explorer.Tours.Core.Domain
             if (!(latitude >= -90 && latitude <= 90)) throw new ArgumentException("Invalid Latitude."); else Latitude = latitude;
             if (!(type == FacilityType.Toilet || type == FacilityType.Other || type == FacilityType.Parking || type == FacilityType.Restaurant)) throw new ArgumentException("Invalid FacilityType.");
             else Type = type;
+            IsPublic = false;
+        }
+
+        public void MarkAsPublicRequested(long requestId)
+        {
+            if (PublicRequestId.HasValue)
+                throw new InvalidOperationException("Public request already exists for this facility.");
+
+            PublicRequestId = requestId;
+        }
+
+        public void ApprovePublic()
+        {
+            if (!PublicRequestId.HasValue)
+                throw new InvalidOperationException("No public request exists for this facility.");
+
+            IsPublic = true;
         }
     }
 }

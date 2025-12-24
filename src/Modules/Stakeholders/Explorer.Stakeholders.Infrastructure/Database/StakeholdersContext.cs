@@ -18,8 +18,7 @@ public class StakeholdersContext : DbContext
     public DbSet<ProfilePost> ProfilePosts { get; set; }
     public DbSet<ClubPost> ClubPosts { get; set; }
 
-
-    public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
+    public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,7 +33,7 @@ public class StakeholdersContext : DbContext
        .HasConversion<string>();
 
         ConfigureStakeholder(modelBuilder);
-        
+
         modelBuilder.Entity<UserProfile>()
             .HasOne<User>()
             .WithOne()
