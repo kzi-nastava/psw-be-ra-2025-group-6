@@ -53,4 +53,9 @@ public class UserDbRepository : IUserRepository
         _dbContext.Users.Update(user);
         _dbContext.SaveChanges();
     }
+
+    public User Get(long id)
+    {
+        return _dbContext.Users.FirstOrDefault(u => u.Id == id);
+    }
 }
