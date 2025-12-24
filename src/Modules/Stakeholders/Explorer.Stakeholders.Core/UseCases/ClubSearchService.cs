@@ -35,19 +35,27 @@ namespace Explorer.Stakeholders.Core.UseCases;
                 .Where(b =>
                     b.Name.Contains(query)
                 );
-            var clubList = clubs
-                .Select(c => new SearchItemDto
-                {
-                    Id = c.Id,
-                    Title = c.Name,
-                    Description = c.Description,
-                    Type = SearchEntityType.Blog,
-                    Url = $"/blogs/{c.Id}",
-                    Photo= c.ImageUris.FirstOrDefault()
-                })
-                .ToList();
+        var clubList = clubs
+        .Select(c =>
+        {
+        var image = c.ImageUris.FirstOrDefault();
 
-            return clubList;
+        return new SearchItemDto
+        {
+            Id = c.Id,
+            Title = c.Name,
+            Description = c.Description,
+            Type = SearchEntityType.Club,
+            Url = $"/clubs/{c.Id}",
+            Photo = Uri.TryCreate(image, UriKind.Absolute, out var uri)
+                && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp)
+            ? image
+            : null
+            };
+            })
+            .ToList();
+
+        return clubList;
         }
     }
 

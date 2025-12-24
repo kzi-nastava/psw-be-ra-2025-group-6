@@ -38,7 +38,8 @@ namespace Explorer.Tours.Core.UseCases
                     Description = t.Description,
                     Type = SearchEntityType.Tour,
                     Url = $"/tours/{t.Id}",
-                    Photo= t.KeyPoints.FirstOrDefault()?.ImagePath
+                    Photo= t.KeyPoints.FirstOrDefault()?.ImagePath?.Replace("{\"url\":\"", "")
+    .Replace("\"}", "")
                 })
                 .ToList();
         }

@@ -43,16 +43,11 @@ public class BlogSearchService : IBlogSearchService
                 Description = b.Description,
                 Type = SearchEntityType.Blog,
                 Url = $"/blogs/{b.Id}",
-                Photo = b.Images.FirstOrDefault()
+                Photo = string.IsNullOrWhiteSpace(b.Images.FirstOrDefault())? null: "https://localhost:44333" + b.Images.FirstOrDefault()
+
             })
             .ToList();
-        foreach (var blog in blogs)
-        {
-            Debug.WriteLine($"Found blog: {blog.Title}");
-            Debug.WriteLine($"Blog personId: {blog.UserId}");
-            Debug.WriteLine($"Searching personId: {personId}");
-            Debug.WriteLine($"isAdmin: {isAdmin}, isAuthor: {isAuthor}");
-        }
+        
 
         return blogList;
     }
