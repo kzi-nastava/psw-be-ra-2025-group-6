@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using System.Security.Claims;
 using DomainBlog = Explorer.Blog.Core.Domain.BlogPost;
 
 namespace Explorer.Blog.Tests.Integration.Administration;
@@ -17,6 +18,17 @@ namespace Explorer.Blog.Tests.Integration.Administration;
 public class BlogCommandTests : BaseBlogIntegrationTest
 {
     public BlogCommandTests(BlogTestFactory factory) : base(factory) { }
+
+    private static ClaimsPrincipal CreateUser()
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, "-11"),
+            new Claim(ClaimTypes.Role, "Author")
+        };
+
+        return new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth"));
+    }
 
     [Fact]
     public async Task CreatesBlog()
@@ -509,6 +521,156 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         blog.QualityStatus.ShouldBe(BlogQualityStatus.Famous);
     }
+
+    [Fact]
+    public async Task Search_returns_posted_blogs_for_regular_user()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IBlogSearchService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var postedBlog = new BlogPost(
+            -11,
+            "Posted blog",
+            "Visible to everyone",
+            new List<string>(),
+            BlogStatus.POSTED
+        );
+
+        var draftBlog = new BlogPost(
+            -11,
+            "Draft blog",
+            "Not visible",
+            new List<string>(),
+            BlogStatus.DRAFT
+        );
+
+        dbContext.Blogs.AddRange(postedBlog, draftBlog);
+        dbContext.SaveChanges();
+
+        var result = await service.SearchAsync(
+            query: "",
+            user: CreateUser(),
+            personId: -11,
+            userRole: "Tourist"
+        );
+
+        result.Any(r => r.Title == "Posted blog").ShouldBeTrue();
+        result.Any(r => r.Title == "Draft blog").ShouldBeFalse();
+
+    }
+
+    [Fact]
+    public async Task Search_returns_own_drafts_for_author()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IBlogSearchService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var myDraft = new BlogPost(
+            -11,
+            "My draft",
+            "Author can see this",
+            new List<string>(),
+            BlogStatus.DRAFT
+        );
+
+        var othersDraft = new BlogPost(
+            -22,
+            "Someone else's draft",
+            "Should not be visible",
+            new List<string>(),
+            BlogStatus.DRAFT
+        );
+
+        dbContext.Blogs.AddRange(myDraft, othersDraft);
+        dbContext.SaveChanges();
+
+        var result = await service.SearchAsync(
+            query: "",
+            user: CreateUser(),
+            personId: -11,
+            userRole: "Author"
+        );
+
+        result.Any(r => r.Title == "My draft").ShouldBeTrue();
+        result.Any(r => r.Title == "Someone else's draft").ShouldBeFalse();
+
+    }
+
+    [Fact]
+    public async Task Search_returns_all_blogs_for_admin()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IBlogSearchService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var posted = new BlogPost(
+            -11,
+            "Posted",
+            "Visible",
+            new List<string>(),
+            BlogStatus.POSTED
+        );
+
+        var draft = new BlogPost(
+            -22,
+            "Draft",
+            "Admin sees this",
+            new List<string>(),
+            BlogStatus.DRAFT
+        );
+
+        dbContext.Blogs.AddRange(posted, draft);
+        dbContext.SaveChanges();
+
+        var result = await service.SearchAsync(
+            query: "",
+            user: CreateUser(),
+            personId: -99,
+            userRole: "Administrator"
+        );
+
+        result.Count.ShouldBeGreaterThanOrEqualTo(2);
+    }
+
+    [Fact]
+    public async Task Search_filters_by_query()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IBlogSearchService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog1 = new BlogPost(
+            -11,
+            "C# Testing Guide",
+            "Description",
+            new List<string>(),
+            BlogStatus.POSTED
+        );
+
+        var blog2 = new BlogPost(
+            -11,
+            "Java Streams",
+            "Description",
+            new List<string>(),
+            BlogStatus.POSTED
+        );
+
+        dbContext.Blogs.AddRange(blog1, blog2);
+        dbContext.SaveChanges();
+
+        var result = await service.SearchAsync(
+            query: "C#",
+            user: CreateUser(),
+            personId: -11,
+            userRole: "Tourist"
+        );
+
+        result.Count.ShouldBe(1);
+        result.First().Title.ShouldBe("C# Testing Guide");
+    }
+
 
     private static BlogController CreateController(IServiceScope scope)
     {
