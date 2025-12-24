@@ -42,6 +42,9 @@ public static class ToursStartup
         services.AddScoped<IMeetupService, MeetupService>();
         services.AddScoped<Explorer.Tours.API.Public.Execution.ITourExecutionService, Explorer.Tours.Core.UseCases.Execution.TourExecutionService>();
         services.AddScoped<IAdminMapService, AdminMapService>();
+        services.AddScoped<IPublicEntityRequestService, PublicEntityRequestService>();
+        services.AddScoped<IPublicEntityService, PublicEntityService>();
+        services.AddScoped<IKeyPointService, KeyPointService>();
         services.AddScoped<ITourReviewService, TourReviewService>();
         services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
@@ -59,6 +62,8 @@ public static class ToursStartup
         services.AddScoped<ITourRepository, TourRepository>();
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<IMeetupRepository, MeetupRepository>();
+        services.AddScoped<IPublicEntityRequestRepository, PublicEntityRequestDbRepository>();
+        services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
         services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
         services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
 

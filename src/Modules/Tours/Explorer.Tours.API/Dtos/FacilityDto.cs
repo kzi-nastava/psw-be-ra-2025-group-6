@@ -9,5 +9,7 @@
         public double Longitude { get; set; }
         public double Latitude { get; set; }
         public FacilityType Type { get; set; }
+        public bool IsPublic { get; set; }
+        public long? PublicRequestId { get; set; }
     }
 }
