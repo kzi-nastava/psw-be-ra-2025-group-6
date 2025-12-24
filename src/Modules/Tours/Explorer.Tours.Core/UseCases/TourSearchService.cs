@@ -25,21 +25,32 @@ namespace Explorer.Tours.Core.UseCases
         {
             var isAuthor = (userRole == "Author");
             var isAdmin = (userRole == "Administrator");
+            var baseUrl =
+    isAuthor ? "/author-tours/form/" :
+    isAdmin ? "/tours/" :
+               "/published-tours/";
 
             return _tourRepository.GetAll()
                 .Where(t =>
-    (string.IsNullOrWhiteSpace(query) || t.Name.Contains(query)) &&
-                    (t.Status == TourStatus.CONFIRMED || isAdmin || (isAuthor && t.AuthorId == personId && t.Status!= TourStatus.SUSPENDED))
+                    (string.IsNullOrWhiteSpace(query) || t.Name.Contains(query)) &&
+                    (
+                        t.Status == TourStatus.CONFIRMED ||
+                        isAdmin ||
+                        (isAuthor && t.AuthorId == personId && t.Status != TourStatus.SUSPENDED)
+                    )
                 )
-                .Select(t => new SearchItemDto
+                .Select(t =>
                 {
-                    Id = t.Id,
-                    Title = t.Name,
-                    Description = t.Description,
-                    Type = SearchEntityType.Tour,
-                    Url = $"/tours/{t.Id}",
-                    Photo= t.KeyPoints.FirstOrDefault()?.ImagePath?.Replace("{\"url\":\"", "")
-    .Replace("\"}", "")
+
+                    return new SearchItemDto
+                    {
+                        Id = t.Id,
+                        Title = t.Name,
+                        Description = t.Description,
+                        Type = SearchEntityType.Tour,
+                        Url = $"{baseUrl}{t.Id}",
+                        Photo = t.KeyPoints.FirstOrDefault()?.ImagePath?.Replace("{\"url\":\"", "").Replace("\"}", "")
+                    };
                 })
                 .ToList();
         }

@@ -45,7 +45,7 @@ namespace Explorer.Stakeholders.Core.UseCases;
             Title = c.Name,
             Description = c.Description,
             Type = SearchEntityType.Club,
-            Url = $"/clubs/{c.Id}",
+            Url = $"/clubs",
             Photo = Uri.TryCreate(image, UriKind.Absolute, out var uri)
                 && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp)
             ? image

@@ -53,7 +53,7 @@ namespace Explorer.Stakeholders.Core.UseCases
                     Description = profile.Quote,
                     Photo = profile.ProfilePicture,
                     Type = SearchEntityType.User,
-                    Url = $"/users/{u.Id}"
+                    Url = $"/stakeholders/user-profile/{u.Id}"
                 };
             })
             .ToList();
