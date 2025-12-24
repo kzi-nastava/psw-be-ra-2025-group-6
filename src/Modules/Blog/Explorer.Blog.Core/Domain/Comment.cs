@@ -7,12 +7,13 @@ public class Comment : ValueObject
 {
     public long UserId { get; private set; }
     public string AuthorName { get; private set; }
+    public string AuthorProfilePicture { get; private set; }
     public string Text { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? LastUpdatedAt { get; private set; }
 
     private Comment() { }
-    public Comment(long userId, string authorName, string text)
+    public Comment(long userId, string authorName, string authorProfilePicture, string text)
     {
         if (userId == 0)
             throw new ArgumentException("Invalid user.");
@@ -25,15 +26,17 @@ public class Comment : ValueObject
 
         UserId = userId;
         AuthorName = authorName;
+        AuthorProfilePicture = authorProfilePicture;
         Text = text;
         CreatedAt = DateTime.UtcNow;
     }
 
     [JsonConstructor]
-    public Comment(long userId, string authorName, string text, DateTime createdAt, DateTime? lastUpdatedAt)
+    public Comment(long userId, string authorName, string authorProfilePicture, string text, DateTime createdAt, DateTime? lastUpdatedAt)
     {
         UserId = userId;
         AuthorName = authorName;
+        AuthorProfilePicture = authorProfilePicture;
         Text = text;
         CreatedAt = createdAt;
         LastUpdatedAt = lastUpdatedAt;
@@ -51,6 +54,7 @@ public class Comment : ValueObject
     {
         yield return UserId;
         yield return AuthorName;
+        yield return AuthorProfilePicture;
         yield return Text;
         yield return CreatedAt;
         yield return LastUpdatedAt;

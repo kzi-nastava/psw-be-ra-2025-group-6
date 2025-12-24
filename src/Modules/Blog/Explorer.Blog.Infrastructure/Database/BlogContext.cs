@@ -47,6 +47,7 @@ public class BlogContext : DbContext
                 comments.ToJson();            
                 comments.Property(c => c.UserId);
                 comments.Property(c => c.AuthorName);
+                comments.Property(c => c.AuthorProfilePicture);
                 comments.Property(c => c.Text);
                 comments.Property(c => c.CreatedAt);
                 comments.Property(c => c.LastUpdatedAt);

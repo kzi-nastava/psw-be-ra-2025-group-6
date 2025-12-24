@@ -6,6 +6,7 @@ using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -14,11 +15,13 @@ public class BlogService : IBlogService
     private readonly IBlogRepository _blogRepository;
     private readonly IMapper _mapper;
     private readonly IInternalStakeholderService _stakeholderService;
-    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper)
+    private readonly IUserProfileRepository _userProfileRepository;
+    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, IUserProfileRepository userProfileRepository)
     {
         _blogRepository = blogRepository;
         _stakeholderService = stakeholderService;
         _mapper = mapper;
+        _userProfileRepository = userProfileRepository;
     }
 
     public PagedResult<BlogDto> GetPaged(int page, int pageSize)
@@ -98,8 +101,10 @@ public class BlogService : IBlogService
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found.");
         var authorName = _stakeholderService.GetUsername(userId);
+        var authorProfilePicture = _userProfileRepository.Get(userId).ProfilePicture;
+        
 
-        blog.AddComment(userId, authorName, text);
+        blog.AddComment(userId, authorName, authorProfilePicture, text);
         _blogRepository.Update(blog);
 
         var comment = blog.Comments.Last();
@@ -144,6 +149,7 @@ public class BlogService : IBlogService
                 Id = index,     
                 UserId = c.UserId,
                 AuthorName = c.AuthorName,
+                AuthorProfilePicture = c.AuthorProfilePicture,
                 Text = c.Text,
                 CreatedAt = c.CreatedAt,
                 LastUpdatedAt = c.LastUpdatedAt

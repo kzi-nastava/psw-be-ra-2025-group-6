@@ -46,14 +46,14 @@ public class BlogPost : AggregateRoot
         Images = Images.Concat(imagePaths).ToList();
     }
 
-    public void AddComment(long userId, string authorName, string text)
+    public void AddComment(long userId, string authorName, string authorProfilePicture, string text)
     {
         if (Comments == null)
         {
             Comments = new List<Comment>();
         }
 
-        var comment = new Comment(userId, authorName, text);
+        var comment = new Comment(userId, authorName, authorProfilePicture, text);
         Comments.Add(comment);
 
         RecalculateQualityStatus();
