@@ -1,12 +1,8 @@
 ﻿using AutoMapper;
-using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
 using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
-using Explorer.BuildingBlocks.Core.Exceptions;
-using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Stakeholders.API.Internal;
-using Explorer.Stakeholders.Core.Domain;
+
 using Shared;
 using System.Diagnostics;
 using System.Security.Claims;
@@ -27,8 +23,8 @@ public class BlogSearchService : IBlogSearchService
         ClaimsPrincipal user, long personId, string userRole)
     {
 
-        var isAuthor = userRole== UserRole.Author.ToString();
-        var isAdmin = userRole== UserRole.Administrator.ToString();
+        var isAuthor = (userRole=="Author");
+        var isAdmin = (userRole=="Administrator");
 
         var blogs = _blogRepository.GetAll()
             .Where(b =>

@@ -3,7 +3,6 @@ using Explorer.Tours.API.Public;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Domain;
 using Shared;
-using Explorer.Stakeholders.Core.Domain;
 using System.Security.Claims;
 
 namespace Explorer.Tours.Core.UseCases
@@ -24,8 +23,8 @@ namespace Explorer.Tours.Core.UseCases
             ClaimsPrincipal user,
             long personId, string userRole)
         {
-            var isAuthor = userRole == UserRole.Author.ToString();
-            var isAdmin = userRole == UserRole.Administrator.ToString();
+            var isAuthor = (userRole == "Author");
+            var isAdmin = (userRole == "Administrator");
 
             return _tourRepository.GetAll()
                 .Where(t =>
