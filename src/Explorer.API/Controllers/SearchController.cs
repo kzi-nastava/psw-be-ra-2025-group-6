@@ -24,6 +24,7 @@ namespace Explorer.API.Controllers
             [FromQuery] SearchEntityType[] types)
         {
             var personId = User.PersonId();
+            var userRole = User.Role().ToString();
 
             var request = new SearchRequest
             {
@@ -31,7 +32,7 @@ namespace Explorer.API.Controllers
                 Types = types
             };
 
-            var response = await _searchService.SearchAsync(request, User, personId);
+            var response = await _searchService.SearchAsync(request, User, personId, userRole);
 
             return Ok(response.Items);
         }

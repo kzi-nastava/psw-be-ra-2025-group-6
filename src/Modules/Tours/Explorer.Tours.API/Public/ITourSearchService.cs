@@ -12,6 +12,6 @@ namespace Explorer.Tours.API.Public
     {
         Task<IReadOnlyCollection<SearchItemDto>> SearchAsync(
             string query,
-            ClaimsPrincipal user, long personId);
+            ClaimsPrincipal user, long personId, string userRole);
     }
 }

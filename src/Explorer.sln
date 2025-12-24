@@ -41,6 +41,7 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Tours.Core", "Modules\Tours\Explorer.Tours.Core\Explorer.Tours.Core.csproj", "{97FFFAD1-71C8-4E9A-93DE-D5CE60E87FA5}"
 	ProjectSection(ProjectDependencies) = postProject
 		{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B} = {7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}
+		{965EAFCE-C069-4A22-A2D6-F2795DF6EF13} = {965EAFCE-C069-4A22-A2D6-F2795DF6EF13}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Tours.API", "Modules\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj", "{1EC26004-9BCF-4E9C-8700-4E58F79757E8}"
@@ -65,9 +66,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Blog.Infrastructur
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Explorer.Blog.Tests", "Modules\Blog\Explorer.Blog.Tests\Explorer.Blog.Tests.csproj", "{DF1A942F-E72F-4C8F-9E92-21C35A98087D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{7368FE9F-DDE6-49C2-AAB5-7CA774A6C11B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Search", "Search\Search.csproj", "{22C76D80-75E5-4DC7-9AFF-55A8EF78AF2F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Search", "Search\Search.csproj", "{22C76D80-75E5-4DC7-9AFF-55A8EF78AF2F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1EC26004-9BCF-4E9C-8700-4E58F79757E8} = {1EC26004-9BCF-4E9C-8700-4E58F79757E8}
 		{253D25ED-B813-4492-A6E7-E5D112013616} = {253D25ED-B813-4492-A6E7-E5D112013616}

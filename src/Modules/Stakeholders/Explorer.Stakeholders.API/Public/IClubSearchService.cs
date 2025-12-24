@@ -6,9 +6,9 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Explorer.Stakeholders.API.Services
+namespace Explorer.Stakeholders.API.Public
 {
-    public interface IUserSearchService
+    public interface IClubSearchService
     {
         Task<IReadOnlyCollection<SearchItemDto>> SearchAsync(
             string query,

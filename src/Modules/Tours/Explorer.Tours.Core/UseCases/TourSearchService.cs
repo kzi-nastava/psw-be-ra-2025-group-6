@@ -3,12 +3,8 @@ using Explorer.Tours.API.Public;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Domain;
 using Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Explorer.Stakeholders.Core.Domain;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Explorer.Tours.Core.UseCases
 {
@@ -26,10 +22,10 @@ namespace Explorer.Tours.Core.UseCases
         public async Task<IReadOnlyCollection<SearchItemDto>> SearchAsync(
             string query,
             ClaimsPrincipal user,
-            long personId)
+            long personId, string userRole)
         {
-            var isAuthor = user.IsInRole("Author");
-            var isAdmin = user.IsInRole("Admin");
+            var isAuthor = userRole == UserRole.Author.ToString();
+            var isAdmin = userRole == UserRole.Administrator.ToString();
 
             return _tourRepository.GetAll()
                 .Where(t =>
@@ -42,7 +38,8 @@ namespace Explorer.Tours.Core.UseCases
                     Title = t.Name,
                     Description = t.Description,
                     Type = SearchEntityType.Tour,
-                    Url = $"/tours/{t.Id}"
+                    Url = $"/tours/{t.Id}",
+                    Photo= t.KeyPoints.FirstOrDefault()?.ImagePath
                 })
                 .ToList();
         }

@@ -11,7 +11,7 @@ namespace Search
     {
         Task<SearchResponse> SearchAsync(
             SearchRequest request,
-            ClaimsPrincipal user, long personId);
+            ClaimsPrincipal user, long personId, string userRole);
     }
 
 }

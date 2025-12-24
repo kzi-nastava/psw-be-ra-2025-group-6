@@ -38,6 +38,7 @@ public static class StakeholdersStartup
         services.AddScoped<IReviewAppService, ReviewAppService>();
 
         services.AddScoped<IClubService, ClubService>();
+        services.AddScoped<IClubSearchService, ClubSearchService>();
 
         services.AddScoped<ITourProblemService, TourProblemService>();
         services.AddScoped<ITourProblemMessageService, TourProblemMessageService>();

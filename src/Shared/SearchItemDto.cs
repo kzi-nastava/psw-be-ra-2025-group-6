@@ -14,6 +14,8 @@ namespace Shared
 
         public string? Description { get; init; }
         public string Url { get; init; } = string.Empty;
+
+        public string Photo { get; init; } = string.Empty;
     }
 
 }
