@@ -171,7 +171,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
 
         var blog = new DomainBlog(-11, "Blog za brisanje", "Opis", new List<string>(), BlogStatus.POSTED);
-        typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, -116);
+        //typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, -116);
         dbContext.Blogs.Add(blog);
         dbContext.SaveChanges();
 
