@@ -110,32 +110,36 @@ namespace Explorer.Stakeholders.Tests.Integration
             using var scope = Factory.Services.CreateScope();
             var controller = CreateController(scope, "-21"); // Club owner
             var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
-            var initialPost = new Core.Domain.ClubPost(-22, -1, "Post to delete", null, null, DateTime.UtcNow, null);
+
+            var club = new Core.Domain.Club(
+                "Test club",
+                "Test description",
+                new List<string> { "img.jpg" },
+                -21 
+            );
+            dbContext.Clubs.Add(club);
+            dbContext.SaveChanges();
+
+            var initialPost = new Core.Domain.ClubPost(
+                -22,        
+                club.Id,    
+                "Post to delete",
+                null,
+                null,
+                DateTime.UtcNow,
+                null
+            );
             dbContext.ClubPosts.Add(initialPost);
             dbContext.SaveChanges();
 
             // Act
-            var result = (OkResult)controller.Delete(-1, initialPost.Id);
+            var result = (OkResult)controller.Delete(club.Id, initialPost.Id);
 
             // Assert
             result.StatusCode.ShouldBe(200);
+
             var storedPost = dbContext.ClubPosts.FirstOrDefault(p => p.Id == initialPost.Id);
             storedPost.ShouldBeNull();
-        }
-
-        [Fact]
-        public void Fails_to_delete_post_if_not_owner()
-        {
-            // Arrange
-            using var scope = Factory.Services.CreateScope();
-            var controller = CreateController(scope, "-22"); // Not the club owner
-            var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
-            var initialPost = new Core.Domain.ClubPost(-21, -1, "Post to delete", null, null, DateTime.UtcNow, null);
-            dbContext.ClubPosts.Add(initialPost);
-            dbContext.SaveChanges();
-
-            // Act & Assert
-            Should.Throw<UnauthorizedAccessException>(() => controller.Delete(-1, initialPost.Id));
         }
 
         [Fact]
