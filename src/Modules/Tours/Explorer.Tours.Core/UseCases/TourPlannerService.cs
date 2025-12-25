@@ -1,0 +1,68 @@
+using AutoMapper;
+using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public;
+using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Explorer.Tours.Core.UseCases
+{
+    public class TourPlannerService : ITourPlannerService
+    {
+        private readonly IMapper _mapper;
+        private readonly ITourPlannerRepository _repository;
+
+        public TourPlannerService(IMapper mapper, ITourPlannerRepository repository)
+        {
+            _mapper = mapper;
+            _repository = repository;
+        }
+
+        public TourPlannerDto Create(long userId, TourPlannerCreateDto dto)
+        {
+            var planner = new TourPlanner(userId, dto.TourId, dto.StartDate, dto.EndDate);
+            var created = _repository.Create(planner);
+            return _mapper.Map<TourPlannerDto>(created);
+        }
+
+        public TourPlannerDto Update(long id, long userId, TourPlannerUpdateDto dto)
+        {
+            var planner = _repository.GetById(id);
+            if (planner.UserId != userId)
+            {
+                throw new UnauthorizedAccessException("You can not update someone else's planner item.");
+            }
+
+            planner.Update(dto.StartDate, dto.EndDate);
+            _repository.Update(planner);
+            return _mapper.Map<TourPlannerDto>(planner);
+        }
+
+        public void Delete(long id)
+        {
+            _repository.Delete(id);
+        }
+
+        public TourPlannerDto GetById(long id)
+        {
+            var planner = _repository.GetById(id);
+            return _mapper.Map<TourPlannerDto>(planner);
+        }
+
+        public List<TourPlannerDto> GetAllByUserId(long userId)
+        {
+            var planners = _repository.GetAllByUserId(userId);
+            return planners.Select(_mapper.Map<TourPlannerDto>).ToList();
+        }
+
+        public PagedResult<TourPlannerDto> GetByUserId(long userId, int page, int size)
+        {
+            var result = _repository.GetByUserId(userId, page, size);
+            var items = result.Results.Select(_mapper.Map<TourPlannerDto>).ToList();
+            return new PagedResult<TourPlannerDto>(items, result.TotalCount);
+        }
+    }
+}

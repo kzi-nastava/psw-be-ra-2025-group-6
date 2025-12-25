@@ -47,6 +47,7 @@ public static class ToursStartup
         services.AddScoped<IKeyPointService, KeyPointService>();
         services.AddScoped<ITourReviewService, TourReviewService>();
         services.AddScoped<IShoppingCartService, ShoppingCartService>();
+        services.AddScoped<ITourPlannerService, TourPlannerService>();
 
         services.AddScoped<ITouristViewService, TouristViewService>();
         services.AddScoped<IQuizService, QuizService>();
@@ -66,6 +67,7 @@ public static class ToursStartup
         services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
         services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
         services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
+        services.AddScoped<ITourPlannerRepository, TourPlannerDbRepository>();
 
 
         // Repo for executions

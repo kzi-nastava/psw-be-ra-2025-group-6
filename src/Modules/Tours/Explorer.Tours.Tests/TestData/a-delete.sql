@@ -5,6 +5,7 @@ DELETE FROM tours."TourReviews";
 DELETE FROM tours."TourExecutions";
 DELETE FROM tours."TourPurchaseTokens";
 DELETE FROM tours."TourReviews";
+DELETE FROM tours."TourPlanners";
 DELETE FROM tours."PublicEntityRequests";
 DELETE FROM tours."TouristEquipment";
 DELETE FROM tours."OrderItems";
