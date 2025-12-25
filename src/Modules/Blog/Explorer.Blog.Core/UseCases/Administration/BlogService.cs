@@ -6,6 +6,7 @@ using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Internal;
+using System.Text.Json;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -14,11 +15,14 @@ public class BlogService : IBlogService
     private readonly IBlogRepository _blogRepository;
     private readonly IMapper _mapper;
     private readonly IInternalStakeholderService _stakeholderService;
-    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper)
+    private readonly IBlogLocationService _locationService;
+
+    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, IBlogLocationService locationService)
     {
         _blogRepository = blogRepository;
         _stakeholderService = stakeholderService;
         _mapper = mapper;
+        _locationService = locationService;
     }
 
     public PagedResult<BlogDto> GetPaged(int page, int pageSize)
@@ -45,6 +49,16 @@ public class BlogService : IBlogService
             new List<string>(),
             status
         );
+
+        if (!string.IsNullOrWhiteSpace(dto.Location))
+        {
+            var locationDto = JsonSerializer.Deserialize<BlogLocationDto>(dto.Location);
+            if (locationDto != null && !string.IsNullOrWhiteSpace(locationDto.City))
+            {
+                var locationEntity = _mapper.Map<BlogLocation>(locationDto);
+                blog.SetLocation(locationEntity);
+            }
+        }
 
         if (dto.ContentItems != null)
         {

@@ -9,7 +9,8 @@ public class BlogProfile : Profile
     public BlogProfile()
     {
         CreateMap<BlogPost, BlogDto>().ReverseMap()
-            .ForMember(d => d.Comments, opt => opt.MapFrom(s => s.Comments));
+            .ForMember(d => d.Comments, opt => opt.MapFrom(s => s.Comments))
+            .ForMember(d => d.Location, opt => opt.MapFrom(s => s.Location));
         CreateMap<BlogDto, BlogPost>();
         CreateMap<Comment, CommentDto>().ReverseMap();
         CreateMap<BlogDto, BlogPost>().ReverseMap();

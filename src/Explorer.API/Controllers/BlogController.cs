@@ -32,14 +32,20 @@ public class BlogController : ControllerBase
     public async Task<ActionResult<BlogDto>> CreateBlog([FromForm] string title,
                                                         [FromForm] string description,
                                                         [FromForm] List<IFormFile>? images,
-                                                        [FromForm] BlogStatusDto status)
+                                                        [FromForm] BlogStatusDto status,
+                                                        [FromForm] string? location = "{}")
     {
         var userId = User.PersonId();
         var userRole = User.Role();
         if (userRole != UserRole.Author && userRole != UserRole.Tourist)
             return Forbid();
 
-        var blogDto = new BlogCreateDto { Title = title, Description = description, Status = status };
+        var blogDto = new BlogCreateDto { 
+            Title = title, 
+            Description = description, 
+            Status = status,
+            Location = location
+        };
         var createdBlog = _blogService.Create(blogDto, userId);
 
         if (images == null || !images.Any())

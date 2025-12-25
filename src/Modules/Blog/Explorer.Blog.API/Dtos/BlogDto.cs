@@ -14,6 +14,6 @@ public class BlogDto
     public BlogQualityStatusDto QualityStatus { get; set; }
     public string Username { get; set; }
     public List<BlogContentItemDto> ContentItems { get; set; } = new();
-
+    public BlogLocationDto? Location { get; set; }
 
 }
