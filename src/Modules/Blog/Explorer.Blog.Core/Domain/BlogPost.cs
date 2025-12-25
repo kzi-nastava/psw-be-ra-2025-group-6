@@ -18,6 +18,8 @@ public class BlogPost : AggregateRoot
 
     private readonly List<BlogVote> _votes = new();
     public IReadOnlyCollection<BlogVote> Votes => _votes.AsReadOnly();
+    public long? LocationId { get; private set; }
+    public BlogLocation? Location { get; private set; }
     public List<BlogContentItem> ContentItems { get; private set; } = new();
 
 
@@ -198,5 +200,20 @@ public class BlogPost : AggregateRoot
     public void ClearContentItems()
     {
         ContentItems.Clear();
+    }
+
+    public void SetLocation(BlogLocation location)
+    {
+        if (location == null) throw new ArgumentNullException(nameof(location));
+        Location = location;
+        LocationId = location.Id;
+    }
+
+    public void UpdateLocation(string city, string country, double latitude, double longitude, string? region = null)
+    {
+        if (Location == null)
+            throw new InvalidOperationException("Location not set yet.");
+
+        Location.UpdateLocation(city, country, latitude, longitude, region);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Explorer.Blog.Core.Domain
 {
-    public class BlogLocation : Entity
+    public class BlogLocation : AggregateRoot
     {
         public string City { get; private set; }
         public string Country { get; private set; }
