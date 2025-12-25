@@ -46,6 +46,17 @@ public class BlogService : IBlogService
             status
         );
 
+        if (dto.ContentItems != null)
+        {
+            foreach (var item in dto.ContentItems.OrderBy(i => i.Order))
+            {
+                blog.AddContentItem(
+                    (ContentType)item.Type,
+                    item.Content
+                );
+            }
+        }
+
         var created = _blogRepository.Create(blog);
         return _mapper.Map<BlogDto>(created);
     }
@@ -63,6 +74,18 @@ public class BlogService : IBlogService
         blog.UpdateTitle(blogDto.Title);
         blog.UpdateDescription(blogDto.Description);
         blog.Status = (BlogStatus)blogDto.Status;
+
+        blog.ClearContentItems();
+        if (blogDto.ContentItems != null)
+        {
+            foreach (var item in blogDto.ContentItems.OrderBy(i => i.Order))
+            {
+                blog.AddContentItem(
+                    (ContentType)item.Type,
+                    item.Content
+                );
+            }
+        }
 
         var updated = _blogRepository.Update(blog);
         return _mapper.Map<BlogDto>(updated);

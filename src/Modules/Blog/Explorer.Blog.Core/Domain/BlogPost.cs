@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using Explorer.BuildingBlocks.Core.Domain;
 
 namespace Explorer.Blog.Core.Domain;
@@ -17,6 +18,8 @@ public class BlogPost : AggregateRoot
 
     private readonly List<BlogVote> _votes = new();
     public IReadOnlyCollection<BlogVote> Votes => _votes.AsReadOnly();
+    public List<BlogContentItem> ContentItems { get; private set; } = new();
+
 
     private BlogPost() { }
 
@@ -163,5 +166,37 @@ public class BlogPost : AggregateRoot
         int commentCount = Comments.Count;
 
         UpdateQualityStatus(score, commentCount);
+    }
+
+    public void AddContentItem(ContentType type, string content)
+    {
+        int nextOrder = ContentItems.Count > 0 ? ContentItems.Max(c => c.Order) + 1 : 0;
+        ContentItems.Add(new BlogContentItem(nextOrder, type, content));
+    }
+
+    public void UpdateContentItem(int order, string newContent)
+    {
+        var item = ContentItems.FirstOrDefault(c => c.Order == order);
+
+        if (item == null)
+            throw new InvalidOperationException("Content item not found.");
+        if (string.IsNullOrWhiteSpace(newContent))
+            throw new ArgumentException("Content cannot be empty.");
+
+        ContentItems[ContentItems.IndexOf(item)] = new BlogContentItem(order, item.Type, newContent);
+    }
+
+    public void RemoveContentItem(int order)
+    {
+        var item = ContentItems.FirstOrDefault(c => c.Order == order);
+        if (item != null)
+        {
+            ContentItems.Remove(item);
+        }
+    }
+
+    public void ClearContentItems()
+    {
+        ContentItems.Clear();
     }
 }
