@@ -42,7 +42,7 @@ public static class BlogStartup
                 x => x.MigrationsHistoryTable("__EFMigrationsHistory", "blog")));
 
         services.AddScoped<IBlogLocationRepository, BlogLocationDbRepository>();
-        services.AddDbContext<BlogLocationContext>(opt =>
+        services.AddDbContext<BlogContext>(opt =>
             opt.UseNpgsql(dataSource,
                 x => x.MigrationsHistoryTable("__EFMigrationsHistory", "blog_location")));
     }

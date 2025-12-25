@@ -6,10 +6,10 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
 {
     public class BlogLocationDbRepository : IBlogLocationRepository
     {
-        protected readonly BlogLocationContext DbContext;
+        protected readonly BlogContext DbContext;
         private readonly DbSet<BlogLocation> _dbSet;
 
-        public BlogLocationDbRepository(BlogLocationContext dbContext)
+        public BlogLocationDbRepository(BlogContext dbContext)
         {
             DbContext = dbContext;
             _dbSet = DbContext.Set<BlogLocation>();
