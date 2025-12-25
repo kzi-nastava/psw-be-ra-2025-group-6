@@ -47,6 +47,22 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             return planner;
         }
 
+        public bool HasOverlappingPlan(long userId, long tourId, DateTime startDate, DateTime endDate, long? excludeId = null)
+        {
+            var query = _planners.Where(p =>
+                p.UserId == userId &&
+                p.TourId == tourId &&
+                startDate <= p.EndDate &&
+                endDate >= p.StartDate);
+
+            if (excludeId.HasValue)
+            {
+                query = query.Where(p => p.Id != excludeId.Value);
+            }
+
+            return query.Any();
+        }
+
         public void Delete(long id)
         {
             var planner = _planners.FirstOrDefault(p => p.Id == id);
