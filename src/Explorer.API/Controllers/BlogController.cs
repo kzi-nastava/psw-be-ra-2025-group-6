@@ -155,20 +155,20 @@ public class BlogController : ControllerBase
         return Ok(created);
     }
 
-    [HttpPut("{id:long}/comments/{commentId:int}")]
-    public IActionResult EditComment(long id, int commentId, [FromBody] CommentCreateDto dto)
+    [HttpPut("{id:long}/comments")]
+    public IActionResult EditComment(long id, [FromBody] CommentEditDto dto)
     {
         var userId = User.PersonId();
-        _blogService.EditComment(id, commentId, userId, dto.Text);
+        _blogService.EditComment(id, userId, dto.CreatedAt, dto.Text);
 
         return Ok();
     }
 
-    [HttpDelete("{id:long}/comments/{commentId:int}")]
-    public IActionResult DeleteComment(long id, int commentId)
+    [HttpDelete("{id:long}/comments")]
+    public IActionResult DeleteComment(long id, [FromQuery] DateTime createdAt)
     {
         var userId = User.PersonId();
-        _blogService.DeleteComment(id, commentId, userId);
+        _blogService.DeleteComment(id, userId, createdAt);
 
         return NoContent();
     }

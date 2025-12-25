@@ -5,10 +5,12 @@ namespace Explorer.Stakeholders.Core.UseCases;
 public class InternalStakeholdersService : IInternalStakeholderService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IUserProfileRepository _profileRepository;
 
-    public InternalStakeholdersService(IUserRepository userRepository)
+    public InternalStakeholdersService(IUserRepository userRepository, IUserProfileRepository profileRepository)
     {
         _userRepository = userRepository;
+        _profileRepository = profileRepository;
     }
 
     public string GetUsername(long userId)
@@ -17,6 +19,13 @@ public class InternalStakeholdersService : IInternalStakeholderService
         if (user == null) throw new Exception("User not found.");
 
         return user.Username;
+    }
+
+    public string GetProfilePicture(long userId)
+    {
+        var userProfile = _profileRepository.Get(userId)?.ProfilePicture ?? "";
+
+        return userProfile;
     }
 }
 

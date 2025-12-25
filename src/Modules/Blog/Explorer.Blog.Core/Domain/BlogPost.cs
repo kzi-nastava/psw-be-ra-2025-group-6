@@ -59,12 +59,17 @@ public class BlogPost : AggregateRoot
         RecalculateQualityStatus();
     }
 
-    public void EditComment(int id, long userId, string text)
+    public void EditComment(long userId, DateTime createdAt, string text)
     {
-        if (Comments == null || id < 0 || id >= Comments.Count)
+        if (Comments == null)
             throw new InvalidOperationException("Comment does not exist.");
 
-        var comment = Comments[id];
+        var comment = Comments.FirstOrDefault(c =>
+            c.UserId == userId &&
+            Math.Abs((c.CreatedAt - createdAt).TotalSeconds) < 1);
+
+        if (comment == null)
+            throw new InvalidOperationException("Comment does not exist.");
 
         if (comment.UserId != userId)
             throw new InvalidOperationException("Only authors can edit their comments.");
@@ -75,12 +80,17 @@ public class BlogPost : AggregateRoot
         comment.Edit(text);
     }
 
-    public void DeleteComment(int id, long userId)
+    public void DeleteComment(long userId, DateTime createdAt)
     {
-        if (Comments == null || id < 0 || id >= Comments.Count)
+        if (Comments == null)
             throw new InvalidOperationException("Comment does not exist.");
 
-        var comment = Comments[id];
+        var comment = Comments.FirstOrDefault(c =>
+            c.UserId == userId &&
+            Math.Abs((c.CreatedAt - createdAt).TotalSeconds) < 1);
+
+        if(comment == null)
+        throw new InvalidOperationException("Comment does not exist.");
 
         if (comment.UserId != userId)
             throw new InvalidOperationException("Only authors can delete their comments.");
@@ -88,7 +98,7 @@ public class BlogPost : AggregateRoot
         if (DateTime.UtcNow - comment.CreatedAt > TimeSpan.FromMinutes(15))
             throw new InvalidOperationException("Delete time expired.");
 
-        Comments.RemoveAt(id);
+        Comments.Remove(comment);
     }
     public void UpdateDescription(string newDescription)
     {

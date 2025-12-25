@@ -42,15 +42,20 @@ public class BlogContext : DbContext
             builder.Property(b => b.Images)
                .HasColumnType("text[]");
 
-            builder.OwnsMany(b => b.Comments, comments =>
+            builder.OwnsMany(b => b.Comments, cb =>
             {
-                comments.ToJson();            
-                comments.Property(c => c.UserId);
-                comments.Property(c => c.AuthorName);
-                comments.Property(c => c.AuthorProfilePicture);
-                comments.Property(c => c.Text);
-                comments.Property(c => c.CreatedAt);
-                comments.Property(c => c.LastUpdatedAt);
+                cb.WithOwner().HasForeignKey("BlogId");
+
+                cb.HasKey("BlogId", "UserId", "CreatedAt");
+
+                cb.Property(c => c.UserId);
+                cb.Property(c => c.AuthorName);
+                cb.Property(c => c.AuthorProfilePicture);
+                cb.Property(c => c.Text);
+                cb.Property(c => c.CreatedAt);
+                cb.Property(c => c.LastUpdatedAt);
+
+                cb.ToTable("Comments", "blog");
             });
         });
     }

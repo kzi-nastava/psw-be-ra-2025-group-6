@@ -15,13 +15,11 @@ public class BlogService : IBlogService
     private readonly IBlogRepository _blogRepository;
     private readonly IMapper _mapper;
     private readonly IInternalStakeholderService _stakeholderService;
-    private readonly IUserProfileRepository _userProfileRepository;
-    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, IUserProfileRepository userProfileRepository)
+    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper)
     {
         _blogRepository = blogRepository;
         _stakeholderService = stakeholderService;
         _mapper = mapper;
-        _userProfileRepository = userProfileRepository;
     }
 
     public PagedResult<BlogDto> GetPaged(int page, int pageSize)
@@ -100,8 +98,9 @@ public class BlogService : IBlogService
     {
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found.");
+
         var authorName = _stakeholderService.GetUsername(userId);
-        var authorProfilePicture = _userProfileRepository.Get(userId).ProfilePicture;
+        var authorProfilePicture = _stakeholderService.GetProfilePicture(userId);
         
 
         blog.AddComment(userId, authorName, authorProfilePicture, text);
@@ -112,28 +111,29 @@ public class BlogService : IBlogService
         return _mapper.Map<CommentDto>(comment);
     }
 
-    public CommentDto EditComment(long blogId, int commentId, long userId, string text)
+    public CommentDto EditComment(long blogId, long userId, DateTime createdAt, string text)
     {
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found.");
 
-        blog.EditComment(commentId, userId, text);
+        blog.EditComment(userId, createdAt, text);
         _blogRepository.Update(blog);
 
-        var comment = blog.Comments.Last();
+        var comment = blog.Comments.First(c => c.UserId == userId && c.CreatedAt == createdAt);
 
         return _mapper.Map<CommentDto>(comment);
     }
 
-    public CommentDto DeleteComment(long blogId, int commentId, long userId) 
+    public CommentDto DeleteComment(long blogId, long userId, DateTime createdAt) 
     { 
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found");
 
-        blog.DeleteComment(commentId, userId);
-        _blogRepository.Update(blog);
+        var comment = blog.Comments?
+            .FirstOrDefault(c => c.UserId == userId && c.CreatedAt == createdAt);
 
-        var comment = blog.Comments.Last();
+        blog.DeleteComment(userId, createdAt);
+        _blogRepository.Update(blog);
 
         return _mapper.Map<CommentDto>(comment);
     }
@@ -145,8 +145,7 @@ public class BlogService : IBlogService
 
         var comments = blog.Comments
             .Select((c, index) => new CommentDto
-            {
-                Id = index,     
+            {    
                 UserId = c.UserId,
                 AuthorName = c.AuthorName,
                 AuthorProfilePicture = c.AuthorProfilePicture,

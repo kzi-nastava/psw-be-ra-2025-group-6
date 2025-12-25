@@ -263,7 +263,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         if (blog == null)
         {
-            blog = new DomainBlog(-11, "Test blog za komentare", "Opis test bloga", new List<string>(), BlogStatus.POSTED);
+            blog = new DomainBlog(-100, "Test blog za komentare", "Opis test bloga", new List<string>(), BlogStatus.POSTED);
 
             typeof(DomainBlog)
                 .GetProperty("Id")?
@@ -290,7 +290,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         var commentDto = result.Value as CommentDto;
         commentDto.ShouldNotBeNull();
         commentDto.Text.ShouldBe(dto.Text);
-        commentDto.UserId.ShouldBe(-11); 
+        commentDto.UserId.ShouldBe(-100); 
 
         var storedBlog = dbContext.Blogs
             .Include(b => b.Comments)
@@ -298,7 +298,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         storedBlog.Comments.Count.ShouldBe(initialCount + 1);
         storedBlog.Comments.Last().Text.ShouldBe(dto.Text);
-        storedBlog.Comments.Last().UserId.ShouldBe(-11);
+        storedBlog.Comments.Last().UserId.ShouldBe(-100);
     }
 
     [Fact]
@@ -326,7 +326,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
                 .First(b => b.Id == blogId);
         }
 
-        blog.AddComment(-11, "Test author", "Stari tekst");
+        blog.AddComment(-11, "Test author", "", "Stari tekst");
         dbContext.SaveChanges();
 
         var before = dbContext.Blogs
@@ -375,7 +375,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
                 .First(b => b.Id == blogId);
         }
 
-        blog.AddComment(-12, "Other user", "Tekst komentara");
+        blog.AddComment(-12, "Other user", "", "Tekst komentara");
         dbContext.SaveChanges();
 
         var dto = new CommentCreateDto
@@ -486,7 +486,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
             blog.AddOrUpdateVote(-11, VoteType.Downvote); 
 
         for (int i = 0; i < 12; i++)
-            blog.AddComment(-11, "Test user", $"Komentar {i}");
+            blog.AddComment(-11, "Test user", "", $"Komentar {i}");
 
         blog.RecalculateQualityStatus();
 
@@ -515,7 +515,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
             blog.AddOrUpdateVote(i, VoteType.Upvote);
 
         for (int i = 1; i <= 40; i++)
-            blog.AddComment(i, $"User{i}", $"Komentar {i}");
+            blog.AddComment(i, $"User{i}", "",$"Komentar {i}");
 
         blog.RecalculateQualityStatus();
 
