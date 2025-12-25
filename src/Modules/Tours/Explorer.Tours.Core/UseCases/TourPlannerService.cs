@@ -1,4 +1,5 @@
 using AutoMapper;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
@@ -23,6 +24,7 @@ namespace Explorer.Tours.Core.UseCases
 
         public TourPlannerDto Create(long userId, TourPlannerCreateDto dto)
         {
+            EnsureNoOverlappingPlan(userId, dto.TourId, dto.StartDate, dto.EndDate, null);
             var planner = new TourPlanner(userId, dto.TourId, dto.StartDate, dto.EndDate);
             var created = _repository.Create(planner);
             return _mapper.Map<TourPlannerDto>(created);
@@ -36,6 +38,7 @@ namespace Explorer.Tours.Core.UseCases
                 throw new UnauthorizedAccessException("You can not update someone else's planner item.");
             }
 
+            EnsureNoOverlappingPlan(userId, planner.TourId, dto.StartDate, dto.EndDate, planner.Id);
             planner.Update(dto.StartDate, dto.EndDate);
             _repository.Update(planner);
             return _mapper.Map<TourPlannerDto>(planner);
@@ -63,6 +66,14 @@ namespace Explorer.Tours.Core.UseCases
             var result = _repository.GetByUserId(userId, page, size);
             var items = result.Results.Select(_mapper.Map<TourPlannerDto>).ToList();
             return new PagedResult<TourPlannerDto>(items, result.TotalCount);
+        }
+
+        private void EnsureNoOverlappingPlan(long userId, long tourId, DateTime startDate, DateTime endDate, long? excludeId)
+        {
+            if (_repository.HasOverlappingPlan(userId, tourId, startDate, endDate, excludeId))
+            {
+                throw new EntityValidationException("You can not schedule the same tour in an overlapping period.");
+            }
         }
     }
 }
