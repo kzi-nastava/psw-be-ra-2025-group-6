@@ -1,4 +1,5 @@
 using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Payments.API.Internal;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Admin;
 using Explorer.Tours.API.Public.Administration;
@@ -12,6 +13,7 @@ using Explorer.Tours.Core.UseCases.Administration;
 using Explorer.Tours.Core.UseCases.Authoring;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
+using Explorer.Tours.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -46,7 +48,6 @@ public static class ToursStartup
         services.AddScoped<IPublicEntityService, PublicEntityService>();
         services.AddScoped<IKeyPointService, KeyPointService>();
         services.AddScoped<ITourReviewService, TourReviewService>();
-        services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
         services.AddScoped<ITouristViewService, TouristViewService>();
         services.AddScoped<IQuizService, QuizService>();
@@ -54,6 +55,7 @@ public static class ToursStartup
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
+        services.AddScoped<ITourDataProvider, TourDataProvider>();
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
         services.AddScoped<IJournalRepository, JournalDbRepository>();
@@ -64,8 +66,7 @@ public static class ToursStartup
         services.AddScoped<IMeetupRepository, MeetupRepository>();
         services.AddScoped<IPublicEntityRequestRepository, PublicEntityRequestDbRepository>();
         services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
-        services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
-        services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
+
 
 
         // Repo for executions

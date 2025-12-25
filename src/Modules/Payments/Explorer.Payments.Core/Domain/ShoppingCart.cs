@@ -1,6 +1,6 @@
 using Explorer.BuildingBlocks.Core.Domain;
 
-namespace Explorer.Tours.Core.Domain;
+namespace Explorer.Payments.Core.Domain;
 
 public class ShoppingCart : Entity
 {
@@ -19,18 +19,18 @@ public class ShoppingCart : Entity
 
     private void Validate()
     {
-        // if (TouristId == 0) throw new ArgumentException("Invalid TouristId");
+        if (TouristId == 0) throw new ArgumentException("Invalid TouristId");
     }
 
-    public void AddItem(Tour tour)
+    public void AddItem(long tourId, string tourName, double price, string tourStatus)
     {
-        if (tour.Status != TourStatus.CONFIRMED)
+        if (tourStatus != "CONFIRMED")
             throw new ArgumentException("Tour must be confirmed to be purchased.");
 
-        if (_items.Any(item => item.TourId == tour.Id))
+        if (_items.Any(item => item.TourId == tourId))
             throw new ArgumentException("Tour is already in the cart.");
 
-        var orderItem = new OrderItem(tour.Id, tour.Name, tour.Price);
+        var orderItem = new OrderItem(tourId, tourName, price);
         _items.Add(orderItem);
         LastModified = DateTime.UtcNow;
     }

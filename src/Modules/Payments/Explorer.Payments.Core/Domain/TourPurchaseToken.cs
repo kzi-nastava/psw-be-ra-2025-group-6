@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Explorer.BuildingBlocks.Core.Domain;
 
-namespace Explorer.Tours.Core.Domain;
+namespace Explorer.Payments.Core.Domain;
 
 public class TourPurchaseToken : Entity
 {
@@ -14,7 +9,7 @@ public class TourPurchaseToken : Entity
     public string TourName { get; init; }
     public double Price { get; init; }
     public DateTime PurchaseDate { get; init; }
-    public bool IsUsed { get; private set; } // Da li je tura aktivirana
+    public bool IsUsed { get; private set; }
 
     public TourPurchaseToken(long touristId, long tourId, string tourName, double price)
     {

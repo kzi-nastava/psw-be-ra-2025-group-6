@@ -1,15 +1,16 @@
-﻿using Explorer.Tours.Core.Domain;
-using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Payments.Core.Domain;
+using Explorer.Payments.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Explorer.Tours.Infrastructure.Database.Repositories;
+namespace Explorer.Payments.Infrastructure.Database.Repositories;
 
-public class TourPurchaseTokenDbRepository : ITourPurchaseTokenRepository
+public class TourPurchaseTokenRepository : ITourPurchaseTokenRepository
 {
-    private readonly ToursContext _dbContext;
+    private readonly PaymentsContext _dbContext;
     private readonly DbSet<TourPurchaseToken> _dbSet;
 
-    public TourPurchaseTokenDbRepository(ToursContext dbContext)
+    public TourPurchaseTokenRepository(PaymentsContext dbContext)
     {
         _dbContext = dbContext;
         _dbSet = _dbContext.Set<TourPurchaseToken>();
@@ -41,14 +42,19 @@ public class TourPurchaseTokenDbRepository : ITourPurchaseTokenRepository
 
     public TourPurchaseToken? GetUnusedByTouristAndTour(long touristId, long tourId)
     {
-        // Return first unused token 
         return _dbSet.FirstOrDefault(t => t.TouristId == touristId && t.TourId == tourId && !t.IsUsed);
     }
-
     public TourPurchaseToken Update(TourPurchaseToken token)
     {
-        _dbSet.Update(token);
-        _dbContext.SaveChanges();
+        try
+        {
+            _dbContext.Update(token);
+            _dbContext.SaveChanges();
+        }
+        catch (DbUpdateException e)
+        {
+            throw new NotFoundException(e.Message);
+        }
         return token;
     }
 }
