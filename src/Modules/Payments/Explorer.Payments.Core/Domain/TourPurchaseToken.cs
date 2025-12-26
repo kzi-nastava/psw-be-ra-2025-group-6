@@ -30,8 +30,10 @@ public class TourPurchaseToken : Entity
         if (Price < 0) throw new ArgumentException("Invalid Price");
     }
 
+    // Preserve method for compatibility but do not mark token as used so a tourist can start the tour multiple times.
     public void MarkAsUsed()
     {
-        IsUsed = true;
+        // Intentionally left blank to allow unlimited starts of a purchased tour.
+        // If in future you need single-use tokens, restore setting IsUsed = true here.
     }
 }
