@@ -50,24 +50,32 @@ public class BlogService : IBlogService
             status
         );
 
-        if (!string.IsNullOrWhiteSpace(dto.Location))
+        if (!string.IsNullOrWhiteSpace(dto.City))
         {
-            var locationDto = JsonSerializer.Deserialize<BlogLocationDto>(dto.Location);
-            if (locationDto != null && !string.IsNullOrWhiteSpace(locationDto.City))
+            // 1. Kreiramo DTO za lokaciju od podataka iz bloga
+            var locationDto = new BlogLocationDto
             {
-                var locationEntity = _mapper.Map<BlogLocation>(locationDto);
-                blog.SetLocation(locationEntity);
-            }
+                City = dto.City,
+                Country = dto.Country,
+                Region = dto.Region,
+                Latitude = dto.Latitude ?? 0,
+                Longitude = dto.Longitude ?? 0
+            };
+
+            // 2. SERVIS kreira lokaciju u svojoj tabeli i vraća nam je sa dodeljenim ID-jem iz baze
+            var savedLocationDto = _locationService.CreateOrGet(locationDto);
+
+            // 3. POSTAVLJAMO ID lokacije u blog. 
+            // Ovo je ključno: BlogPost entitet sada zna tačan ID iz tabele lokacija.
+            blog.SetLocationId(savedLocationDto.Id);
         }
+
 
         if (dto.ContentItems != null)
         {
             foreach (var item in dto.ContentItems.OrderBy(i => i.Order))
             {
-                blog.AddContentItem(
-                    (ContentType)item.Type,
-                    item.Content
-                );
+                blog.AddContentItem((ContentType)item.Type, item.Content);
             }
         }
 
@@ -88,6 +96,11 @@ public class BlogService : IBlogService
         blog.UpdateTitle(blogDto.Title);
         blog.UpdateDescription(blogDto.Description);
         blog.Status = (BlogStatus)blogDto.Status;
+        if (blogDto.Location != null)
+        {
+            var savedLocation = _locationService.CreateOrGet(blogDto.Location);
+            blog.SetLocation(_mapper.Map<BlogLocation>(savedLocation));
+        }
 
         blog.ClearContentItems();
         if (blogDto.ContentItems != null)

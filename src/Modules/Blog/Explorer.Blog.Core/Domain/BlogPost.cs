@@ -209,6 +209,12 @@ public class BlogPost : AggregateRoot
         LocationId = location.Id;
     }
 
+    public void SetLocationId(long locationId)
+    {
+        if (locationId <= 0) throw new ArgumentException("Invalid LocationId.");
+        this.LocationId = locationId;
+    }
+
     public void UpdateLocation(string city, string country, double latitude, double longitude, string? region = null)
     {
         if (Location == null)
