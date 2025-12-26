@@ -6,6 +6,7 @@ namespace Explorer.Blog.Infrastructure.Database;
 public class BlogContext : DbContext
 {
     public DbSet<BlogPost> Blogs { get; set; }
+    public DbSet<BlogLocation> BlogLocations { get; set; }
 
     public BlogContext(DbContextOptions<BlogContext> options) : base(options) { }
 
@@ -28,6 +29,11 @@ public class BlogContext : DbContext
                 v.HasKey("BlogId", "UserId");
                 v.ToTable("Votes", "blog");
             });
+
+            b.HasOne(x => x.Location)
+                .WithMany()
+                .HasForeignKey(x => x.LocationId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 
@@ -50,6 +56,14 @@ public class BlogContext : DbContext
                 comments.Property(c => c.Text);
                 comments.Property(c => c.CreatedAt);
                 comments.Property(c => c.LastUpdatedAt);
+            });
+
+            builder.OwnsMany(b => b.ContentItems, content =>
+            {
+                content.Property(c => c.Order).IsRequired();
+                content.Property(c => c.Type).IsRequired();
+                content.Property(c => c.Content).IsRequired();
+                content.ToTable("BlogContentItems", "blog");
             });
         });
     }
