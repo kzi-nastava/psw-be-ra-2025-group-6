@@ -6,11 +6,12 @@ public class InternalStakeholdersService : IInternalStakeholderService
 {
     private readonly IUserRepository _userRepository;
     private readonly IUserProfileRepository _userProfileRepository;
-
-    public InternalStakeholdersService(IUserRepository userRepository, IUserProfileRepository userProfileRepository)
+    private readonly IFollowRepository _followRepository;
+    public InternalStakeholdersService(IUserRepository userRepository, IUserProfileRepository userProfileRepository, IFollowRepository followRepository)
     {
         _userRepository = userRepository;
         _userProfileRepository = userProfileRepository;
+        _followRepository = followRepository;
     }
 
     public string GetUsername(long userId)
@@ -25,6 +26,12 @@ public class InternalStakeholdersService : IInternalStakeholderService
     {
         var profile = _userProfileRepository.Get(userId);
         return profile?.ProfilePicture ?? "";
+    }
+
+    public List<long> GetFollowedIds(long followerId)
+    {
+        var followedUsers = _followRepository.GetFollowing(followerId);
+        return followedUsers.Select(u => (long)u.Id).ToList();
     }
 }
 

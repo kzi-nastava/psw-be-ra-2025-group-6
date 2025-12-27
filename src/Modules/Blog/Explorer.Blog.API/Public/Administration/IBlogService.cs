@@ -24,4 +24,5 @@ public interface IBlogService
     BlogVoteDto? GetUserVote(long userId, long blogId);
     BlogDto RecalculateQualityStatus(long blogId);
     List<BlogDto> GetBlogsByQualityStatus(BlogQualityStatusDto status);
+    PagedResult<BlogDto> GetFollowingBlogs(int page, int pageSize, long userId);
 }
