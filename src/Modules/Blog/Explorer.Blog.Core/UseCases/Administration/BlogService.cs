@@ -253,6 +253,7 @@ public class BlogService : IBlogService
     {
         var dto = _mapper.Map<BlogDto>(blog);
         dto.Username = _stakeholderService.GetUsername(blog.UserId);
+        dto.AuthorProfilePicture = _stakeholderService.GetProfilePicture(blog.UserId);
         return dto;
     }
 }

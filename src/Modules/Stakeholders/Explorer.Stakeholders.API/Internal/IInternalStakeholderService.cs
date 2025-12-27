@@ -2,5 +2,6 @@
 public interface IInternalStakeholderService
 {
     string GetUsername(long userId);
+    string GetProfilePicture(long userId);
 }
 

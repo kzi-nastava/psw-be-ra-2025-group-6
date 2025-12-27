@@ -13,5 +13,5 @@ public class BlogDto
     public DateTime? LastModifiedAt { get; set; }
     public BlogQualityStatusDto QualityStatus { get; set; }
     public string Username { get; set; }
-
+    public string AuthorProfilePicture { get; set; }
 }
