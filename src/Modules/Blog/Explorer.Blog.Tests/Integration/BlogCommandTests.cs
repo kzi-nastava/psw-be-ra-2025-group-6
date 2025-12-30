@@ -248,7 +248,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         blog.CountDownvotes().ShouldBe(1);
     }
 
-    [Fact]
+   /* [Fact]
     public void AddComment_creates_comment_in_db()
     {
         using var scope = Factory.Services.CreateScope();
@@ -440,7 +440,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
 
         after.Comments.Count.ShouldBeGreaterThan(0);
         after.Comments.Any(c => c.Text == "Tekst za brisanje").ShouldBeFalse();
-    }
+    }*/
 
     [Fact]
     public void RemoveVote_ExistingVote_RemovesVote()

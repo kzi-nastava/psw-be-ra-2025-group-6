@@ -1,7 +1,5 @@
 ﻿using Explorer.Blog.Core.Domain.RepositoryInterfaces;
-﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.Core.Domain;
-using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;

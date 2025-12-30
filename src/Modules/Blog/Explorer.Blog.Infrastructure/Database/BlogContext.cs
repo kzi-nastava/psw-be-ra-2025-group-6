@@ -46,7 +46,7 @@ public class BlogContext : DbContext
             {
                 cb.WithOwner().HasForeignKey("BlogId");
 
-                cb.HasKey("BlogId", "UserId", "CreatedAt");
+                cb.HasKey("BlogId", "Id");
 
                 cb.Property(c => c.UserId);
                 cb.Property(c => c.AuthorName);

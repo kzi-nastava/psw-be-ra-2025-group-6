@@ -1,9 +1,8 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
-using System.Text.Json.Serialization;
 
 namespace Explorer.Blog.Core.Domain;
 
-public class Comment : ValueObject
+public class Comment : Entity
 {
     public long UserId { get; private set; }
     public string AuthorName { get; private set; }
@@ -31,7 +30,6 @@ public class Comment : ValueObject
         CreatedAt = DateTime.UtcNow;
     }
 
-    [JsonConstructor]
     public Comment(long userId, string authorName, string authorProfilePicture, string text, DateTime createdAt, DateTime? lastUpdatedAt)
     {
         UserId = userId;
@@ -49,14 +47,5 @@ public class Comment : ValueObject
 
         Text = newText.Trim();
         LastUpdatedAt = DateTime.UtcNow;
-    }
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-        yield return UserId;
-        yield return AuthorName;
-        yield return AuthorProfilePicture;
-        yield return Text;
-        yield return CreatedAt;
-        yield return LastUpdatedAt;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Explorer.Stakeholders.API.Internal;
+﻿using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Stakeholders.Core.UseCases;
@@ -23,9 +24,14 @@ public class InternalStakeholdersService : IInternalStakeholderService
 
     public string GetProfilePicture(long userId)
     {
-        var userProfile = _profileRepository.Get(userId)?.ProfilePicture ?? "";
-
-        return userProfile;
+        try
+        {
+            return _profileRepository.Get(userId).ProfilePicture ?? "";
+        }
+        catch (NotFoundException)
+        {
+            return "";
+        }
     }
 }
 
