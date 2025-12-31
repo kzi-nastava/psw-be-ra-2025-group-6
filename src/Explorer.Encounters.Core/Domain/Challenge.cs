@@ -14,6 +14,8 @@ namespace Explorer.Encounters.Core.Domain
         public int XP { get; private set; }
         public ChallengeStatus Status { get; private set; }
         public ChallengeType Type { get; private set; }
+        public long? CreatorId { get; private set; }
+        public bool IsCreatedByTourist { get; private set; }
 
         private Challenge() { }
 
@@ -32,6 +34,28 @@ namespace Explorer.Encounters.Core.Domain
             XP = xp;
             Type = type;
             Status = status;
+            IsCreatedByTourist = false;
+        }
+
+        // Constructor for tourist-created challenges
+        public Challenge(string title, string description, double longitude, double latitude, int xp, ChallengeType type, long creatorId)
+        {
+            if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("Invalid Title.");
+            if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
+            if (longitude < -180 || longitude > 180) throw new ArgumentException("Invalid Longitude.");
+            if (latitude < -90 || latitude > 90) throw new ArgumentException("Invalid Latitude.");
+            if (xp < 0) throw new ArgumentException("XP must be non-negative.");
+            if (creatorId <= 0) throw new ArgumentException("Invalid CreatorId.");
+
+            Title = title;
+            Description = description;
+            Longitude = longitude;
+            Latitude = latitude;
+            XP = xp;
+            Type = type;
+            Status = ChallengeStatus.Draft; // Tourist-created challenges start as Draft
+            CreatorId = creatorId;
+            IsCreatedByTourist = true;
         }
 
         public void Publish()

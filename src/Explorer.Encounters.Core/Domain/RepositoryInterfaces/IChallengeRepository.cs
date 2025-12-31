@@ -10,5 +10,6 @@ namespace Explorer.Encounters.Core.Domain.RepositoryInterfaces
         Challenge Create(Challenge challenge);
         Challenge Update(Challenge challenge);
         void Delete(long id);
+        List<Challenge> GetPendingApproval();
     }
 }
