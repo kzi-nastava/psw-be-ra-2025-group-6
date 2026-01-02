@@ -24,4 +24,9 @@ public interface IBlogService
     BlogVoteDto? GetUserVote(long userId, long blogId);
     BlogDto RecalculateQualityStatus(long blogId);
     List<BlogDto> GetBlogsByQualityStatus(BlogQualityStatusDto status);
+    bool ToggleCommentLike(long blogId, long commentId, long userId);
+    int CountCommentLikes(long blogId, long commentId);
+    bool IsCommentLikedByUser(long blogId, long commentId, long userId);
+    void ReportComment(long blogId, long commentId, long userId, ReportTypeDto reason, string? additionalInfo);
+    bool IsCommentReportedByUser(long blogId, long commentId, long userId);
 }

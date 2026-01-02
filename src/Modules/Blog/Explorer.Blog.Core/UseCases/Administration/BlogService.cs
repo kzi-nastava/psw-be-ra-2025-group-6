@@ -14,11 +14,15 @@ public class BlogService : IBlogService
     private readonly IBlogRepository _blogRepository;
     private readonly IMapper _mapper;
     private readonly IInternalStakeholderService _stakeholderService;
-    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper)
+    private readonly ICommentLikeRepository _likeRepository;
+    private readonly ICommentReportRepository _reportRepository;
+    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, ICommentLikeRepository likeRepository, ICommentReportRepository reportRepository)
     {
         _blogRepository = blogRepository;
         _stakeholderService = stakeholderService;
         _mapper = mapper;
+        _likeRepository = likeRepository;
+        _reportRepository = reportRepository;
     }
 
     public PagedResult<BlogDto> GetPaged(int page, int pageSize)
@@ -144,6 +148,7 @@ public class BlogService : IBlogService
         var comments = blog.Comments
             .Select((c, index) => new CommentDto
             {    
+                Id = c.Id,
                 UserId = c.UserId,
                 AuthorName = c.AuthorName,
                 AuthorProfilePicture = c.AuthorProfilePicture,
@@ -257,5 +262,59 @@ public class BlogService : IBlogService
         var dto = _mapper.Map<BlogDto>(blog);
         dto.Username = _stakeholderService.GetUsername(blog.UserId);
         return dto;
+    }
+
+    public bool ToggleCommentLike(long blogId, long commentId, long userId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+        if (!blog.Comments.Any(c => c.Id == commentId))
+            throw new Exception("Comment not found.");
+
+        return _likeRepository.Toggle(blogId, commentId, userId);
+    }
+
+    public int CountCommentLikes(long blogId, long commentId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+        if (!blog.Comments.Any(c => c.Id == commentId))
+            throw new Exception("Comment not found.");
+
+        return _likeRepository.CountLikes(blogId, commentId);
+    }
+
+    public bool IsCommentLikedByUser(long blogId, long commentId, long userId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+        if (!blog.Comments.Any(c => c.Id == commentId))
+            throw new Exception("Comment not found.");
+
+        return _likeRepository.IsLikedByUser(blogId, commentId, userId);
+    }
+
+    public void ReportComment(long blogId, long commentId, long userId, ReportTypeDto reason, string? additionalInfo)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+        if (!blog.Comments.Any(c => c.Id == commentId))
+            throw new Exception("Comment not found.");
+        if (_reportRepository.Exists(blogId, commentId, userId))
+            throw new InvalidOperationException("You already reported this comment.");
+
+        var domainReason = (ReportType)(int)reason;
+
+        var report = new CommentReport(blogId, commentId, userId, domainReason, additionalInfo);
+        _reportRepository.Create(report);
+    }
+
+    public bool IsCommentReportedByUser(long blogId, long commentId, long userId)
+    {
+        return _reportRepository.Exists(blogId, commentId, userId);
     }
 }
