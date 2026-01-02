@@ -275,4 +275,44 @@ public class BlogController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpGet("{blogId:long}/comments/{commentId:long}/like")]
+    public IActionResult ToggleCommentLike(long blogId, long commentId)
+    {
+        var userId = User.PersonId();
+
+        var liked = _blogService.ToggleCommentLike(blogId, commentId, userId);
+        var count = _blogService.CountCommentLikes(blogId, commentId);
+
+        return Ok(new {liked, count});
+    }
+
+    [HttpGet("{blogId:long}/comments/{commentId:long}/likes")]
+    public IActionResult GetCommentLikes(long blogId, long commentId)
+    {
+        var userId = User.PersonId();
+
+        var count = _blogService.CountCommentLikes(blogId, commentId);
+        var liked = _blogService.IsCommentLikedByUser(blogId, commentId, userId);
+
+        return Ok(new {liked, count});
+    }
+
+    [HttpPost("{blogId:long}/comments/{commentId:long}/report")]
+    public IActionResult ReportComment(long blogId, long commentId, [FromBody] CommentReportCreateDto dto)
+    {
+        var userId = User.PersonId();
+
+        _blogService.ReportComment(blogId, commentId, userId, dto.Reason, dto.AdditionalInfo);
+        return NoContent(); // 204
+    }
+
+    [HttpGet("{blogId:long}/comments/{commentId:long}/report/status")]
+    public IActionResult GetReportStatus(long blogId, long commentId)
+    {
+        var userId = User.PersonId();
+
+        var alreadyReported = _blogService.IsCommentReportedByUser(blogId, commentId, userId);
+        return Ok(new { alreadyReported });
+    }
 }

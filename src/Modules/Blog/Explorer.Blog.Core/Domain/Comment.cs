@@ -4,6 +4,7 @@ namespace Explorer.Blog.Core.Domain;
 
 public class Comment : Entity
 {
+    public long BlogId { get; private set; }
     public long UserId { get; private set; }
     public string AuthorName { get; private set; }
     public string AuthorProfilePicture { get; private set; }
@@ -12,7 +13,7 @@ public class Comment : Entity
     public DateTime? LastUpdatedAt { get; private set; }
 
     private Comment() { }
-    public Comment(long userId, string authorName, string authorProfilePicture, string text)
+    public Comment(long blogId, long userId, string authorName, string authorProfilePicture, string text)
     {
         if (userId == 0)
             throw new ArgumentException("Invalid user.");
@@ -23,6 +24,7 @@ public class Comment : Entity
         if (string.IsNullOrWhiteSpace(authorName))
             throw new ArgumentException("Author name required.");
 
+        BlogId = blogId;
         UserId = userId;
         AuthorName = authorName;
         AuthorProfilePicture = authorProfilePicture;

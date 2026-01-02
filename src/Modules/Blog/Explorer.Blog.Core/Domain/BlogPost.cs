@@ -10,7 +10,6 @@ public class BlogPost : AggregateRoot
     public DateTime CreatedAt { get; private set; }
     public List<string> Images { get; private set; }
     public List<Comment> Comments { get; private set; } = new();
-
     public BlogStatus Status { get; set; }
     public DateTime? LastModifiedAt { get; private set; }
     public BlogQualityStatus QualityStatus { get; private set; } = BlogQualityStatus.None;
@@ -46,14 +45,14 @@ public class BlogPost : AggregateRoot
         Images = Images.Concat(imagePaths).ToList();
     }
 
-    public void AddComment(long userId, string authorName, string authorProfilePicture, string text)
+    public void AddComment(long blogId, long userId, string authorName, string authorProfilePicture, string text)
     {
         if (Comments == null)
         {
             Comments = new List<Comment>();
         }
 
-        var comment = new Comment(userId, authorName, authorProfilePicture, text);
+        var comment = new Comment(blogId, userId, authorName, authorProfilePicture, text);
         Comments.Add(comment);
 
         RecalculateQualityStatus();

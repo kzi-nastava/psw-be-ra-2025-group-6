@@ -105,7 +105,7 @@ public class BlogService : IBlogService
         var authorProfilePicture = _stakeholderService.GetProfilePicture(userId);
         
 
-        blog.AddComment(userId, authorName, authorProfilePicture, text);
+        blog.AddComment(blogId, userId, authorName, authorProfilePicture, text);
         _blogRepository.Update(blog);
 
         var comment = blog.Comments.Last();
