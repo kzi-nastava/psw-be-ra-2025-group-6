@@ -52,7 +52,6 @@ public class BlogService : IBlogService
 
     public BlogDto Update(BlogDto blogDto)
     {
-        //var blog = _mapper.Map<BlogPost>(blogDto);
         var blog = _blogRepository.GetById(blogDto.Id);
         if (blog == null)
             throw new NotFoundException("Blog not found");

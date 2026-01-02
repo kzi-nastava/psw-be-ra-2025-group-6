@@ -17,12 +17,11 @@ public class CommentReport : Entity
 
     public CommentReport() {}
 
-    public CommentReport(long blogId, long commentId, long userId, ReportType reason, string? additionalInfo,
-        AdminReportStatus reportStatus)
+    public CommentReport(long blogId, long commentId, long userId, ReportType reason, string? additionalInfo)
     {
         if (blogId <= 0) throw new ArgumentException("Invalid blog.");
         if (commentId <= 0) throw new ArgumentException("Invalid comment.");
-        if (UserId <= 0) throw new ArgumentException("Invalid user.");
+        if (userId <= 0) throw new ArgumentException("Invalid user.");
 
         BlogId = blogId;
         CommentId = commentId;
