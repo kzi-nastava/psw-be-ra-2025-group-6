@@ -17,6 +17,7 @@ public class BlogContext : DbContext
         modelBuilder.HasDefaultSchema("blog");
 
         ConfigureBlogPost(modelBuilder);
+        ConfigureComments(modelBuilder);
         ConfigureCommentLikes(modelBuilder);
         ConfigureCommentReports(modelBuilder);
 
@@ -51,6 +52,24 @@ public class BlogContext : DbContext
                 .WithOne()
                 .HasForeignKey(c => c.BlogId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
+
+    private static void ConfigureComments(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Comment>(cb =>
+        {
+            cb.ToTable("Comments", "blog");
+            cb.HasKey(c => c.Id);
+
+            cb.Property(c => c.UserId).IsRequired();
+            cb.Property(c => c.AuthorName).IsRequired();
+            cb.Property(c => c.AuthorProfilePicture).IsRequired();
+            cb.Property(c => c.Text).IsRequired();
+            cb.Property(c => c.CreatedAt).IsRequired();
+            cb.Property(c => c.LastUpdatedAt);
+
+            cb.HasIndex(c => c.BlogId);
         });
     }
 

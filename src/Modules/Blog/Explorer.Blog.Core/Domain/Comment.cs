@@ -32,8 +32,9 @@ public class Comment : Entity
         CreatedAt = DateTime.UtcNow;
     }
 
-    public Comment(long userId, string authorName, string authorProfilePicture, string text, DateTime createdAt, DateTime? lastUpdatedAt)
+    public Comment(long blogId, long userId, string authorName, string authorProfilePicture, string text, DateTime createdAt, DateTime? lastUpdatedAt)
     {
+        BlogId = blogId;
         UserId = userId;
         AuthorName = authorName;
         AuthorProfilePicture = authorProfilePicture;

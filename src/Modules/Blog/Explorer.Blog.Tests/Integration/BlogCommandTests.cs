@@ -6,7 +6,6 @@ using Explorer.Blog.Infrastructure.Database;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Security.Claims;
@@ -486,7 +485,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
             blog.AddOrUpdateVote(-11, VoteType.Downvote); 
 
         for (int i = 0; i < 12; i++)
-            blog.AddComment(-11, "Test user", "", $"Komentar {i}");
+            blog.AddComment(-1,-11, "Test user", "", $"Komentar {i}");
 
         blog.RecalculateQualityStatus();
 
@@ -515,7 +514,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
             blog.AddOrUpdateVote(i, VoteType.Upvote);
 
         for (int i = 1; i <= 40; i++)
-            blog.AddComment(i, $"User{i}", "",$"Komentar {i}");
+            blog.AddComment(-1, i, $"User{i}", "",$"Komentar {i}");
 
         blog.RecalculateQualityStatus();
 
