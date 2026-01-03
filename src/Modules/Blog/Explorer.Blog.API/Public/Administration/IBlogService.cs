@@ -29,4 +29,7 @@ public interface IBlogService
     bool IsCommentLikedByUser(long blogId, long commentId, long userId);
     void ReportComment(long blogId, long commentId, long userId, ReportTypeDto reason, string? additionalInfo);
     bool IsCommentReportedByUser(long blogId, long commentId, long userId);
+    PagedResult<CommentReportDto> GetOpenCommentReports(int page, int pageSize);
+    void ApproveCommentReport(long reportId, long adminId, string note);
+    void DismissCommentReport(long reportId, long adminId, string note);
 }

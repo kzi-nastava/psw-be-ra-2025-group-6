@@ -55,5 +55,12 @@ public class CommentReportDbRepository : ICommentReportRepository
     {
         return _dbSet.Count(x => x.ReportStatus == AdminReportStatus.OPEN);
     }
+
+    public CommentReport Update(CommentReport report)
+    {
+        _dbSet.Update(report);
+        DbContext.SaveChanges();
+        return report;
+    }
 }
 

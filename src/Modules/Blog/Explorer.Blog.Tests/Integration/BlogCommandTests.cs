@@ -514,7 +514,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
             blog.AddOrUpdateVote(i, VoteType.Upvote);
 
         for (int i = 1; i <= 40; i++)
-            blog.AddComment(-1, i, $"User{i}", "",$"Komentar {i}");
+            blog.AddComment( i, i, $"User{i}", "", $"Komentar {i}");
 
         blog.RecalculateQualityStatus();
 

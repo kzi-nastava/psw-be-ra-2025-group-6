@@ -317,4 +317,51 @@ public class BlogService : IBlogService
     {
         return _reportRepository.Exists(blogId, commentId, userId);
     }
+
+    public PagedResult<CommentReportDto> GetOpenCommentReports(int page, int pageSize)
+    {
+        if (page <= 0) page = 1;
+        if (pageSize <= 0) pageSize = 10;
+
+        var skip = (page - 1) * pageSize;
+
+        var openReports = _reportRepository.GetOpen(skip, pageSize);
+        var total = _reportRepository.CountOpen();
+
+        var items = openReports.Select(r => new CommentReportDto
+        {
+            Id = (int)r.Id,
+            BlogId = r.BlogId,
+            CommentId = r.CommentId,
+            UserId = r.UserId,
+            Reason = (ReportTypeDto)(int)r.Reason,
+            AdditionalInfo = r.AdditionalInfo,
+            CreatedAt = r.CreatedAt,
+            ReportStatus = (AdminReportStatusDto)(int)r.ReportStatus,
+            ReviewedAt = r.ReviewedAt,
+            ReviewerId = r.ReviewerId,
+            AdminNote = r.AdminNote
+        }).ToList();
+
+        return new PagedResult<CommentReportDto>(items, total);
+    }
+
+    public void ApproveCommentReport(long reportId, long adminId, string? note)
+    {
+        var report = _reportRepository.GetById(reportId);
+        if (report == null) throw new NotFoundException("Report not found");
+
+        report.Approve(adminId, note);
+
+        _reportRepository.Update(report);
+    }
+
+    public void DismissCommentReport(long reportId, long adminId, string? note)
+    {
+        var report = _reportRepository.GetById(reportId);
+        if (report == null) throw new NotFoundException("Report not found");
+
+        report.Dismiss(adminId, note);
+        _reportRepository.Update(report);
+    }
 }
