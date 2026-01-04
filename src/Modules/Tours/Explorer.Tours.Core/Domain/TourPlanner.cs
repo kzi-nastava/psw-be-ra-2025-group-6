@@ -13,6 +13,8 @@ namespace Explorer.Tours.Core.Domain
 
         public DateTime EndDate { get; set; }
 
+        private TourPlanner() { }
+
         public TourPlanner(long userId, long tourId, DateTime startDate, DateTime endDate)
         {
             UserId = userId;
