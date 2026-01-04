@@ -11,10 +11,6 @@ public class CommentLike : Entity
 
     public CommentLike(long blogId, long commentId, long userId)
     {
-        if (blogId <= 0) throw new ArgumentException("Invalid blogId.");
-        if (commentId <= 0) throw new ArgumentException("Invalid commentId.");
-        if (userId <= 0) throw new ArgumentException("Invalid userId.");
-
         BlogId = blogId;
         CommentId = commentId;
         UserId = userId;

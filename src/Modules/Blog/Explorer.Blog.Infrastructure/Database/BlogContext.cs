@@ -70,6 +70,7 @@ public class BlogContext : DbContext
             cb.Property(c => c.LastUpdatedAt);
 
             cb.HasIndex(c => c.BlogId);
+
         });
     }
 
@@ -84,7 +85,7 @@ public class BlogContext : DbContext
 
             b.HasOne<BlogPost>()
                 .WithMany()
-                .HasForeignKey(x => x.BlogId)
+                .HasForeignKey(x => x.CommentId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }
@@ -98,6 +99,10 @@ public class BlogContext : DbContext
 
             b.HasIndex(x => new { x.BlogId, x.CommentId, x.UserId }).IsUnique();
 
+            b.HasOne<Comment>()
+                .WithMany()
+                .HasForeignKey(x => x.CommentId)
+                .OnDelete(DeleteBehavior.Cascade);
             b.HasOne<BlogPost>()
                 .WithMany()
                 .HasForeignKey(x => x.BlogId)

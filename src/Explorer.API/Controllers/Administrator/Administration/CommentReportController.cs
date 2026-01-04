@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers.Administrator.Administration;
 
-[Authorize(Roles = "Administrator")]
+[Authorize(Policy = "administratorPolicy")]
 [Route("api/admin/comment-reports")]
 [ApiController]
 public class CommentReportController : ControllerBase

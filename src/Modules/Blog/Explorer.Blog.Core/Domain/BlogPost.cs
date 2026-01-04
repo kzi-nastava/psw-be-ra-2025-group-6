@@ -58,16 +58,10 @@ public class BlogPost : AggregateRoot
         RecalculateQualityStatus();
     }
 
-    public void EditComment(long userId, DateTime createdAt, string text)
+    public void EditComment(long commentId, long userId, DateTime createdAt, string text)
     {
-        if (Comments == null)
-            throw new InvalidOperationException("Comment does not exist.");
-
-        var comment = Comments.FirstOrDefault(c =>
-            c.UserId == userId &&
-            Math.Abs((c.CreatedAt - createdAt).TotalSeconds) < 1);
-
-        if (comment == null)
+        var comment = Comments?.FirstOrDefault(c => c.Id == commentId);
+        if (comment is null)
             throw new InvalidOperationException("Comment does not exist.");
 
         if (comment.UserId != userId)
@@ -79,16 +73,11 @@ public class BlogPost : AggregateRoot
         comment.Edit(text);
     }
 
-    public void DeleteComment(long userId, DateTime createdAt)
+    public void DeleteComment(long commentId, long userId, DateTime createdAt)
     {
-        if (Comments == null)
-            throw new InvalidOperationException("Comment does not exist.");
+        var comment = Comments?.FirstOrDefault(c => c.Id == commentId);
 
-        var comment = Comments.FirstOrDefault(c =>
-            c.UserId == userId &&
-            Math.Abs((c.CreatedAt - createdAt).TotalSeconds) < 1);
-
-        if(comment == null)
+        if (comment == null)
         throw new InvalidOperationException("Comment does not exist.");
 
         if (comment.UserId != userId)

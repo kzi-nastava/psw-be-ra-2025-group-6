@@ -13,8 +13,8 @@ public interface IBlogService
     BlogDto Delete(long id);
     void AddImages(long blogId, List<string> imagePaths);
     CommentDto AddComment(long blogId, long userId, string text);
-    CommentDto EditComment(long blogId, long userId, DateTime createdAt, string text);
-    CommentDto DeleteComment(long blogId, long userId, DateTime createdAt);
+    CommentDto EditComment(long blogId, long commentId, long userId, string text);
+    CommentDto DeleteComment(long blogId, long commentId, long userId);
     List<CommentDto> GetComments(long id);
     void Archive(long blogId);
     BlogDto UpdateDescription(long blogId, string newDescription);

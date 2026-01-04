@@ -3,6 +3,7 @@
 public class CommentDto
 {
     public long Id { get; set; }
+    public long BlogId { get; set; }
     public long UserId { get; set; }
     public string AuthorName { get; set; }
     public string AuthorProfilePicture { get; set; }

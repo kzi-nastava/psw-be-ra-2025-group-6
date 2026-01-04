@@ -113,28 +113,27 @@ public class BlogService : IBlogService
         return _mapper.Map<CommentDto>(comment);
     }
 
-    public CommentDto EditComment(long blogId, long userId, DateTime createdAt, string text)
+    public CommentDto EditComment(long blogId, long commentId, long userId, string text)
     {
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found.");
 
-        blog.EditComment(userId, createdAt, text);
-        _blogRepository.Update(blog);
+        var comment = blog.Comments.First(c => c.Id == commentId);
 
-        var comment = blog.Comments.First(c => c.UserId == userId && c.CreatedAt == createdAt);
+        blog.EditComment(commentId, userId, comment.CreatedAt, text);
+        _blogRepository.Update(blog);
 
         return _mapper.Map<CommentDto>(comment);
     }
 
-    public CommentDto DeleteComment(long blogId, long userId, DateTime createdAt) 
+    public CommentDto DeleteComment(long blogId, long commentId, long userId) 
     { 
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found");
 
-        var comment = blog.Comments?
-            .FirstOrDefault(c => c.UserId == userId && c.CreatedAt == createdAt);
+        var comment = blog.Comments.First(c => c.Id == commentId);
 
-        blog.DeleteComment(userId, createdAt);
+        blog.DeleteComment(commentId, userId, comment.CreatedAt);
         _blogRepository.Update(blog);
 
         return _mapper.Map<CommentDto>(comment);
