@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using Explorer.BuildingBlocks.Tests;
+using Explorer.Payments.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -15,12 +16,16 @@ public class BaseToursIntegrationTest : BaseWebIntegrationTest<ToursTestFactory>
     public BaseToursIntegrationTest(ToursTestFactory factory) : base(factory)
     {
         using var scope = Factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ToursContext>();
-        ReseedDatabase(db);
 
-        // Seed authentication-related data needed for Tours integration tests
+        // 1. Get all contexts
+        var toursContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var paymentsContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
         var stakeholdersContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+
+        // 2. Reseed all databases
+        ReseedPayments(paymentsContext);
         ReseedStakeholders(stakeholdersContext);
+        ReseedDatabase(toursContext);
     }
 
     private static void ReseedDatabase(ToursContext context)
@@ -42,6 +47,21 @@ public class BaseToursIntegrationTest : BaseWebIntegrationTest<ToursTestFactory>
         Array.Sort(scriptFiles);
         var script = string.Join('\n', scriptFiles.Select(File.ReadAllText));
         context.Database.ExecuteSqlRaw(script);
+    }
+    
+    private static void ReseedPayments(PaymentsContext context)
+    {
+        context.Database.ExecuteSqlRaw("CREATE SCHEMA IF NOT EXISTS payments;");
+        context.Database.EnsureCreated();
+        try
+        {
+            var databaseCreator = context.Database.GetService<IRelationalDatabaseCreator>();
+            databaseCreator.CreateTables();
+        }
+        catch
+        {
+            // Tables already exist
+        }
     }
 
     private static void ReseedStakeholders(StakeholdersContext context)
