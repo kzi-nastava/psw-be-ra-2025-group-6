@@ -51,5 +51,11 @@ namespace Explorer.Stakeholders.Core.UseCases
             user.Block();
             _userRepository.Update(user);
         }
+
+        public UserDto GetUser(long userId)
+        {
+            var user = _userRepository.Get(userId);
+            return _mapper.Map<UserDto>(user);
+        }
     }
 }

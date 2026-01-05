@@ -27,6 +27,13 @@ public class ProfilePostsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{id:long}")]
+    public ActionResult<PagedResult<ProfilePostDto>> GetOtherUsers(long id,[FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = _service.GetPagedByAuthor(id, page, pageSize);
+        return Ok(result);
+    }
+
     [HttpPost]
     public ActionResult<ProfilePostDto> Create([FromBody] ProfilePostDto dto)
     {
