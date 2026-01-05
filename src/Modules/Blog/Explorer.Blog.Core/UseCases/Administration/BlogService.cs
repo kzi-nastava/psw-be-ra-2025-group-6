@@ -6,6 +6,7 @@ using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.Core.Domain;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -120,7 +121,7 @@ public class BlogService : IBlogService
 
         var comment = blog.Comments.First(c => c.Id == commentId);
 
-        blog.EditComment(commentId, userId, comment.CreatedAt, text);
+        blog.EditComment(commentId, userId, text);
         _blogRepository.Update(blog);
 
         return _mapper.Map<CommentDto>(comment);
@@ -133,13 +134,13 @@ public class BlogService : IBlogService
 
         var comment = blog.Comments.First(c => c.Id == commentId);
 
-        blog.DeleteComment(commentId, userId, comment.CreatedAt);
+        blog.DeleteComment(commentId, userId);
         _blogRepository.Update(blog);
 
         return _mapper.Map<CommentDto>(comment);
     }
 
-    public List<CommentDto> GetComments(long blogId)
+    public List<CommentDto> GetComments(long blogId, long userId)
     {
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found");
@@ -148,12 +149,17 @@ public class BlogService : IBlogService
             .Select((c, index) => new CommentDto
             {    
                 Id = c.Id,
+                BlogId = c.BlogId,
                 UserId = c.UserId,
                 AuthorName = c.AuthorName,
                 AuthorProfilePicture = c.AuthorProfilePicture,
                 Text = c.Text,
                 CreatedAt = c.CreatedAt,
-                LastUpdatedAt = c.LastUpdatedAt
+                LastUpdatedAt = c.LastUpdatedAt,
+
+                LikeCount = _likeRepository.CountLikes(blogId, c.Id),
+                IsLikedByMe = _likeRepository.IsLikedByUser(blogId, c.Id, userId),
+                IsReportedByMe = _reportRepository.Exists(blogId, c.Id, userId)
             })
             .ToList();
 

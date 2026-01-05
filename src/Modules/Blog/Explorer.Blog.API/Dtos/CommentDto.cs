@@ -10,4 +10,7 @@ public class CommentDto
     public string Text{ get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? LastUpdatedAt { get; set; }
+    public int LikeCount { get; set; }
+    public bool IsLikedByMe { get; set; }
+    public bool IsReportedByMe { get; set; }
 }

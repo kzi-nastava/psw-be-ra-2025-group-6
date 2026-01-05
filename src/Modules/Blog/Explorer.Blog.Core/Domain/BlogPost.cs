@@ -58,7 +58,7 @@ public class BlogPost : AggregateRoot
         RecalculateQualityStatus();
     }
 
-    public void EditComment(long commentId, long userId, DateTime createdAt, string text)
+    public void EditComment(long commentId, long userId, string text)
     {
         var comment = Comments?.FirstOrDefault(c => c.Id == commentId);
         if (comment is null)
@@ -73,7 +73,7 @@ public class BlogPost : AggregateRoot
         comment.Edit(text);
     }
 
-    public void DeleteComment(long commentId, long userId, DateTime createdAt)
+    public void DeleteComment(long commentId, long userId)
     {
         var comment = Comments?.FirstOrDefault(c => c.Id == commentId);
 

@@ -5,6 +5,7 @@ using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection.Metadata;
 
 namespace Explorer.API.Controllers;
 
@@ -176,7 +177,8 @@ public class BlogController : ControllerBase
     [HttpGet("{id:long}/comments")]
     public IActionResult GetComment(long id)
     {
-        var comments = _blogService.GetComments(id);
+        var userId = User.PersonId();
+        var comments = _blogService.GetComments(id, userId);
         return Ok(comments);
     }
 
@@ -276,7 +278,7 @@ public class BlogController : ControllerBase
         }
     }
 
-    [HttpGet("{blogId:long}/comments/{commentId:long}/like")]
+    [HttpPost("{blogId:long}/comments/{commentId:long}/like")]
     public IActionResult ToggleCommentLike(long blogId, long commentId)
     {
         var userId = User.PersonId();

@@ -15,7 +15,7 @@ public interface IBlogService
     CommentDto AddComment(long blogId, long userId, string text);
     CommentDto EditComment(long blogId, long commentId, long userId, string text);
     CommentDto DeleteComment(long blogId, long commentId, long userId);
-    List<CommentDto> GetComments(long id);
+    List<CommentDto> GetComments(long id, long userId);
     void Archive(long blogId);
     BlogDto UpdateDescription(long blogId, string newDescription);
     void Vote(long userId, long blogId, VoteTypeDto voteType);

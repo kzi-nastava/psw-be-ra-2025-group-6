@@ -83,9 +83,13 @@ public class BlogContext : DbContext
 
             b.HasIndex(x => new { x.BlogId, x.CommentId, x.UserId }).IsUnique();
 
-            b.HasOne<BlogPost>()
+            b.HasOne<Comment>()
                 .WithMany()
                 .HasForeignKey(x => x.CommentId)
+                .OnDelete(DeleteBehavior.Cascade);
+            b.HasOne<BlogPost>()
+                .WithMany()
+                .HasForeignKey(x => x.BlogId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }
