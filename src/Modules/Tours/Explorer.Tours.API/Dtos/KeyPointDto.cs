@@ -10,4 +10,6 @@ public class KeyPointDto
     public double Latitude { get; set; }
     public string ImagePath { get; set; }
     public string Secret { get; set; }
+    public bool IsPublic { get; set; }
+    public long? PublicRequestId { get; set; }
 }

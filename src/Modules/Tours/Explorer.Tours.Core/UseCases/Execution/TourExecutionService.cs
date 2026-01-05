@@ -1,9 +1,10 @@
 using AutoMapper;
+using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Payments.API.Internal;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Execution;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
-using Explorer.BuildingBlocks.Core.Exceptions;
 
 namespace Explorer.Tours.Core.UseCases.Execution;
 
@@ -11,19 +12,19 @@ public class TourExecutionService : ITourExecutionService
 {
     private readonly ITourRepository _tourRepository;
     private readonly ITourExecutionRepository _executionRepository;
-    private readonly ITourPurchaseTokenRepository _tokenRepository;
+    private readonly IInternalTourPurchaseTokenService _tokenService;
     private readonly IMapper _mapper;
     private const double ProximityThresholdMeters = 50.0;
 
     public TourExecutionService(
         ITourRepository tourRepository,
         ITourExecutionRepository executionRepository,
-        ITourPurchaseTokenRepository tokenRepository,
+        IInternalTourPurchaseTokenService tokenService,
         IMapper mapper)
     {
         _tourRepository = tourRepository;
         _executionRepository = executionRepository;
-        _tokenRepository = tokenRepository;
+        _tokenService = tokenService;
         _mapper = mapper;
     }
 
@@ -35,8 +36,7 @@ public class TourExecutionService : ITourExecutionService
         if (tour.Status != TourStatus.CONFIRMED && tour.Status != TourStatus.ARCHIVED)
             throw new InvalidOperationException("Only published or archived tours can be started.");
 
-        var token = _tokenRepository.GetUnusedByTouristAndTour(touristId, dto.TourId);
-        if (token == null || token.IsUsed)
+        if (!_tokenService.DoesTouristHaveUnusedToken(touristId, dto.TourId))
             throw new InvalidOperationException("Tour must be purchased before starting. Please add it to your cart and checkout.");
 
 
@@ -252,13 +252,7 @@ public class TourExecutionService : ITourExecutionService
         _executionRepository.Update(execution);
 
         // Mark token as used ONLY when tour is completed (not abandoned)
-        var token = _tokenRepository.GetUnusedByTouristAndTour(touristId, execution.TourId);
-        
-        if (token != null)
-        {
-            token.MarkAsUsed();
-            _tokenRepository.Update(token);
-        }
+        _tokenService.MarkTokenAsUsed(touristId, execution.TourId);
 
         return new TourExecutionResultDto
         {

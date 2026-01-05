@@ -62,5 +62,10 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             if (entity == null) throw new NotFoundException("Not found: " + id);
             return entity;
         }
+
+        public List<Facility> GetAll()
+        {
+            return _dbSet.AsNoTracking().ToList();
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Payments.API.Internal;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Core.Domain;
@@ -13,14 +14,14 @@ public class TourService : ITourService
     private readonly ITourRepository _tourRepository;
     private readonly IEquipmentRepository _equipmentRepository;
     private readonly IMapper _mapper;
-    private readonly ITourPurchaseTokenRepository _tokenRepository;
+    private readonly IInternalTourPurchaseTokenService _tokenService;
 
-    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper, ITourPurchaseTokenRepository tokenRepository)
+    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper, IInternalTourPurchaseTokenService tokenService)
     {
         _tourRepository = repository;
         _equipmentRepository = equipmentRepository;
         _mapper = mapper;
-        _tokenRepository = tokenRepository;
+        _tokenService = tokenService;
     }
 
     public List<TourDto> GetAll()
@@ -140,7 +141,7 @@ public class TourService : ITourService
 
         foreach (var dto in durations)
         {
-            var duration=_mapper.Map<TourDuration>(dto);
+            var duration = _mapper.Map<TourDuration>(dto);
             var existing = tour.Duration.FirstOrDefault(d => d.TravelType == duration.TravelType);
             if (existing != null)
             {
@@ -148,13 +149,14 @@ public class TourService : ITourService
             }
             else
             {
-                tour.SetDuration(duration); 
+                tour.SetDuration(duration);
             }
         }
 
         _tourRepository.Update(tour);
         return _mapper.Map<TourDto>(tour);
     }
+   
     private TouristTourDto MapToTouristView(Tour tour)
     {
         return new TouristTourDto
@@ -180,16 +182,13 @@ public class TourService : ITourService
 
         return _mapper.Map<TourDto>(tour);
     }
-
     public List<TourDto> GetAvailableForTourist(long touristId)
     {
         var confirmedTours = _tourRepository.GetAll()
             .Where(t => t.Status == TourStatus.CONFIRMED)
             .ToList();
 
-        var purchasedTourIds = _tokenRepository.GetByTouristId(touristId)
-            .Select(t => t.TourId)
-            .ToHashSet();
+        var purchasedTourIds = _tokenService.GetPurchasedTourIds(touristId).ToHashSet();
 
         return _mapper.Map<List<TourDto>>(
             confirmedTours.Where(t => !purchasedTourIds.Contains(t.Id)).ToList()
@@ -204,9 +203,7 @@ public class TourService : ITourService
             .ToList();
 
 
-        var purchasedTourIds = _tokenRepository.GetByTouristId(touristId)
-            .Select(t => t.TourId)
-            .ToHashSet();
+        var purchasedTourIds = _tokenService.GetPurchasedTourIds(touristId).ToHashSet();
 
 
         var availableTours = confirmedTours

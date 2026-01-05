@@ -88,7 +88,6 @@ public class TourRepository : ITourRepository
         DbContext.Entry(existingTour).CurrentValues.SetValues(tour);
         DbContext.Entry(existingTour).Property(t => t.Duration).IsModified = true;
 
-
         try
         {
             DbContext.SaveChanges();
