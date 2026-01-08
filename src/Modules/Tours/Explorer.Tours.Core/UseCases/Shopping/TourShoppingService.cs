@@ -22,10 +22,22 @@ public class TourShoppingService : ITourShoppingService
 
         var tours = _tourRepository.GetPublishedWithKeyPoints();
         var matchingTours = tours
-            .Select(t => new { Tour = t, Distance = t.DistanceTo(latitude, longitude) })
+            .Select(t => new
+            {
+                Tour = t,
+                Distance = t.DistanceTo(latitude, longitude),
+                ReferencePoint = t.GetReferenceKeyPoint()
+            })
             .Where(t => t.Distance <= radiusInKm)
             .OrderBy(t => t.Distance)
-            .Select(t => _mapper.Map<TourDto>(t.Tour))
+            .Select(t =>
+            {
+                var dto = _mapper.Map<TourDto>(t.Tour);
+                dto.DistanceInKm = t.Distance;
+                dto.MarkerLat = t.ReferencePoint?.Latitude;
+                dto.MarkerLng = t.ReferencePoint?.Longitude;
+                return dto;
+            })
             .ToList();
 
         return matchingTours;
