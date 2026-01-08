@@ -8,6 +8,7 @@ using System.Net.Http.Json;
 
 namespace Explorer.Stakeholders.Tests.Integration.AdminUsers
 {
+    [Collection("Sequential")]
     public class UserControllerTests : IAsyncLifetime, IClassFixture<StakeholdersTestFactory>
     {
         private readonly StakeholdersTestFactory _factory;
