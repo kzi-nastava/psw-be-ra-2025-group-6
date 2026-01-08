@@ -5,6 +5,7 @@ public class TouristTourDto
     public string Name { get; set; }
     public KeyPointDto FirstKeyPoint { get; set; }
     public TourDifficultyDto Difficulty { get; set; }
+    public List<KeyPointDto> KeyPoints { get; set; }
     public double Price { get; set; }
     public List<string> Tags { get; set; }
     public double DistanceInKm { get; set; }

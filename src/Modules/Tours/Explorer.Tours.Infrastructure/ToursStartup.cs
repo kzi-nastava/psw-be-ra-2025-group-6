@@ -1,4 +1,5 @@
 using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Payments.API.Internal;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Admin;
 using Explorer.Tours.API.Public.Administration;
@@ -17,6 +18,7 @@ using Explorer.Tours.Core.UseCases.Authoring;
 using Explorer.Tours.API.Public.Shopping;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
+using Explorer.Tours.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -48,8 +50,10 @@ public static class ToursStartup
         services.AddScoped<IMeetupService, MeetupService>();
         services.AddScoped<Explorer.Tours.API.Public.Execution.ITourExecutionService, Explorer.Tours.Core.UseCases.Execution.TourExecutionService>();
         services.AddScoped<IAdminMapService, AdminMapService>();
+        services.AddScoped<IPublicEntityRequestService, PublicEntityRequestService>();
+        services.AddScoped<IPublicEntityService, PublicEntityService>();
+        services.AddScoped<IKeyPointService, KeyPointService>();
         services.AddScoped<ITourReviewService, TourReviewService>();
-        services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
         services.AddScoped<ITouristViewService, TouristViewService>();
         services.AddScoped<IQuizService, QuizService>();
@@ -57,6 +61,7 @@ public static class ToursStartup
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
+        services.AddScoped<ITourDataProvider, TourDataProvider>();
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
         services.AddScoped<IJournalRepository, JournalDbRepository>();
@@ -65,8 +70,9 @@ public static class ToursStartup
         services.AddScoped<ITourRepository, TourRepository>();
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<IMeetupRepository, MeetupRepository>();
-        services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
-        services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
+        services.AddScoped<IPublicEntityRequestRepository, PublicEntityRequestDbRepository>();
+        services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
+
 
 
         // Repo for executions

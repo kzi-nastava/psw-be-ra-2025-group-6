@@ -1,6 +1,8 @@
 using Explorer.Blog.Infrastructure;
 using Explorer.Stakeholders.Infrastructure;
 using Explorer.Tours.Infrastructure;
+using Explorer.Encounters.Infrastructure;
+using Explorer.Payments.Infrastructure;
 
 namespace Explorer.API.Startup;
 
@@ -11,6 +13,8 @@ public static class ModulesConfiguration
         services.ConfigureToursModule();
         services.ConfigureStakeholdersModule();
         services.ConfigureBlogModule();
+        services.ConfigureEncountersModule();
+        services.ConfigurePaymentsModule();
 
         return services;
     }

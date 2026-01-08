@@ -48,97 +48,31 @@ VALUES
 
 INSERT INTO tours."Tours"
 ("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
-VALUES 
-(
-    -4,
-    'Arhivirana tura',
-    'Test arhivirana tura za shopping cart',
-    0,
-    ARRAY['test', 'archived'],
-    150,
-    2,
-    3,
-    0,
-    '[]'::jsonb
-);
+VALUES
+    (
+        -4,
+        'Arhivirana',
+        'Arhivirana tura',
+        0,
+        ARRAY['Kanjiza', '7 days'],
+        100,
+        2,
+        4,
+        0,
+        '[]'::jsonb
+    );
 
 INSERT INTO tours."Tours"
-("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
-VALUES 
-(
-    -5,
-    'Another Confirmed Tour',
-    'Another confirmed tour',
-    2,
-    ARRAY['test'],
-    150,
-    1,
-    4,
-    0,
-    '[]'::jsonb
-);
-
-
--- Mark as published for tourist view tests (Status=CONFIRMED and PublishedTime set)
-UPDATE tours."Tours" SET "PublishedTime" = NOW() WHERE "Id" = -3;
-
-INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "Longitude", "Latitude", "ImagePath", "Secret")
-VALUES (-102, -1, 'Belgrade Center', 'Belgrade downtown point', 20.4489, 44.7866, 'belgrade.jpg', 'secret-belgrade');
-
--- Marketplace search seed data near Novi Sad
-INSERT INTO tours."Tours"
-("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
-VALUES 
-(
-    -10,
-    'Danube Walk',
-    'Lagana šetnja uz Dunav u centru Novog Sada',
-    0,
-    ARRAY['dunav', 'šetnja', 'novi sad'],
-    0,
-    1,
-    4,
-    0,
-    '[]'::jsonb
-);
-
-INSERT INTO tours."Tours"
-("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
-VALUES 
-(
-    -11,
-    'Fortress Loop',
-    'Kružna tura oko Petrovaradinske tvrđave',
-    1,
-    ARRAY['tvrđava', 'kružna', 'novi sad'],
-    0,
-    1,
-    4,
-    0,
-    '[]'::jsonb
-);
-
-INSERT INTO tours."Tours"
-("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
-VALUES 
-(
-    -12,
-    'Far Tour',
-    'Primer ture van Novog Sada (Beograd)',
-    0,
-    ARRAY['beograd', 'primer'],
-    0,
-    1,
-    4,
-    0,
-    '[]'::jsonb
-);
-
-INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "Longitude", "Latitude", "ImagePath", "Secret")
-VALUES (-103, -10, 'Kej kod Železničkog mosta', 'Pogled na Dunav', 19.8335, 45.2671, 'danube-walk.jpg', 'secret-danube-walk');
-
-INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "Longitude", "Latitude", "ImagePath", "Secret")
-VALUES (-104, -11, 'Glavni plato', 'Centralni deo tvrđave', 19.8610, 45.2520, 'fortress-loop.jpg', 'secret-fortress');
-
-INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "Longitude", "Latitude", "ImagePath", "Secret")
-VALUES (-105, -12, 'Trg republike', 'Centralna tačka u Beogradu', 20.4612, 44.8125, 'far-tour.jpg', 'secret-far');
+VALUES
+    (
+        -5,
+        'Another Confirmed Tour',
+        'Konfirmovana tura',
+        0,
+        ARRAY['Confirmed Tour', '7 days'],
+        100,
+        1,
+        4,
+        0,
+        '[]'::jsonb
+    );
