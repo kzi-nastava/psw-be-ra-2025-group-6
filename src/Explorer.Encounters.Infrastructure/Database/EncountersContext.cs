@@ -15,6 +15,8 @@ namespace Explorer.Encounters.Infrastructure.Database
         public DbSet<Challenge> Challenges { get; set; }
         public DbSet<TouristXpProfile> TouristXpProfiles { get; set; }
         public DbSet<EncounterCompletion> EncounterCompletions { get; set; }
+        public DbSet<SocialEncounter> SocialEncounters { get; set; }
+        public DbSet<ActiveSocialParticipant> ActiveSocialParticipants { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,6 +52,18 @@ namespace Explorer.Encounters.Infrastructure.Database
                 b.Property(c => c.XpAwarded).IsRequired();
                 b.HasIndex(c => new { c.UserId, c.ChallengeId }).IsUnique();
             });
+
+            // Konfiguriši SocialEncounter
+            modelBuilder.Entity<SocialEncounter>().HasKey(x => x.Id);
+            modelBuilder.Entity<SocialEncounter>()
+                .HasIndex(x => x.ChallengeId)
+                .IsUnique(); // Samo jedan SocialEncounter po Challenge-u
+
+            // Konfiguriši ActiveSocialParticipant
+            modelBuilder.Entity<ActiveSocialParticipant>().HasKey(x => x.Id);
+            modelBuilder.Entity<ActiveSocialParticipant>()
+                .HasIndex(x => new { x.UserId, x.SocialEncounterId })
+                .IsUnique();
         }
     }
 }
