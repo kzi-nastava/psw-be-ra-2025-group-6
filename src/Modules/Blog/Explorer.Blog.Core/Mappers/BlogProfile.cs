@@ -9,7 +9,8 @@ public class BlogProfile : Profile
     public BlogProfile()
     {
         CreateMap<BlogPost, BlogDto>().ReverseMap()
-            .ForMember(d => d.Comments, opt => opt.MapFrom(s => s.Comments));
+            .ForMember(d => d.Comments, opt => opt.MapFrom(s => s.Comments))
+            .ForMember(d => d.Location, opt => opt.MapFrom(s => s.Location));
         CreateMap<BlogDto, BlogPost>();
         CreateMap<Comment, CommentDto>().ReverseMap();
         CreateMap<BlogDto, BlogPost>().ReverseMap();
@@ -20,5 +21,11 @@ public class BlogProfile : Profile
         CreateMap<BlogVote, BlogVoteDto>().ForMember(dest => dest.Type, opt => opt.MapFrom(src => (VoteTypeDto)(int)src.Type));
         CreateMap<BlogVoteDto, BlogVote>().ForMember(dest => dest.Type, opt => opt.MapFrom(src => (VoteType)(int)src.Type));
         CreateMap<BlogQualityStatus, BlogQualityStatusDto>().ReverseMap();
+        CreateMap<BlogLocation, BlogLocationDto>().ReverseMap();
+        CreateMap<BlogContentItem, BlogContentItemDto>()
+            .ForMember(d => d.Type, opt => opt.MapFrom(s => (ContentTypeDto)s.Type));
+        CreateMap<BlogContentItemDto, BlogContentItem>()
+            .ForMember(d => d.Type, opt => opt.MapFrom(s => (ContentType)s.Type));
+
     }
 }
