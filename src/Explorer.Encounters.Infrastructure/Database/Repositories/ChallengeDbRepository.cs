@@ -47,5 +47,12 @@ namespace Explorer.Encounters.Infrastructure.Database.Repositories
             _db.SaveChanges();
             return challenge;
         }
+
+        public List<Challenge> GetPendingApproval()
+        {
+            return _db.Set<Challenge>()
+                .Where(c => c.IsCreatedByTourist && c.Status == ChallengeStatus.Draft)
+                .ToList();
+        }
     }
 }

@@ -14,6 +14,10 @@ namespace Explorer.Encounters.Core.Mappers
                 .ForMember(d => d.Type, opt => opt.MapFrom(s => s.Type.ToString()));
 
             CreateMap<ChallengeDto, Challenge>().ConvertUsing(new ChallengeDtoToChallengeConverter());
+
+            CreateMap<EncounterCompletion, EncounterCompletionDto>().ReverseMap();
+            CreateMap<SocialEncounter, SocialEncounterDto>().ReverseMap();
+            CreateMap<ActiveSocialParticipant, ActiveSocialParticipantDto>().ReverseMap();
         }
 
         private class ChallengeDtoToChallengeConverter : ITypeConverter<ChallengeDto, Challenge>

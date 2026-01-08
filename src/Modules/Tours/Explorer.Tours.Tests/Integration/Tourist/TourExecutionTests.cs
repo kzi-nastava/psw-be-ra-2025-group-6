@@ -1,4 +1,5 @@
 using Explorer.API.Controllers.Tourist;
+using Explorer.Payments.Infrastructure.Database;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Execution;
 using Explorer.Tours.Infrastructure.Database;
@@ -6,6 +7,7 @@ using Explorer.Tours.Infrastructure.Database.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using Explorer.Payments.Core.Domain;
 using Explorer.Tours.Core.Domain;
 
 namespace Explorer.Tours.Tests.Integration.Tourist;
@@ -23,24 +25,26 @@ public class TourExecutionTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var toursDbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
 
         // Clean up any existing tokens and executions
-        var existingTokens = dbContext.TourPurchaseTokens
+        var existingTokens = paymentsDbContext.TourPurchaseTokens
             .Where(t => t.TouristId == TOURIST_ID && t.TourId == -3)
             .ToList();
-        dbContext.TourPurchaseTokens.RemoveRange(existingTokens);
+        paymentsDbContext.TourPurchaseTokens.RemoveRange(existingTokens);
         
-        var existingExecutions = dbContext.Set<TourExecutionEntity>()
+        var existingExecutions = toursDbContext.Set<TourExecutionEntity>()
             .Where(e => e.TouristId == TOURIST_ID && e.TourId == -3)
             .ToList();
-        dbContext.Set<TourExecutionEntity>().RemoveRange(existingExecutions);
-        dbContext.SaveChanges();
+        toursDbContext.Set<TourExecutionEntity>().RemoveRange(existingExecutions);
+        paymentsDbContext.SaveChanges();
+        toursDbContext.SaveChanges();
 
         // Create purchase token (simulate checkout)
         var token = new TourPurchaseToken(TOURIST_ID, -3, "Tura Pariza", 100);
-        dbContext.TourPurchaseTokens.Add(token);
-        dbContext.SaveChanges();
+        paymentsDbContext.TourPurchaseTokens.Add(token);
+        paymentsDbContext.SaveChanges();
 
         var dto = new TourExecutionStartDto
         {
@@ -74,8 +78,8 @@ public class TourExecutionTests : BaseToursIntegrationTest
         result.RouteToFirstKeyPoint[0].Longitude.ShouldBe(dto.Longitude);
 
         // Verify token is NOT marked as used yet (only on complete)
-        dbContext.ChangeTracker.Clear();
-        var unchangedToken = dbContext.TourPurchaseTokens.Find(token.Id);
+        toursDbContext.ChangeTracker.Clear();
+        var unchangedToken = paymentsDbContext.TourPurchaseTokens.Find(token.Id);
         unchangedToken.ShouldNotBeNull();
         unchangedToken.IsUsed.ShouldBeFalse();
     }
@@ -104,14 +108,14 @@ public class TourExecutionTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
 
         // Clean up any existing tokens for this tour/tourist combination
-        var existingTokens = dbContext.TourPurchaseTokens
+        var existingTokens = paymentsDbContext.TourPurchaseTokens
             .Where(t => t.TouristId == TOURIST_ID && t.TourId == -3)
             .ToList();
-        dbContext.TourPurchaseTokens.RemoveRange(existingTokens);
-        dbContext.SaveChanges();
+        paymentsDbContext.TourPurchaseTokens.RemoveRange(existingTokens);
+        paymentsDbContext.SaveChanges();
 
         var dto = new TourExecutionStartDto
         {
@@ -131,12 +135,12 @@ public class TourExecutionTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
 
         // Create purchase token
         var token = new TourPurchaseToken(TOURIST_ID, -3, "Tura Pariza", 100);
-        dbContext.TourPurchaseTokens.Add(token);
-        dbContext.SaveChanges();
+        paymentsDbContext.TourPurchaseTokens.Add(token);
+        paymentsDbContext.SaveChanges();
 
         var startDto = new TourExecutionStartDto
         {
@@ -169,6 +173,11 @@ public class TourExecutionTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
+
+        var token = new TourPurchaseToken(TOURIST_ID, -3, "Tura Pariza", 100);
+        paymentsDbContext.TourPurchaseTokens.Add(token);
+        paymentsDbContext.SaveChanges();
 
         var startDto = new TourExecutionStartDto
         {
@@ -203,6 +212,11 @@ public class TourExecutionTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
+
+        var token = new TourPurchaseToken(TOURIST_ID, -3, "Tura Pariza", 100);
+        paymentsDbContext.TourPurchaseTokens.Add(token);
+        paymentsDbContext.SaveChanges();
 
         var startDto = new TourExecutionStartDto
         {
@@ -240,6 +254,11 @@ public class TourExecutionTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
+
+        var token = new TourPurchaseToken(TOURIST_ID, -3, "Tura Pariza", 100);
+        paymentsDbContext.TourPurchaseTokens.Add(token);
+        paymentsDbContext.SaveChanges();
 
         var startDto = new TourExecutionStartDto
         {
@@ -278,6 +297,11 @@ public class TourExecutionTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
+
+        var token = new TourPurchaseToken(TOURIST_ID, -3, "Tura Pariza", 100);
+        paymentsDbContext.TourPurchaseTokens.Add(token);
+        paymentsDbContext.SaveChanges();
 
         var startDto = new TourExecutionStartDto
         {
@@ -312,19 +336,20 @@ public class TourExecutionTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var toursDbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
 
         // Clean up existing data
-        var existingTokens = dbContext.TourPurchaseTokens
+        var existingTokens = paymentsDbContext.TourPurchaseTokens
             .Where(t => t.TouristId == TOURIST_ID && t.TourId == -3)
             .ToList();
-        dbContext.TourPurchaseTokens.RemoveRange(existingTokens);
-        dbContext.SaveChanges();
+        paymentsDbContext.TourPurchaseTokens.RemoveRange(existingTokens);
+        paymentsDbContext.SaveChanges();
 
         // Create purchase token
         var token = new TourPurchaseToken(TOURIST_ID, -3, "Tura Pariza", 100);
-        dbContext.TourPurchaseTokens.Add(token);
-        dbContext.SaveChanges();
+        paymentsDbContext.TourPurchaseTokens.Add(token);
+        paymentsDbContext.SaveChanges();
 
         // Start execution first
         var startDto = new TourExecutionStartDto
@@ -360,12 +385,12 @@ public class TourExecutionTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
 
         // Create purchase token
         var token = new TourPurchaseToken(TOURIST_ID, -3, "Tura Pariza", 100);
-        dbContext.TourPurchaseTokens.Add(token);
-        dbContext.SaveChanges();
+        paymentsDbContext.TourPurchaseTokens.Add(token);
+        paymentsDbContext.SaveChanges();
 
         // Start execution first
         var startDto = new TourExecutionStartDto
@@ -399,12 +424,12 @@ public class TourExecutionTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller1 = CreateController(scope, TOURIST_ID);
         var controller2 = CreateController(scope, 2); // Different tourist
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
 
         // Create purchase token for tourist 1
         var token = new TourPurchaseToken(TOURIST_ID, -3, "Tura Pariza", 100);
-        dbContext.TourPurchaseTokens.Add(token);
-        dbContext.SaveChanges();
+        paymentsDbContext.TourPurchaseTokens.Add(token);
+        paymentsDbContext.SaveChanges();
 
         // Start execution with tourist 1
         var startDto = new TourExecutionStartDto
@@ -427,20 +452,20 @@ public class TourExecutionTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
 
         // Clean up any existing tokens
-        var existingTokens = dbContext.TourPurchaseTokens
+        var existingTokens = paymentsDbContext.TourPurchaseTokens
             .Where(t => t.TouristId == TOURIST_ID && t.TourId == -3)
             .ToList();
-        dbContext.TourPurchaseTokens.RemoveRange(existingTokens);
-        dbContext.SaveChanges();
+        paymentsDbContext.TourPurchaseTokens.RemoveRange(existingTokens);
+        paymentsDbContext.SaveChanges();
 
         // Create and use purchase token
         var token = new TourPurchaseToken(TOURIST_ID, -3, "Tura Pariza", 100);
         token.MarkAsUsed();
-        dbContext.TourPurchaseTokens.Add(token);
-        dbContext.SaveChanges();
+        paymentsDbContext.TourPurchaseTokens.Add(token);
+        paymentsDbContext.SaveChanges();
 
         var dto = new TourExecutionStartDto
         {
@@ -460,24 +485,26 @@ public class TourExecutionTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var toursDbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
 
         // Clean up existing data
-        var existingTokens = dbContext.TourPurchaseTokens
+        var existingTokens = paymentsDbContext.TourPurchaseTokens
             .Where(t => t.TouristId == TOURIST_ID && t.TourId == -3)
             .ToList();
-        dbContext.TourPurchaseTokens.RemoveRange(existingTokens);
+        paymentsDbContext.TourPurchaseTokens.RemoveRange(existingTokens);
         
-        var existingExecutions = dbContext.Set<TourExecutionEntity>()
+        var existingExecutions = toursDbContext.Set<TourExecutionEntity>()
             .Where(e => e.TouristId == TOURIST_ID && e.TourId == -3)
             .ToList();
-        dbContext.Set<TourExecutionEntity>().RemoveRange(existingExecutions);
-        dbContext.SaveChanges();
+        toursDbContext.Set<TourExecutionEntity>().RemoveRange(existingExecutions);
+        paymentsDbContext.SaveChanges();
+        toursDbContext.SaveChanges();
 
         // Create purchase token
         var token = new TourPurchaseToken(TOURIST_ID, -3, "Tura Pariza", 100);
-        dbContext.TourPurchaseTokens.Add(token);
-        dbContext.SaveChanges();
+        paymentsDbContext.TourPurchaseTokens.Add(token);
+        paymentsDbContext.SaveChanges();
         var tokenId = token.Id;
 
         // Start first execution
@@ -494,8 +521,8 @@ public class TourExecutionTests : BaseToursIntegrationTest
         controller.Abandon(firstData!.TourExecutionId);
 
         // Verify token is still unused (check in DB)
-        dbContext.ChangeTracker.Clear();
-        var unchangedToken = dbContext.TourPurchaseTokens.Find(tokenId);
+        toursDbContext.ChangeTracker.Clear();
+        var unchangedToken = paymentsDbContext.TourPurchaseTokens.Find(tokenId);
         unchangedToken.ShouldNotBeNull();
         unchangedToken.IsUsed.ShouldBeFalse();
 
@@ -516,24 +543,26 @@ public class TourExecutionTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, TOURIST_ID);
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var toursDbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var paymentsDbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
 
         // Clean up existing data
-        var existingTokens = dbContext.TourPurchaseTokens
+        var existingTokens = paymentsDbContext.TourPurchaseTokens
             .Where(t => t.TouristId == TOURIST_ID && t.TourId == -3)
             .ToList();
-        dbContext.TourPurchaseTokens.RemoveRange(existingTokens);
+        paymentsDbContext.TourPurchaseTokens.RemoveRange(existingTokens);
         
-        var existingExecutions = dbContext.Set<TourExecutionEntity>()
+        var existingExecutions = toursDbContext.Set<TourExecutionEntity>()
             .Where(e => e.TouristId == TOURIST_ID && e.TourId == -3)
             .ToList();
-        dbContext.Set<TourExecutionEntity>().RemoveRange(existingExecutions);
-        dbContext.SaveChanges();
+        toursDbContext.Set<TourExecutionEntity>().RemoveRange(existingExecutions);
+        paymentsDbContext.SaveChanges();
+        toursDbContext.SaveChanges();
 
         // Create purchase token
         var token = new TourPurchaseToken(TOURIST_ID, -3, "Tura Pariza", 100);
-        dbContext.TourPurchaseTokens.Add(token);
-        dbContext.SaveChanges();
+        paymentsDbContext.TourPurchaseTokens.Add(token);
+        paymentsDbContext.SaveChanges();
 
         // Start and complete execution
         var startDto = new TourExecutionStartDto

@@ -1,12 +1,10 @@
+using Explorer.Payments.API.Dtos;
+using Explorer.Payments.API.Public;
 using Explorer.Stakeholders.Infrastructure.Authentication;
-using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Stakeholders.Infrastructure.Authentication;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public;
-using Explorer.Tours.Core.UseCases;
+using Explorer.Tours.API.Public.Authoring;
+using Explorer.Tours.Core.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Explorer.API.Controllers.Tourist
 {
@@ -15,10 +13,12 @@ namespace Explorer.API.Controllers.Tourist
     public class ShoppingCartController : ControllerBase
     {
         private readonly IShoppingCartService _shoppingCartService;
+        private readonly ITourService _tourService;
 
-        public ShoppingCartController(IShoppingCartService shoppingCartService)
+        public ShoppingCartController(IShoppingCartService shoppingCartService, ITourService tourService)
         {
             _shoppingCartService = shoppingCartService;
+            _tourService = tourService;
         }
 
         [HttpGet]
@@ -34,20 +34,22 @@ namespace Explorer.API.Controllers.Tourist
         {
             try
             {
-                var touristId = User.PersonId(); 
-                var result = _shoppingCartService.AddItem(touristId, tourId);
+                var touristId = User.PersonId();
+                var tour = _tourService.Get(tourId); 
+
+                var result = _shoppingCartService.AddItem(touristId, tour.Id, tour.Name, tour.Price);
                 return Ok(result);
             }
             catch (ArgumentException ex) when (ex.Message.Contains("already in the cart"))
             {
-                return Conflict(new { message = ex.Message }); // 409 status ispravka (duplikati) 
+                return Conflict(new { message = ex.Message }); 
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message }); // 400 status ispravka 
+                return BadRequest(new { message = ex.Message }); 
             }
         }
-
+        
         [HttpDelete("items/{tourId:long}")]
         public ActionResult<ShoppingCartDto> RemoveItem(long tourId)
         {
@@ -59,7 +61,7 @@ namespace Explorer.API.Controllers.Tourist
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message }); // 404 status ispravka 
+                return NotFound(new { message = ex.Message });
             }
         }
 
@@ -68,13 +70,17 @@ namespace Explorer.API.Controllers.Tourist
         {
             try
             {
-                var touristId = User.PersonId(); // Koristi extension metodu
+                var touristId = User.PersonId();
                 var result = _shoppingCartService.Checkout(touristId);
                 return Ok(result);
             }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
         }
     }

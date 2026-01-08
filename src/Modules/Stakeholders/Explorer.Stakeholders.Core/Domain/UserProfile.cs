@@ -38,4 +38,5 @@ public class UserProfile : Entity
         Quote = quote;
         Validate();
     }
+
 }

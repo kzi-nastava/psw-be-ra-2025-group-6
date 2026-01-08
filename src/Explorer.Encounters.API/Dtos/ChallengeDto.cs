@@ -10,5 +10,7 @@ namespace Explorer.Encounters.API.Dtos
         public int XP { get; set; }
         public string Status { get; set; }
         public string Type { get; set; }
+        public long? CreatorId { get; set; }
+        public bool IsCreatedByTourist { get; set; }
     }
 }

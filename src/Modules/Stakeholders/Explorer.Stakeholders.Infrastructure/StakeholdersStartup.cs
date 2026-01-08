@@ -43,6 +43,9 @@ public static class StakeholdersStartup
         services.AddScoped<ITourProblemService, TourProblemService>();
         services.AddScoped<ITourProblemMessageService, TourProblemMessageService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IProfilePostService, ProfilePostService>();
+        services.AddScoped<IClubPostService, ClubPostService>();
+        services.AddScoped<IClubMembershipService, TemporaryClubMembershipService>();
 
         services.AddScoped<IInternalStakeholderService, InternalStakeholdersService>();
 
@@ -63,6 +66,9 @@ public static class StakeholdersStartup
         services.AddScoped<ITourProblemMessageRepository, TourProblemMessageDatabaseRepository>();
         services.AddScoped<INotificationRepository, NotificationDatabaseRepository>();
         services.AddScoped<ITourInfoGateway, TourInfoGateway>();
+        services.AddScoped<IProfilePostRepository, ProfilePostDbRepository>();
+        services.AddScoped<IClubPostRepository, ClubPostDbRepository>();
+        services.AddScoped<IBlogInfoGateway, BlogInfoGateway>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();
