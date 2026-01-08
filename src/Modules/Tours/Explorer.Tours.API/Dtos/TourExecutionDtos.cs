@@ -37,6 +37,9 @@ public class RecentTourExecutionResultDto
 {
     public long TourExecutionId { get; set; }
     public long TourId { get; set; }
+
+    public string TourName { get; set; }
+    public string TourDescription { get; set; }
     public long TouristId { get; set; }
     public string Status { get; set; }
     public DateTime StartTime { get; set; }

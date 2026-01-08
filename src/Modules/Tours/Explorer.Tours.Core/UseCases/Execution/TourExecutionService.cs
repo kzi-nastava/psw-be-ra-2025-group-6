@@ -313,6 +313,8 @@ public class TourExecutionService : ITourExecutionService
             {
                 TourExecutionId = execution.Id,
                 TourId = execution.TourId,
+                TourName = tour.Name,
+                TourDescription = tour.Description,
                 TouristId = execution.TouristId,
                 Status = execution.Status.ToString(),
                 StartTime = execution.StartTime,
