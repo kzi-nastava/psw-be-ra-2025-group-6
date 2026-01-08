@@ -301,6 +301,29 @@ public class TourExecutionService : ITourExecutionService
         }).ToList();
     }
 
+    public List<RecentTourExecutionResultDto> GetRecentExecutedTours(long touristId)
+    {
+        var executions = _executionRepository.GetAll(touristId);
+
+        return executions.Select(execution =>
+        {
+            var tour = _tourRepository.GetWithKeyPoints(execution.TourId);
+
+            return new RecentTourExecutionResultDto
+            {
+                TourExecutionId = execution.Id,
+                TourId = execution.TourId,
+                TouristId = execution.TouristId,
+                Status = execution.Status.ToString(),
+                StartTime = execution.StartTime,
+                EndTime = execution.EndTime,
+                LastActivity = execution.LastActivity,
+                ProgressPercentage = execution.ProgressPercentage,
+                FirstKeyPoint = _mapper.Map<KeyPointDto>(tour.KeyPoints[0])
+            };
+        }).ToList();
+    }
+
     private double CalculateProgress(List<KeyPoint> orderedKeyPoints, List<CompletedKeyPoint> completedKeyPoints)
     {
         if (orderedKeyPoints.Count == 0) return 0;

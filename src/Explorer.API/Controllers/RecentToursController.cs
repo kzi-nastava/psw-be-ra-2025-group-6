@@ -49,7 +49,7 @@ public class RecentToursController : ControllerBase
         {
             Debug.WriteLine($"Exception in GetTouristsTours method: {ex.Message}");
         }
-        return Ok(_tourExecutionService.GetExecutedTours(id));
+        return Ok(_tourExecutionService.GetRecentExecutedTours(id));
     }
 
 
