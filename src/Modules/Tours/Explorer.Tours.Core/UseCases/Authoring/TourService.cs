@@ -206,12 +206,12 @@ public class TourService : ITourService
 
         var purchasedTourIds = _tokenService.GetPurchasedTourIds(touristId).ToHashSet();
 
-        /*return _mapper.Map<List<TourDto>>(
-            confirmedTours.Where(t => !purchasedTourIds.Contains(t.Id)).ToList()
-        );*/
         return _mapper.Map<List<TourDto>>(
-            confirmedTours
+            confirmedTours.Where(t => !purchasedTourIds.Contains(t.Id)).ToList()
         );
+        /*return _mapper.Map<List<TourDto>>(
+            confirmedTours
+        );*/
     }
 
     public PagedResult<TourDto> GetAvailableForTouristPaged(long touristId, int page, int pageSize)
