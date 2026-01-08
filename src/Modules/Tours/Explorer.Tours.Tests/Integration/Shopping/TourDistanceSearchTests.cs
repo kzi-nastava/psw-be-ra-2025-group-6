@@ -25,8 +25,10 @@ public class TourDistanceSearchTests : BaseToursIntegrationTest
         tours.Count.ShouldBe(2);
         tours[0].Id.ShouldBe(-10); // Closest (distance 0)
         tours[0].DistanceInKm.ShouldBe(0, 0.0001);
-        tours[0].MarkerLat.ShouldBe(45.2671, 0.0001);
-        tours[0].MarkerLng.ShouldBe(19.8335, 0.0001);
+        tours[0].MarkerLat.HasValue.ShouldBeTrue();
+        tours[0].MarkerLat.Value.ShouldBe(45.2671, 0.0001);
+        tours[0].MarkerLng.HasValue.ShouldBeTrue();
+        tours[0].MarkerLng.Value.ShouldBe(19.8335, 0.0001);
         tours[1].Id.ShouldBe(-11);
     }
 
