@@ -18,7 +18,7 @@ public class CommentReportController : ControllerBase
         _blogService = blogService;
     }
 
-    [HttpGet("open")]
+    [HttpGet("by-status")]
     public ActionResult GetByReportStatus([FromQuery] AdminReportStatusDto status, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         var result = _blogService.GetByReportStatus(status, page, pageSize);
