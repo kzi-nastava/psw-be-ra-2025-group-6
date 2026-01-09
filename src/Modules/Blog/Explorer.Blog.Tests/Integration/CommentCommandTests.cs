@@ -386,6 +386,7 @@ public class CommentCommandTests : BaseBlogIntegrationTest
         var admin = CreateAdminReportController(scope, adminId: -1);
 
         var result = admin.Approve(reportId, new CommentReportReviewDto { Note = "ok" });
+        result.ShouldBeOfType<NoContentResult>();
 
         var updated = dbContext.CommentReports.First(r => r.Id == reportId);
         updated.ReportStatus.ShouldBe(AdminReportStatus.APPROVED);
