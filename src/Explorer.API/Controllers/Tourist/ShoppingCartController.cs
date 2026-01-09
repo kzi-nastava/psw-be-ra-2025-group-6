@@ -24,7 +24,7 @@ namespace Explorer.API.Controllers.Tourist
         [HttpGet]
         public ActionResult<ShoppingCartDto> Get()
         {
-            var touristId = User.PersonId();
+            if (!TryGetPersonId(out var touristId)) return Unauthorized();
             var result = _shoppingCartService.GetByTouristId(touristId);
             return Ok(result);
         }
@@ -34,7 +34,7 @@ namespace Explorer.API.Controllers.Tourist
         {
             try
             {
-                var touristId = User.PersonId();
+                if (!TryGetPersonId(out var touristId)) return Unauthorized();
                 var tour = _tourService.Get(tourId); 
 
                 var result = _shoppingCartService.AddItem(touristId, tour.Id, tour.Name, tour.Price);
@@ -55,7 +55,7 @@ namespace Explorer.API.Controllers.Tourist
         {
             try
             {
-                var touristId = User.PersonId();
+                if (!TryGetPersonId(out var touristId)) return Unauthorized();
                 var result = _shoppingCartService.RemoveItem(touristId, tourId);
                 return Ok(result);
             }
@@ -70,7 +70,7 @@ namespace Explorer.API.Controllers.Tourist
         {
             try
             {
-                var touristId = User.PersonId();
+                if (!TryGetPersonId(out var touristId)) return Unauthorized();
                 var result = _shoppingCartService.Checkout(touristId);
                 return Ok(result);
             }
@@ -82,6 +82,12 @@ namespace Explorer.API.Controllers.Tourist
             {
                 return NotFound(new { message = ex.Message });
             }
+        }
+
+        private bool TryGetPersonId(out long personId)
+        {
+            personId = User.PersonId();
+            return personId > 0;
         }
     }
 }

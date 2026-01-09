@@ -1,4 +1,7 @@
 using Explorer.BuildingBlocks.Core.Exceptions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text.Json;
 
@@ -32,26 +35,80 @@ public class ExceptionHandlingMiddleware
     {
         context.Response.ContentType = "application/json";
 
-        var (statusCode, message) = exception switch
+        var (statusCode, response) = exception switch
         {
-            ArgumentException ex => (HttpStatusCode.BadRequest, ex.Message),
-            UnauthorizedAccessException ex => (HttpStatusCode.Unauthorized, ex.Message),
-            ForbiddenException ex => (HttpStatusCode.Forbidden, ex.Message),
-            NotFoundException ex => (HttpStatusCode.NotFound, ex.Message),
-            EntityValidationException ex => (HttpStatusCode.UnprocessableEntity, ex.Message),
-            _ => (HttpStatusCode.InternalServerError, "An internal server error occurred.")
+            RequestValidationException ex => (
+                HttpStatusCode.BadRequest,
+                new ApiErrorResponse(
+                    "VALIDATION_ERROR",
+                    "Validation failed.",
+                    ex.Errors.Select(e => new ApiErrorDetail(e.Field, e.Message)).ToList()
+                )
+            ),
+            AlreadyExistsException ex => (
+                HttpStatusCode.Conflict,
+                new ApiErrorResponse(
+                    "CONFLICT",
+                    "Resource already exists.",
+                    new List<ApiErrorDetail>
+                    {
+                        new(ex.Field ?? "general", ex.Message)
+                    }
+                )
+            ),
+            EntityValidationException ex => (
+                HttpStatusCode.BadRequest,
+                new ApiErrorResponse(
+                    "VALIDATION_ERROR",
+                    "Validation failed.",
+                    new List<ApiErrorDetail>
+                    {
+                        new("general", ex.Message)
+                    }
+                )
+            ),
+            ArgumentException ex => (
+                HttpStatusCode.BadRequest,
+                new ApiErrorResponse(
+                    "VALIDATION_ERROR",
+                    "Validation failed.",
+                    new List<ApiErrorDetail>
+                    {
+                        new("general", ex.Message)
+                    }
+                )
+            ),
+            UnauthorizedAccessException ex => BuildUnauthorizedResponse(context, ex),
+            ForbiddenException ex => (
+                HttpStatusCode.Forbidden,
+                new ApiErrorResponse("FORBIDDEN", ex.Message)
+            ),
+            NotFoundException ex => (
+                HttpStatusCode.NotFound,
+                new ApiErrorResponse("NOT_FOUND", ex.Message)
+            ),
+            _ => (
+                HttpStatusCode.InternalServerError,
+                new ApiErrorResponse("INTERNAL_ERROR", "An unexpected error occurred.")
+            )
         };
 
         context.Response.StatusCode = (int)statusCode;
 
-        var response = new
-        {
-            title = "An error occurred",
-            status = (int)statusCode,
-            detail = message
-        };
-
         var jsonResponse = JsonSerializer.Serialize(response);
         await context.Response.WriteAsync(jsonResponse);
+    }
+
+    private static (HttpStatusCode, ApiErrorResponse) BuildUnauthorizedResponse(HttpContext context, UnauthorizedAccessException ex)
+    {
+        var isLogin = context.Request.Path.StartsWithSegments("/api/users/login", StringComparison.OrdinalIgnoreCase);
+        var isInvalidCredentials = ex.Message.Contains("Invalid credentials", StringComparison.OrdinalIgnoreCase);
+
+        if (isLogin || isInvalidCredentials)
+        {
+            return (HttpStatusCode.Unauthorized, new ApiErrorResponse("INVALID_CREDENTIALS", "Invalid username or password."));
+        }
+
+        return (HttpStatusCode.Forbidden, new ApiErrorResponse("FORBIDDEN", ex.Message));
     }
 }

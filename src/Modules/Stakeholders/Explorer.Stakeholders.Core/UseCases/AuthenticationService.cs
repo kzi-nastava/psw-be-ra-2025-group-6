@@ -44,12 +44,66 @@ public class AuthenticationService : IAuthenticationService
     public AuthenticationTokensDto RegisterTourist(AccountRegistrationDto account)
     {
         if (_userRepository.Exists(account.Username))
-            throw new EntityValidationException("Provided username already exists.");
+            throw new AlreadyExistsException("Provided username already exists.", "username");
 
-        var user = _userRepository.Create(new User(account.Username, account.Password, UserRole.Tourist, true));
-        var person = _personRepository.Create(new Person(user.Id, account.Name, account.Surname, account.Email));
-        _userProfileRepository.Create(new UserProfile(user.Id, account.Name, account.Surname, "", "", ""));
+        User user;
+        try
+        {
+            user = new User(account.Username, account.Password, UserRole.Tourist, true);
+        }
+        catch (ArgumentException ex)
+        {
+            throw BuildUserValidationException(ex);
+        }
+
+        user = _userRepository.Create(user);
+
+        Person person;
+        try
+        {
+            person = new Person(user.Id, account.Name, account.Surname, account.Email);
+        }
+        catch (ArgumentException ex)
+        {
+            throw BuildPersonValidationException(ex);
+        }
+
+        person = _personRepository.Create(person);
+
+        try
+        {
+            _userProfileRepository.Create(new UserProfile(user.Id, account.Name, account.Surname, "", "", ""));
+        }
+        catch (ArgumentException ex)
+        {
+            throw BuildPersonValidationException(ex);
+        }
 
         return _tokenGenerator.GenerateAccessToken(user, person.Id);
+    }
+
+    private static RequestValidationException BuildUserValidationException(ArgumentException ex)
+    {
+        var (field, message) = ex.Message switch
+        {
+            "Invalid Name" => ("username", "Username is required."),
+            "Invalid Surname" => ("password", "Password is required."),
+            _ => ("general", ex.Message)
+        };
+
+        return new RequestValidationException(new[] { new ValidationError(field, message) });
+    }
+
+    private static RequestValidationException BuildPersonValidationException(ArgumentException ex)
+    {
+        var (field, message) = ex.Message switch
+        {
+            "Invalid Name" => ("name", "Name is required."),
+            "Invalid Surname" => ("surname", "Surname is required."),
+            "Invalid Email" => ("email", "Email is invalid."),
+            _ => ("general", ex.Message)
+        };
+
+        return new RequestValidationException(new[] { new ValidationError(field, message) });
     }
 }
