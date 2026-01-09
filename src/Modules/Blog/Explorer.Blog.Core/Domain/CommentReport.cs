@@ -36,7 +36,6 @@ public class CommentReport : Entity
 
     private void Review(long adminId, AdminReportStatus newStatus, string? note)
     {
-        if (adminId <= 0) throw new ArgumentException("Invalid admin.");
         if (ReportStatus != AdminReportStatus.OPEN)
             throw new InvalidOperationException("Report is already reviewed.");
 

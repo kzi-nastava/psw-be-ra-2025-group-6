@@ -166,7 +166,7 @@ public class BlogPost : AggregateRoot
     public void HideComment(long commentId, long adminId)
     {
         var comment = Comments.FirstOrDefault(c => c.Id == commentId);
-        if (comment != null)
+        if (comment == null)
         {
             throw new ArgumentException("Comment not found.");
         }

@@ -368,6 +368,7 @@ public class BlogService : IBlogService
         _blogRepository.Update(blog);
 
         _reportRepository.DeleteOpenByComment(report.BlogId, report.CommentId);
+        
     }
 
     public void DismissCommentReport(long reportId, long adminId, string? note)

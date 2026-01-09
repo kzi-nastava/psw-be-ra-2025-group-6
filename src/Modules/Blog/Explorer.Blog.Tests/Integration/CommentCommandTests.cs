@@ -366,14 +366,13 @@ public class CommentCommandTests : BaseBlogIntegrationTest
         EnsureBlogExists(dbContext, -1, -11);
 
         var author = CreateController(scope, userId: -11);
-        (author.AddComment(blogId, new CommentCreateDto { Text = "Komentar za admin approve" }) as OkObjectResult)
-            .ShouldNotBeNull();
+        var addRes = author.AddComment(blogId, new CommentCreateDto { Text = "Komentar za admin approve" }) as OkObjectResult;
+        addRes.ShouldNotBeNull();
 
-        var commentId = dbContext.Comments
-            .Where(c => c.BlogId == blogId && c.Text == "Komentar za admin approve")
-            .OrderByDescending(c => c.CreatedAt)
-            .Select(c => c.Id)
-            .First();
+        var createdComment = addRes.Value as CommentDto;
+        createdComment.ShouldNotBeNull();
+
+        var commentId = createdComment.Id;
 
         var reporter = CreateController(scope, userId: -12);
         (reporter.ReportComment(blogId, commentId, new CommentReportCreateDto { Reason = 0, AdditionalInfo = "x" }) as NoContentResult)
@@ -384,18 +383,18 @@ public class CommentCommandTests : BaseBlogIntegrationTest
             .Select(r => r.Id)
             .First();
 
-        var admin = CreateAdminReportController(scope, adminId: 999);
+        var admin = CreateAdminReportController(scope, adminId: -1);
 
-        (admin.GetOpen() as OkObjectResult).ShouldNotBeNull();
-
-        var approve = admin.Approve(reportId, new CommentReportReviewDto { Note = "ok" }) as NoContentResult;
-        approve.ShouldNotBeNull();
+        var result = admin.Approve(reportId, new CommentReportReviewDto { Note = "ok" });
 
         var updated = dbContext.CommentReports.First(r => r.Id == reportId);
         updated.ReportStatus.ShouldBe(AdminReportStatus.APPROVED);
-        updated.ReviewerId.ShouldBe(999);
+        updated.ReviewerId.ShouldBe(-1);
         updated.ReviewedAt.ShouldNotBeNull();
         updated.AdminNote.ShouldBe("ok");
+
+        var comment = dbContext.Comments.First(c => c.Id == commentId);
+        comment.IsHidden.ShouldBeTrue();
     }
 
     [Fact]
