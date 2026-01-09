@@ -6,7 +6,6 @@ using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Internal;
-using Explorer.Stakeholders.Core.Domain;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -159,7 +158,9 @@ public class BlogService : IBlogService
 
                 LikeCount = _likeRepository.CountLikes(blogId, c.Id),
                 IsLikedByMe = _likeRepository.IsLikedByUser(blogId, c.Id, userId),
-                IsReportedByMe = _reportRepository.Exists(blogId, c.Id, userId)
+                IsReportedByMe = _reportRepository.Exists(blogId, c.Id, userId),
+
+                IsHidden = c.IsHidden
             })
             .ToList();
 
@@ -323,15 +324,16 @@ public class BlogService : IBlogService
         return _reportRepository.Exists(blogId, commentId, userId);
     }
 
-    public PagedResult<CommentReportDto> GetOpenCommentReports(int page, int pageSize)
+    public PagedResult<CommentReportDto> GetByReportStatus(AdminReportStatusDto statusDto, int page, int pageSize)
     {
         if (page <= 0) page = 1;
         if (pageSize <= 0) pageSize = 10;
 
         var skip = (page - 1) * pageSize;
+        var status = (AdminReportStatus)(int)statusDto;
 
-        var openReports = _reportRepository.GetOpen(skip, pageSize);
-        var total = _reportRepository.CountOpen();
+        var openReports = _reportRepository.GetByReportStatus(status, skip, pageSize);
+        var total = _reportRepository.CountByStatus(status);
 
         var items = openReports.Select(r => new CommentReportDto
         {
@@ -356,9 +358,16 @@ public class BlogService : IBlogService
         var report = _reportRepository.GetById(reportId);
         if (report == null) throw new NotFoundException("Report not found");
 
-        report.Approve(adminId, note);
+        var blog = _blogRepository.GetById(report.BlogId);
+        if (blog == null) throw new NotFoundException("Blog not found");
 
+        report.Approve(adminId, note);
         _reportRepository.Update(report);
+
+        blog.HideComment(report.CommentId, adminId);
+        _blogRepository.Update(blog);
+
+        _reportRepository.DeleteOpenByComment(report.BlogId, report.CommentId);
     }
 
     public void DismissCommentReport(long reportId, long adminId, string? note)

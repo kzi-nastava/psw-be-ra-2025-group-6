@@ -13,4 +13,6 @@ public class CommentDto
     public int LikeCount { get; set; }
     public bool IsLikedByMe { get; set; }
     public bool IsReportedByMe { get; set; }
+
+    public bool IsHidden { get; set; }
 }

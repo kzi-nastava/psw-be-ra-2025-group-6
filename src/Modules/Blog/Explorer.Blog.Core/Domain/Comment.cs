@@ -11,6 +11,7 @@ public class Comment : Entity
     public string Text { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? LastUpdatedAt { get; private set; }
+    public bool IsHidden { get; private set; }
 
     private Comment() { }
     public Comment(long blogId, long userId, string authorName, string authorProfilePicture, string text)
@@ -30,6 +31,7 @@ public class Comment : Entity
         AuthorProfilePicture = authorProfilePicture;
         Text = text;
         CreatedAt = DateTime.UtcNow;
+        IsHidden = false;
     }
 
     public Comment(long blogId, long userId, string authorName, string authorProfilePicture, string text, DateTime createdAt, DateTime? lastUpdatedAt)
@@ -41,6 +43,7 @@ public class Comment : Entity
         Text = text;
         CreatedAt = createdAt;
         LastUpdatedAt = lastUpdatedAt;
+        IsHidden = false;
     }
 
     public void Edit(string newText)
@@ -50,5 +53,10 @@ public class Comment : Entity
 
         Text = newText.Trim();
         LastUpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Hide(long adminId)
+    {
+        IsHidden = true;
     }
 }

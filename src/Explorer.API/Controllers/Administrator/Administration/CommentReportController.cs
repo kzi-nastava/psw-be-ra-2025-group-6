@@ -19,9 +19,9 @@ public class CommentReportController : ControllerBase
     }
 
     [HttpGet("open")]
-    public ActionResult GetOpen([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public ActionResult GetByReportStatus([FromQuery] AdminReportStatusDto status, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var result = _blogService.GetOpenCommentReports(page, pageSize);
+        var result = _blogService.GetByReportStatus(status, page, pageSize);
         return Ok(result);
     }
 

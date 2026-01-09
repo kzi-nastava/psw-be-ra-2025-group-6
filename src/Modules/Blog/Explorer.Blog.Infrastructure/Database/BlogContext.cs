@@ -68,6 +68,7 @@ public class BlogContext : DbContext
             cb.Property(c => c.Text).IsRequired();
             cb.Property(c => c.CreatedAt).IsRequired();
             cb.Property(c => c.LastUpdatedAt);
+            cb.Property(c => c.IsHidden).IsRequired().HasDefaultValue(false);
 
             cb.HasIndex(c => c.BlogId);
 

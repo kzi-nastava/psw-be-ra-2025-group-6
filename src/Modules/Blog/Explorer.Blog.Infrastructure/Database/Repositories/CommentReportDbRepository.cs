@@ -40,10 +40,10 @@ public class CommentReportDbRepository : ICommentReportRepository
         return _dbSet.FirstOrDefault(x => x.Id == id);
     }
 
-    public IEnumerable<CommentReport> GetOpen(int skip, int take)
+    public IEnumerable<CommentReport> GetByReportStatus(AdminReportStatus status, int skip, int take)
     {
         return _dbSet
-            .Where(r => r.ReportStatus == AdminReportStatus.OPEN)
+            .Where(r => r.ReportStatus == status)
             .OrderBy(r => r.CreatedAt)
             .Skip(skip)
             .Take(take)
@@ -51,9 +51,9 @@ public class CommentReportDbRepository : ICommentReportRepository
             .ToList();
     }
 
-    public int CountOpen()
+    public int CountByStatus(AdminReportStatus status)
     {
-        return _dbSet.Count(x => x.ReportStatus == AdminReportStatus.OPEN);
+        return _dbSet.Count(r => r.ReportStatus == status);
     }
 
     public CommentReport Update(CommentReport report)
@@ -61,6 +61,17 @@ public class CommentReportDbRepository : ICommentReportRepository
         _dbSet.Update(report);
         DbContext.SaveChanges();
         return report;
+    }
+
+    public void DeleteOpenByComment(long blogId, long commentId)
+    {
+        var openReports = _dbSet.Where(r =>
+            r.BlogId == blogId &&
+            r.CommentId == commentId &&
+            r.ReportStatus == AdminReportStatus.OPEN);
+
+        _dbSet.RemoveRange(openReports);
+        DbContext.SaveChanges();
     }
 }
 

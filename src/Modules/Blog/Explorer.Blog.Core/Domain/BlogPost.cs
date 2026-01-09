@@ -162,4 +162,16 @@ public class BlogPost : AggregateRoot
 
         UpdateQualityStatus(score, commentCount);
     }
+
+    public void HideComment(long commentId, long adminId)
+    {
+        var comment = Comments.FirstOrDefault(c => c.Id == commentId);
+        if (comment != null)
+        {
+            throw new ArgumentException("Comment not found.");
+        }
+
+        comment.Hide(adminId);
+
+    }
 }

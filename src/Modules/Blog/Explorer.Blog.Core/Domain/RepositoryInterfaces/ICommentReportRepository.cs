@@ -5,8 +5,9 @@ public interface ICommentReportRepository
     CommentReport Create(CommentReport report);
     CommentReport Get(long blogId, long commentId, long userId);
     CommentReport GetById(long id);
-    IEnumerable<CommentReport> GetOpen(int skip, int take);
-    int CountOpen();
+    IEnumerable<CommentReport> GetByReportStatus(AdminReportStatus status, int skip, int take);
+    int CountByStatus(AdminReportStatus status);
     CommentReport Update(CommentReport report);
+    void DeleteOpenByComment(long blogId, long commentId);
 }
 
