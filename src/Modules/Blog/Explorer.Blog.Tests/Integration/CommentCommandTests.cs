@@ -4,6 +4,8 @@ using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
 using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Infrastructure.Database;
+using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -92,7 +94,21 @@ public class CommentCommandTests : BaseBlogIntegrationTest
         dbContext.SaveChanges();
     }
 
+    private void EnsureUserProfileExists(IServiceScope scope, long userId)
+    {
+        var stakeholders = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
 
+        var exists = stakeholders.UserProfiles.Any(p => p.UserId == userId || p.Id == userId);
+        if (exists) return;
+
+        var profile = new UserProfile(userId, "Test", $"User{userId}", "", "Biography", "Quote"); 
+        typeof(UserProfile).GetProperty("Id")?.SetValue(profile, userId);
+
+        typeof(UserProfile).GetProperty("UserId")?.SetValue(profile, userId);
+
+        stakeholders.UserProfiles.Add(profile);
+        stakeholders.SaveChanges();
+    }
 
 
     [Fact]
@@ -104,6 +120,8 @@ public class CommentCommandTests : BaseBlogIntegrationTest
 
         const long blogId = -1;
         EnsureBlogExists(dbContext, -1, -11);
+        EnsureUserProfileExists(scope, -11);
+        EnsureUserProfileExists(scope, -12);
 
         var initialCount = dbContext.Comments.Count(c => c.BlogId == blogId);
 
@@ -137,6 +155,8 @@ public class CommentCommandTests : BaseBlogIntegrationTest
 
         const long blogId = -1;
         EnsureBlogExists(dbContext, -1, -11);
+        EnsureUserProfileExists(scope, -11);
+        EnsureUserProfileExists(scope, -12);
 
         (controller.AddComment(blogId, new CommentCreateDto { Text = "Stari tekst" }) as OkObjectResult)
             .ShouldNotBeNull();
@@ -169,6 +189,8 @@ public class CommentCommandTests : BaseBlogIntegrationTest
 
         const long blogId = -1;
         EnsureBlogExists(dbContext, -1, -11);
+        EnsureUserProfileExists(scope, -11);
+        EnsureUserProfileExists(scope, -12);
 
         var controllerAuthor = CreateController(scope, userId: -12);
         (controllerAuthor.AddComment(blogId, new CommentCreateDto { Text = "Tekst komentara" }) as OkObjectResult)
@@ -198,6 +220,8 @@ public class CommentCommandTests : BaseBlogIntegrationTest
 
         const long blogId = -1;
         EnsureBlogExists(dbContext, -1, -11);
+        EnsureUserProfileExists(scope, -11);
+        EnsureUserProfileExists(scope, -12);
 
         (controller.AddComment(blogId, new CommentCreateDto { Text = "Tekst za brisanje" }) as OkObjectResult)
             .ShouldNotBeNull();
@@ -222,6 +246,8 @@ public class CommentCommandTests : BaseBlogIntegrationTest
 
         const long blogId = -1;
         EnsureBlogExists(dbContext, -1, -11);
+        EnsureUserProfileExists(scope, -11);
+        EnsureUserProfileExists(scope, -12);
 
         var author = CreateController(scope, userId: -12);
         (author.AddComment(blogId, new CommentCreateDto { Text = "Komentar za like" }) as OkObjectResult)
@@ -259,6 +285,8 @@ public class CommentCommandTests : BaseBlogIntegrationTest
 
         const long blogId = -1;
         EnsureBlogExists(dbContext, -1, -11);
+        EnsureUserProfileExists(scope, -11);
+        EnsureUserProfileExists(scope, -12);
 
         var author = CreateController(scope, userId: -12);
         (author.AddComment(blogId, new CommentCreateDto { Text = "Komentar za unlike" }) as OkObjectResult)
@@ -295,6 +323,8 @@ public class CommentCommandTests : BaseBlogIntegrationTest
 
         const long blogId = -1;
         EnsureBlogExists(dbContext, -1, -11);
+        EnsureUserProfileExists(scope, -11);
+        EnsureUserProfileExists(scope, -12);
 
         var author = CreateController(scope, userId: -11);
         (author.AddComment(blogId, new CommentCreateDto { Text = "Komentar za report" }) as OkObjectResult)
@@ -336,6 +366,8 @@ public class CommentCommandTests : BaseBlogIntegrationTest
 
         const long blogId = -1;
         EnsureBlogExists(dbContext, -1, -11);
+        EnsureUserProfileExists(scope, -11);
+        EnsureUserProfileExists(scope, -12);
 
         var author = CreateController(scope, userId: -11);
         (author.AddComment(blogId, new CommentCreateDto { Text = "Komentar za dupli report" }) as OkObjectResult)
@@ -364,6 +396,8 @@ public class CommentCommandTests : BaseBlogIntegrationTest
 
         const long blogId = -1;
         EnsureBlogExists(dbContext, -1, -11);
+        EnsureUserProfileExists(scope, -11);
+        EnsureUserProfileExists(scope, -12);
 
         var author = CreateController(scope, userId: -11);
         var addRes = author.AddComment(blogId, new CommentCreateDto { Text = "Komentar za admin approve" }) as OkObjectResult;
@@ -406,6 +440,8 @@ public class CommentCommandTests : BaseBlogIntegrationTest
 
         const long blogId = -1;
         EnsureBlogExists(dbContext, -1, -11);
+        EnsureUserProfileExists(scope, -11);
+        EnsureUserProfileExists(scope, -12);
 
         var author = CreateController(scope, userId: -11);
         (author.AddComment(blogId, new CommentCreateDto { Text = "Komentar za admin dismiss" }) as OkObjectResult)
