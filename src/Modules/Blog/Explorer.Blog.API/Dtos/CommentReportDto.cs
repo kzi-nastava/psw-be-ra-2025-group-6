@@ -12,6 +12,9 @@ public class CommentReportDto
     public DateTime? ReviewedAt { get; set; }
     public long? ReviewerId { get; set; }
     public string? AdminNote { get; set; }
-
+    public long CommentAuthorId { get; set; }
+    public string CommentAuthorName { get; set; } = "";
+    public string CommentText { get; set; } = "";
+    public DateTime CommentCreatedAt { get; set; }
 }
 

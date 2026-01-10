@@ -332,22 +332,39 @@ public class BlogService : IBlogService
         var skip = (page - 1) * pageSize;
         var status = (AdminReportStatus)(int)statusDto;
 
-        var openReports = _reportRepository.GetByReportStatus(status, skip, pageSize);
+        var reports = _reportRepository.GetByReportStatus(status, skip, pageSize).ToList();
         var total = _reportRepository.CountByStatus(status);
 
-        var items = openReports.Select(r => new CommentReportDto
+        var blogIds = reports.Select(r => r.BlogId).Distinct().ToList();
+        var blogsById = blogIds
+            .Select(id => _blogRepository.GetById(id))
+            .Where(b => b != null)
+            .ToDictionary(b => b.Id, b => b);
+
+        var items = reports.Select(r =>
         {
-            Id = (int)r.Id,
-            BlogId = r.BlogId,
-            CommentId = r.CommentId,
-            UserId = r.UserId,
-            Reason = (ReportTypeDto)(int)r.Reason,
-            AdditionalInfo = r.AdditionalInfo,
-            CreatedAt = r.CreatedAt,
-            ReportStatus = (AdminReportStatusDto)(int)r.ReportStatus,
-            ReviewedAt = r.ReviewedAt,
-            ReviewerId = r.ReviewerId,
-            AdminNote = r.AdminNote
+            blogsById.TryGetValue(r.BlogId, out var blog);
+            var comment = blog?.Comments.FirstOrDefault(c => c.Id == r.CommentId);
+
+            return new CommentReportDto
+            {
+                Id = (int)r.Id,
+                BlogId = r.BlogId,
+                CommentId = r.CommentId,
+                UserId = r.UserId,
+                Reason = (ReportTypeDto)(int)r.Reason,
+                AdditionalInfo = r.AdditionalInfo,
+                CreatedAt = r.CreatedAt,
+                ReportStatus = (AdminReportStatusDto)(int)r.ReportStatus,
+                ReviewedAt = r.ReviewedAt,
+                ReviewerId = r.ReviewerId,
+                AdminNote = r.AdminNote,
+
+                CommentAuthorId = comment?.UserId ?? 0,
+                CommentAuthorName = comment?.AuthorName ?? "[deleted]",
+                CommentText = comment?.Text ?? "",
+                CommentCreatedAt = comment?.CreatedAt ?? default
+            };
         }).ToList();
 
         return new PagedResult<CommentReportDto>(items, total);
