@@ -52,7 +52,7 @@ public class BlogDbRepository : IBlogRepository
 
     public PagedResult<BlogPost> GetPaged(int page, int pageSize)
     {
-        var task = _dbSet.GetPagedById(page, pageSize);
+        var task = _dbSet.Include(b => b.Location).GetPagedById(page, pageSize);
         task.Wait();
         return task.Result;
     }
@@ -62,6 +62,7 @@ public class BlogDbRepository : IBlogRepository
         return _dbSet
             .Include(b => b.Votes)
             .Include(b => b.Comments)
+            .Include(b => b.Location)
             .FirstOrDefault(b => b.Id == id);
     }
 
@@ -76,6 +77,7 @@ public class BlogDbRepository : IBlogRepository
         return _dbSet
             .Include(b => b.Votes)
             .Include(b => b.Comments)
+            .Include(b => b.Location)
             .ToList();
     }
 }

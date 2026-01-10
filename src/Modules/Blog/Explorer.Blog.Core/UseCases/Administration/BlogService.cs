@@ -16,16 +16,19 @@ public class BlogService : IBlogService
     private readonly IInternalStakeholderService _stakeholderService;
     private readonly ICommentLikeRepository _likeRepository;
     private readonly ICommentReportRepository _reportRepository;
-    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, ICommentLikeRepository likeRepository, ICommentReportRepository reportRepository)
+    private readonly IBlogLocationService _locationService;
+    
+    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, ICommentLikeRepository likeRepository, ICommentReportRepository reportRepository, IBlogLocationService locationService)
     {
         _blogRepository = blogRepository;
         _stakeholderService = stakeholderService;
         _mapper = mapper;
         _likeRepository = likeRepository;
         _reportRepository = reportRepository;
+        _locationService = locationService;
     }
 
-    public PagedResult<BlogDto> GetPaged(int page, int pageSize)
+public PagedResult<BlogDto> GetPaged(int page, int pageSize)
     {
         var result = _blogRepository.GetPaged(page, pageSize);
         var items = result.Results.Select(MapBlogWithUsername).ToList();
@@ -50,6 +53,35 @@ public class BlogService : IBlogService
             status
         );
 
+        if (!string.IsNullOrWhiteSpace(dto.City))
+        {
+            // 1. Kreiramo DTO za lokaciju od podataka iz bloga
+            var locationDto = new BlogLocationDto
+            {
+                City = dto.City,
+                Country = dto.Country,
+                Region = dto.Region,
+                Latitude = dto.Latitude ?? 0,
+                Longitude = dto.Longitude ?? 0
+            };
+
+            // 2. SERVIS kreira lokaciju u svojoj tabeli i vraća nam je sa dodeljenim ID-jem iz baze
+            var savedLocationDto = _locationService.CreateOrGet(locationDto);
+
+            // 3. POSTAVLJAMO ID lokacije u blog. 
+            // Ovo je ključno: BlogPost entitet sada zna tačan ID iz tabele lokacija.
+            blog.SetLocationId(savedLocationDto.Id);
+        }
+
+
+        if (dto.ContentItems != null)
+        {
+            foreach (var item in dto.ContentItems.OrderBy(i => i.Order))
+            {
+                blog.AddContentItem((ContentType)item.Type, item.Content);
+            }
+        }
+
         var created = _blogRepository.Create(blog);
         return _mapper.Map<BlogDto>(created);
     }
@@ -60,12 +92,29 @@ public class BlogService : IBlogService
         if (blog == null)
             throw new NotFoundException("Blog not found");
 
-        if (blog.Status != BlogStatus.DRAFT)
-            throw new Exception("Only blogs POSTED blogs can be changed.");
+        if (blog.Status == BlogStatus.ARCHIVED)
+            throw new Exception("Cannot edit archived blogs.");
 
         blog.UpdateTitle(blogDto.Title);
         blog.UpdateDescription(blogDto.Description);
         blog.Status = (BlogStatus)blogDto.Status;
+        if (blogDto.Location != null)
+        {
+            var savedLocation = _locationService.CreateOrGet(blogDto.Location);
+            blog.SetLocation(_mapper.Map<BlogLocation>(savedLocation));
+        }
+
+        blog.ClearContentItems();
+        if (blogDto.ContentItems != null)
+        {
+            foreach (var item in blogDto.ContentItems.OrderBy(i => i.Order))
+            {
+                blog.AddContentItem(
+                    (ContentType)item.Type,
+                    item.Content
+                );
+            }
+        }
 
         var updated = _blogRepository.Update(blog);
         return _mapper.Map<BlogDto>(updated);

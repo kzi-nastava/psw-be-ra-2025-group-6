@@ -476,6 +476,169 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         result.First().Title.ShouldBe("C# Testing Guide");
     }
 
+    [Fact]
+    public void AddContentItem_AddsTextItemToBlog()
+    {
+        var blog = new DomainBlog(-11, "Blog sa content", "Opis", new List<string>(), BlogStatus.DRAFT);
+
+        blog.ContentItems.ShouldBeEmpty();
+
+        blog.AddContentItem(ContentType.Text, "Ovo je tekstualni sadržaj");
+
+        blog.ContentItems.Count.ShouldBe(1);
+        blog.ContentItems[0].Content.ShouldBe("Ovo je tekstualni sadržaj");
+        blog.ContentItems[0].Type.ShouldBe(ContentType.Text);
+        blog.ContentItems[0].Order.ShouldBe(0);
+    }
+
+    [Fact]
+    public void AddContentItem_AddsImageItemToBlog()
+    {
+        var blog = new DomainBlog(-11, "Blog sa content", "Opis", new List<string>(), BlogStatus.DRAFT);
+
+        blog.AddContentItem(ContentType.Image, "/path/to/image.png");
+
+        blog.ContentItems.Count.ShouldBe(1);
+        blog.ContentItems[0].Content.ShouldBe("/path/to/image.png");
+        blog.ContentItems[0].Type.ShouldBe(ContentType.Image);
+    }
+
+    [Fact]
+    public void UpdateContentItem_UpdatesExistingItem()
+    {
+        var blog = new DomainBlog(-11, "Blog za update content", "Opis", new List<string>(), BlogStatus.DRAFT);
+
+        blog.AddContentItem(ContentType.Text, "Stari tekst");
+
+        blog.UpdateContentItem(0, "Novi tekst");
+
+        blog.ContentItems[0].Content.ShouldBe("Novi tekst");
+    }
+
+    [Fact]
+    public void UpdateContentItem_ThrowsForInvalidOrder()
+    {
+        var blog = new DomainBlog(-11, "Blog za update content", "Opis", new List<string>(), BlogStatus.DRAFT);
+
+        Should.Throw<InvalidOperationException>(() => blog.UpdateContentItem(0, "Tekst"));
+    }
+
+    [Fact]
+    public void RemoveContentItem_RemovesExistingItem()
+    {
+        var blog = new DomainBlog(-11, "Blog za remove content", "Opis", new List<string>(), BlogStatus.DRAFT);
+
+        blog.AddContentItem(ContentType.Text, "Tekst 1");
+        blog.AddContentItem(ContentType.Image, "/img.png");
+
+        blog.ContentItems.Count.ShouldBe(2);
+
+        blog.RemoveContentItem(0);
+
+        blog.ContentItems.Count.ShouldBe(1);
+        blog.ContentItems[0].Type.ShouldBe(ContentType.Image);
+    }
+
+    [Fact]
+    public void RemoveContentItem_DoesNothingForInvalidOrder()
+    {
+        var blog = new DomainBlog(-11, "Blog za remove content", "Opis", new List<string>(), BlogStatus.DRAFT);
+
+        blog.AddContentItem(ContentType.Text, "Tekst");
+
+        blog.RemoveContentItem(5);
+        blog.ContentItems.Count.ShouldBe(1);
+    }
+
+    [Fact]
+    public void ClearContentItems_RemovesAllItems()
+    {
+        var blog = new DomainBlog(-11, "Blog za clear content", "Opis", new List<string>(), BlogStatus.DRAFT);
+
+        blog.AddContentItem(ContentType.Text, "Tekst 1");
+        blog.AddContentItem(ContentType.Image, "/img.png");
+
+        blog.ContentItems.Count.ShouldBe(2);
+
+        blog.ClearContentItems();
+
+        blog.ContentItems.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void SetLocation_AssignsLocationToBlog()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Blog sa lokacijom", "Opis", new List<string>(), BlogStatus.DRAFT);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        var location = new BlogLocation("Belgrade", "Serbia", 44.8176, 20.4569);
+        blog.SetLocation(location);
+
+        blog.Location.ShouldNotBeNull();
+        blog.LocationId.ShouldBe(location.Id);
+        blog.Location.City.ShouldBe("Belgrade");
+        blog.Location.Country.ShouldBe("Serbia");
+    }
+
+    [Fact]
+    public void UpdateLocation_ChangesExistingLocation()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Blog sa lokacijom", "Opis", new List<string>(), BlogStatus.DRAFT);
+        var location = new BlogLocation("Belgrade", "Serbia", 44.8176, 20.4569);
+        blog.SetLocation(location);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        blog.UpdateLocation("Novi Sad", "Serbia", 45.2671, 19.8335);
+
+        blog.Location!.City.ShouldBe("Novi Sad");
+        blog.Location.Longitude.ShouldBe(19.8335);
+        blog.Location.Latitude.ShouldBe(45.2671);
+    }
+
+    [Fact]
+    public void UpdateLocation_ThrowsIfLocationNotSet()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var blog = new DomainBlog(-11, "Blog bez lokacije", "Opis", new List<string>(), BlogStatus.DRAFT);
+        dbContext.Blogs.Add(blog);
+        dbContext.SaveChanges();
+
+        Should.Throw<InvalidOperationException>(() =>
+            blog.UpdateLocation("Novi Sad", "Serbia", 45.2671, 19.8335)
+        );
+    }
+
+    [Fact]
+    public void DeleteBlog_DoesNotDeleteLocation()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var blogContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+        var locationContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+
+        var location = new BlogLocation("Belgrade", "Serbia", 44.8176, 20.4569);
+        locationContext.BlogLocations.Add(location);
+        locationContext.SaveChanges();
+
+        var blog = new DomainBlog(-11, "Blog sa lokacijom", "Opis", new List<string>(), BlogStatus.DRAFT);
+        blog.SetLocation(location);
+        blogContext.Blogs.Add(blog);
+        blogContext.SaveChanges();
+
+        blogContext.Blogs.Remove(blog);
+        blogContext.SaveChanges();
+
+        locationContext.BlogLocations.FirstOrDefault(l => l.Id == location.Id).ShouldNotBeNull();
+    }
 
     private static BlogController CreateController(IServiceScope scope)
     {

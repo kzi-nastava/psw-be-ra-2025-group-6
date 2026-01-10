@@ -9,6 +9,7 @@ public class BlogContext : DbContext
     public DbSet<Comment> Comments { get; set; }
     public DbSet<CommentLike> CommentLikes { get; set; }
     public DbSet<CommentReport> CommentReports { get; set; }
+    public DbSet<BlogLocation> BlogLocations { get; set; }
 
     public BlogContext(DbContextOptions<BlogContext> options) : base(options) { }
 
@@ -34,6 +35,11 @@ public class BlogContext : DbContext
                 v.HasKey("BlogId", "UserId");
                 v.ToTable("Votes", "blog");
             });
+
+            b.HasOne(x => x.Location)
+                .WithMany()
+                .HasForeignKey(x => x.LocationId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 
@@ -52,6 +58,24 @@ public class BlogContext : DbContext
                 .WithOne()
                 .HasForeignKey(c => c.BlogId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.OwnsMany(b => b.Comments, comments =>
+            {
+                comments.ToJson();            
+                comments.Property(c => c.UserId);
+                comments.Property(c => c.AuthorName);
+                comments.Property(c => c.Text);
+                comments.Property(c => c.CreatedAt);
+                comments.Property(c => c.LastUpdatedAt);
+            });
+
+            builder.OwnsMany(b => b.ContentItems, content =>
+            {
+                content.Property(c => c.Order).IsRequired();
+                content.Property(c => c.Type).IsRequired();
+                content.Property(c => c.Content).IsRequired();
+                content.ToTable("BlogContentItems", "blog");
+            });
         });
     }
 
