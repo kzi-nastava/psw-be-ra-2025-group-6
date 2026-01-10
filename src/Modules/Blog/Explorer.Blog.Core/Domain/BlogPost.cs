@@ -11,7 +11,6 @@ public class BlogPost : AggregateRoot
     public DateTime CreatedAt { get; private set; }
     public List<string> Images { get; private set; }
     public List<Comment> Comments { get; private set; } = new();
-
     public BlogStatus Status { get; set; }
     public DateTime? LastModifiedAt { get; private set; }
     public BlogQualityStatus QualityStatus { get; private set; } = BlogQualityStatus.None;
@@ -51,25 +50,24 @@ public class BlogPost : AggregateRoot
         Images = Images.Concat(imagePaths).ToList();
     }
 
-    public void AddComment(long userId, string authorName, string text)
+    public void AddComment(long blogId, long userId, string authorName, string authorProfilePicture, string text)
     {
         if (Comments == null)
         {
             Comments = new List<Comment>();
         }
 
-        var comment = new Comment(userId, authorName, text);
+        var comment = new Comment(blogId, userId, authorName, authorProfilePicture, text);
         Comments.Add(comment);
 
         RecalculateQualityStatus();
     }
 
-    public void EditComment(int id, long userId, string text)
+    public void EditComment(long commentId, long userId, string text)
     {
-        if (Comments == null || id < 0 || id >= Comments.Count)
+        var comment = Comments?.FirstOrDefault(c => c.Id == commentId);
+        if (comment is null)
             throw new InvalidOperationException("Comment does not exist.");
-
-        var comment = Comments[id];
 
         if (comment.UserId != userId)
             throw new InvalidOperationException("Only authors can edit their comments.");
@@ -80,12 +78,12 @@ public class BlogPost : AggregateRoot
         comment.Edit(text);
     }
 
-    public void DeleteComment(int id, long userId)
+    public void DeleteComment(long commentId, long userId)
     {
-        if (Comments == null || id < 0 || id >= Comments.Count)
-            throw new InvalidOperationException("Comment does not exist.");
+        var comment = Comments?.FirstOrDefault(c => c.Id == commentId);
 
-        var comment = Comments[id];
+        if (comment == null)
+        throw new InvalidOperationException("Comment does not exist.");
 
         if (comment.UserId != userId)
             throw new InvalidOperationException("Only authors can delete their comments.");
@@ -93,7 +91,7 @@ public class BlogPost : AggregateRoot
         if (DateTime.UtcNow - comment.CreatedAt > TimeSpan.FromMinutes(15))
             throw new InvalidOperationException("Delete time expired.");
 
-        Comments.RemoveAt(id);
+        Comments.Remove(comment);
     }
     public void UpdateDescription(string newDescription)
     {
@@ -168,6 +166,17 @@ public class BlogPost : AggregateRoot
         int commentCount = Comments.Count;
 
         UpdateQualityStatus(score, commentCount);
+    }
+
+    public void HideComment(long commentId, long adminId)
+    {
+        var comment = Comments.FirstOrDefault(c => c.Id == commentId);
+        if (comment == null)
+        {
+            throw new ArgumentException("Comment not found.");
+        }
+
+        comment.Hide(adminId);
     }
 
     public void AddContentItem(ContentType type, string content)

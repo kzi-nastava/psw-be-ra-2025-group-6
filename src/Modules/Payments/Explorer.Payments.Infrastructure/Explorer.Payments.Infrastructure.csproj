@@ -11,4 +11,8 @@
     <ProjectReference Include="..\Explorer.Payments.Core\Explorer.Payments.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

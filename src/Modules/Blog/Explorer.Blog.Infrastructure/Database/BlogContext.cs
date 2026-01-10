@@ -6,6 +6,9 @@ namespace Explorer.Blog.Infrastructure.Database;
 public class BlogContext : DbContext
 {
     public DbSet<BlogPost> Blogs { get; set; }
+    public DbSet<Comment> Comments { get; set; }
+    public DbSet<CommentLike> CommentLikes { get; set; }
+    public DbSet<CommentReport> CommentReports { get; set; }
     public DbSet<BlogLocation> BlogLocations { get; set; }
 
     public BlogContext(DbContextOptions<BlogContext> options) : base(options) { }
@@ -15,6 +18,9 @@ public class BlogContext : DbContext
         modelBuilder.HasDefaultSchema("blog");
 
         ConfigureBlogPost(modelBuilder);
+        ConfigureComments(modelBuilder);
+        ConfigureCommentLikes(modelBuilder);
+        ConfigureCommentReports(modelBuilder);
 
         modelBuilder.Entity<BlogPost>(b =>
         {
@@ -48,15 +54,10 @@ public class BlogContext : DbContext
             builder.Property(b => b.Images)
                .HasColumnType("text[]");
 
-            builder.OwnsMany(b => b.Comments, comments =>
-            {
-                comments.ToJson();            
-                comments.Property(c => c.UserId);
-                comments.Property(c => c.AuthorName);
-                comments.Property(c => c.Text);
-                comments.Property(c => c.CreatedAt);
-                comments.Property(c => c.LastUpdatedAt);
-            });
+            builder.HasMany(b => b.Comments)
+                .WithOne()
+                .HasForeignKey(c => c.BlogId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.OwnsMany(b => b.ContentItems, content =>
             {
@@ -68,4 +69,63 @@ public class BlogContext : DbContext
         });
     }
 
+    private static void ConfigureComments(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Comment>(cb =>
+        {
+            cb.ToTable("Comments", "blog");
+            cb.HasKey(c => c.Id);
+
+            cb.Property(c => c.UserId).IsRequired();
+            cb.Property(c => c.AuthorName).IsRequired();
+            cb.Property(c => c.AuthorProfilePicture).IsRequired();
+            cb.Property(c => c.Text).IsRequired();
+            cb.Property(c => c.CreatedAt).IsRequired();
+            cb.Property(c => c.LastUpdatedAt);
+            cb.Property(c => c.IsHidden).IsRequired().HasDefaultValue(false);
+
+            cb.HasIndex(c => c.BlogId);
+
+        });
+    }
+
+    private static void ConfigureCommentLikes(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CommentLike>(b =>
+        {
+            b.ToTable("CommentLikes", "blog");
+            b.HasKey(x => x.Id);
+
+            b.HasIndex(x => new { x.BlogId, x.CommentId, x.UserId }).IsUnique();
+
+            b.HasOne<Comment>()
+                .WithMany()
+                .HasForeignKey(x => x.CommentId)
+                .OnDelete(DeleteBehavior.Cascade);
+            b.HasOne<BlogPost>()
+                .WithMany()
+                .HasForeignKey(x => x.BlogId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
+
+    private static void ConfigureCommentReports(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CommentReport>(b =>
+        {
+            b.ToTable("CommentReports", "blog");
+            b.HasKey(x => x.Id);
+
+            b.HasIndex(x => new { x.BlogId, x.CommentId, x.UserId }).IsUnique();
+
+            b.HasOne<Comment>()
+                .WithMany()
+                .HasForeignKey(x => x.CommentId)
+                .OnDelete(DeleteBehavior.Cascade);
+            b.HasOne<BlogPost>()
+                .WithMany()
+                .HasForeignKey(x => x.BlogId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
 }

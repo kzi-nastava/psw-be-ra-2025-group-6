@@ -1,4 +1,5 @@
-﻿using Explorer.Stakeholders.API.Internal;
+﻿using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Stakeholders.Core.UseCases;
