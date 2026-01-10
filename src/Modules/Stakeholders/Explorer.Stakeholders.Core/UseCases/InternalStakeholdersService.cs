@@ -6,12 +6,13 @@ namespace Explorer.Stakeholders.Core.UseCases;
 public class InternalStakeholdersService : IInternalStakeholderService
 {
     private readonly IUserRepository _userRepository;
-    private readonly IUserProfileRepository _profileRepository;
-
-    public InternalStakeholdersService(IUserRepository userRepository, IUserProfileRepository profileRepository)
+    private readonly IUserProfileRepository _userProfileRepository;
+    private readonly IFollowRepository _followRepository;
+    public InternalStakeholdersService(IUserRepository userRepository, IUserProfileRepository userProfileRepository, IFollowRepository followRepository)
     {
         _userRepository = userRepository;
-        _profileRepository = profileRepository;
+        _userProfileRepository = userProfileRepository;
+        _followRepository = followRepository;
     }
 
     public string GetUsername(long userId)
@@ -24,14 +25,14 @@ public class InternalStakeholdersService : IInternalStakeholderService
 
     public string GetProfilePicture(long userId)
     {
-        try
-        {
-            return _profileRepository.Get(userId).ProfilePicture ?? "";
-        }
-        catch (NotFoundException)
-        {
-            return "";
-        }
+        var profile = _userProfileRepository.Get(userId);
+        return profile?.ProfilePicture ?? "";
+    }
+
+    public List<long> GetFollowedIds(long followerId)
+    {
+        var followedUsers = _followRepository.GetFollowing(followerId);
+        return followedUsers.Select(u => (long)u.Id).ToList();
     }
 }
 

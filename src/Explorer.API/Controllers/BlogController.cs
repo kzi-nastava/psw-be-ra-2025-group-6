@@ -331,4 +331,12 @@ public class BlogController : ControllerBase
         var alreadyReported = _blogService.IsCommentReportedByUser(blogId, commentId, userId);
         return Ok(new { alreadyReported });
     }
+
+    [HttpGet("following")]
+    public ActionResult<PagedResult<BlogDto>> GetFollowingBlogs([FromQuery] int page, [FromQuery] int pageSize)
+    {
+        var userId = User.PersonId();
+        var result = _blogService.GetFollowingBlogs(page, pageSize, userId);
+        return Ok(result);
+    }
 }

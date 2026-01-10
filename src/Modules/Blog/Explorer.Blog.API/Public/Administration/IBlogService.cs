@@ -32,4 +32,6 @@ public interface IBlogService
     PagedResult<CommentReportDto> GetByReportStatus(AdminReportStatusDto status, int page, int pageSize);
     void ApproveCommentReport(long reportId, long adminId, string note);
     void DismissCommentReport(long reportId, long adminId, string note);
+    PagedResult<BlogDto> GetFollowingBlogs(int page, int pageSize, long userId);
 }
+
