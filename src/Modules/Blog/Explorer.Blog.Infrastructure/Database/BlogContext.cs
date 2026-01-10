@@ -59,16 +59,6 @@ public class BlogContext : DbContext
                 .HasForeignKey(c => c.BlogId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.OwnsMany(b => b.Comments, comments =>
-            {
-                comments.ToJson();            
-                comments.Property(c => c.UserId);
-                comments.Property(c => c.AuthorName);
-                comments.Property(c => c.Text);
-                comments.Property(c => c.CreatedAt);
-                comments.Property(c => c.LastUpdatedAt);
-            });
-
             builder.OwnsMany(b => b.ContentItems, content =>
             {
                 content.Property(c => c.Order).IsRequired();
