@@ -46,6 +46,17 @@ public class TourRepository : ITourRepository
         return new PagedResult<Tour>(items, totalCount);
     }
 
+    public List<Tour> GetByAuthorId(long authorId)
+    {
+        return DbContext.Tours
+            .Where(t => t.AuthorId == authorId)
+            .Include(t => t.Equipment)
+            .Include(t => t.KeyPoints)
+            .Include(t => t.TourReviews)
+            .ToList();
+    }
+
+
     public Tour Get(long id)
     {
         var entity = DbContext.Tours
@@ -87,7 +98,6 @@ public class TourRepository : ITourRepository
 
         DbContext.Entry(existingTour).CurrentValues.SetValues(tour);
         DbContext.Entry(existingTour).Property(t => t.Duration).IsModified = true;
-
 
         try
         {
