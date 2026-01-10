@@ -7,6 +7,7 @@ using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Internal;
 using System.Text.Json;
+using Explorer.Stakeholders.Core.UseCases;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -303,6 +304,30 @@ public class BlogService : IBlogService
     {
         var dto = _mapper.Map<BlogDto>(blog);
         dto.Username = _stakeholderService.GetUsername(blog.UserId);
+        dto.AuthorProfilePicture = _stakeholderService.GetProfilePicture(blog.UserId);
         return dto;
+    }
+
+    public PagedResult<BlogDto> GetFollowingBlogs(int page, int pageSize, long userId)
+    {
+        var followedIds = _stakeholderService.GetFollowedIds(userId);
+
+        if (followedIds == null || !followedIds.Any())
+            return new PagedResult<BlogDto>(new List<BlogDto>(), 0);
+
+        var allBlogs = _blogRepository.GetAll();
+
+        var filteredBlogs = allBlogs
+            .Where(b => followedIds.Contains(b.UserId) && b.Status == BlogStatus.POSTED)
+            .OrderByDescending(b => b.CreatedAt)
+            .Select(MapBlogWithUsername)
+            .ToList();
+
+        var pagedItems = filteredBlogs
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return new PagedResult<BlogDto>(pagedItems, filteredBlogs.Count);
     }
 }
