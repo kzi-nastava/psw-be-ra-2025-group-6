@@ -13,4 +13,8 @@
     <ProjectReference Include="..\..\Stakeholders\Explorer.Stakeholders.API\Explorer.Stakeholders.API.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

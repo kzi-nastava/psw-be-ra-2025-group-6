@@ -6,8 +6,6 @@ using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Internal;
-using System.Text.Json;
-using Explorer.Stakeholders.Core.UseCases;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -16,17 +14,21 @@ public class BlogService : IBlogService
     private readonly IBlogRepository _blogRepository;
     private readonly IMapper _mapper;
     private readonly IInternalStakeholderService _stakeholderService;
+    private readonly ICommentLikeRepository _likeRepository;
+    private readonly ICommentReportRepository _reportRepository;
     private readonly IBlogLocationService _locationService;
-
-    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, IBlogLocationService locationService)
+    
+    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, ICommentLikeRepository likeRepository, ICommentReportRepository reportRepository, IBlogLocationService locationService)
     {
         _blogRepository = blogRepository;
         _stakeholderService = stakeholderService;
         _mapper = mapper;
+        _likeRepository = likeRepository;
+        _reportRepository = reportRepository;
         _locationService = locationService;
     }
 
-    public PagedResult<BlogDto> GetPaged(int page, int pageSize)
+public PagedResult<BlogDto> GetPaged(int page, int pageSize)
     {
         var result = _blogRepository.GetPaged(page, pageSize);
         var items = result.Results.Select(MapBlogWithUsername).ToList();
@@ -86,7 +88,6 @@ public class BlogService : IBlogService
 
     public BlogDto Update(BlogDto blogDto)
     {
-        //var blog = _mapper.Map<BlogPost>(blogDto);
         var blog = _blogRepository.GetById(blogDto.Id);
         if (blog == null)
             throw new NotFoundException("Blog not found");
@@ -148,9 +149,12 @@ public class BlogService : IBlogService
     {
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found.");
-        var authorName = _stakeholderService.GetUsername(userId);
 
-        blog.AddComment(userId, authorName, text);
+        var authorName = _stakeholderService.GetUsername(userId);
+        var authorProfilePicture = _stakeholderService.GetProfilePicture(userId);
+        
+
+        blog.AddComment(blogId, userId, authorName, authorProfilePicture, text);
         _blogRepository.Update(blog);
 
         var comment = blog.Comments.Last();
@@ -158,46 +162,54 @@ public class BlogService : IBlogService
         return _mapper.Map<CommentDto>(comment);
     }
 
-    public CommentDto EditComment(long blogId, int commentId, long userId, string text)
+    public CommentDto EditComment(long blogId, long commentId, long userId, string text)
     {
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found.");
 
+        var comment = blog.Comments.First(c => c.Id == commentId);
+
         blog.EditComment(commentId, userId, text);
         _blogRepository.Update(blog);
-
-        var comment = blog.Comments.Last();
 
         return _mapper.Map<CommentDto>(comment);
     }
 
-    public CommentDto DeleteComment(long blogId, int commentId, long userId) 
+    public CommentDto DeleteComment(long blogId, long commentId, long userId) 
     { 
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found");
 
+        var comment = blog.Comments.First(c => c.Id == commentId);
+
         blog.DeleteComment(commentId, userId);
         _blogRepository.Update(blog);
-
-        var comment = blog.Comments.Last();
 
         return _mapper.Map<CommentDto>(comment);
     }
 
-    public List<CommentDto> GetComments(long blogId)
+    public List<CommentDto> GetComments(long blogId, long userId)
     {
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found");
 
         var comments = blog.Comments
             .Select((c, index) => new CommentDto
-            {
-                Id = index,     
+            {    
+                Id = c.Id,
+                BlogId = c.BlogId,
                 UserId = c.UserId,
                 AuthorName = c.AuthorName,
+                AuthorProfilePicture = c.AuthorProfilePicture,
                 Text = c.Text,
                 CreatedAt = c.CreatedAt,
-                LastUpdatedAt = c.LastUpdatedAt
+                LastUpdatedAt = c.LastUpdatedAt,
+
+                LikeCount = _likeRepository.CountLikes(blogId, c.Id),
+                IsLikedByMe = _likeRepository.IsLikedByUser(blogId, c.Id, userId),
+                IsReportedByMe = _reportRepository.Exists(blogId, c.Id, userId),
+
+                IsHidden = c.IsHidden
             })
             .ToList();
 
@@ -305,7 +317,134 @@ public class BlogService : IBlogService
         var dto = _mapper.Map<BlogDto>(blog);
         dto.Username = _stakeholderService.GetUsername(blog.UserId);
         dto.AuthorProfilePicture = _stakeholderService.GetProfilePicture(blog.UserId);
+        dto.VisibleCommentCount = _blogRepository.CountVisibleComments(blog.Id);
         return dto;
+    }
+    public bool ToggleCommentLike(long blogId, long commentId, long userId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+        if (!blog.Comments.Any(c => c.Id == commentId))
+            throw new Exception("Comment not found.");
+
+        return _likeRepository.Toggle(blogId, commentId, userId);
+    }
+
+    public int CountCommentLikes(long blogId, long commentId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+        if (!blog.Comments.Any(c => c.Id == commentId))
+            throw new Exception("Comment not found.");
+
+        return _likeRepository.CountLikes(blogId, commentId);
+    }
+
+    public bool IsCommentLikedByUser(long blogId, long commentId, long userId)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+        if (!blog.Comments.Any(c => c.Id == commentId))
+            throw new Exception("Comment not found.");
+
+        return _likeRepository.IsLikedByUser(blogId, commentId, userId);
+    }
+
+    public void ReportComment(long blogId, long commentId, long userId, ReportTypeDto reason, string? additionalInfo)
+    {
+        var blog = _blogRepository.GetById(blogId);
+        if (blog == null)
+            throw new Exception("Blog not found");
+        if (!blog.Comments.Any(c => c.Id == commentId))
+            throw new Exception("Comment not found.");
+        if (_reportRepository.Exists(blogId, commentId, userId))
+            throw new InvalidOperationException("You already reported this comment.");
+
+        var domainReason = (ReportType)(int)reason;
+
+        var report = new CommentReport(blogId, commentId, userId, domainReason, additionalInfo);
+        _reportRepository.Create(report);
+    }
+
+    public bool IsCommentReportedByUser(long blogId, long commentId, long userId)
+    {
+        return _reportRepository.Exists(blogId, commentId, userId);
+    }
+
+    public PagedResult<CommentReportDto> GetByReportStatus(AdminReportStatusDto statusDto, int page, int pageSize)
+    {
+        if (page <= 0) page = 1;
+        if (pageSize <= 0) pageSize = 10;
+
+        var skip = (page - 1) * pageSize;
+        var status = (AdminReportStatus)(int)statusDto;
+
+        var reports = _reportRepository.GetByReportStatus(status, skip, pageSize).ToList();
+        var total = _reportRepository.CountByStatus(status);
+
+        var blogIds = reports.Select(r => r.BlogId).Distinct().ToList();
+        var blogsById = blogIds
+            .Select(id => _blogRepository.GetById(id))
+            .Where(b => b != null)
+            .ToDictionary(b => b.Id, b => b);
+
+        var items = reports.Select(r =>
+        {
+            blogsById.TryGetValue(r.BlogId, out var blog);
+            var comment = blog?.Comments.FirstOrDefault(c => c.Id == r.CommentId);
+
+            return new CommentReportDto
+            {
+                Id = (int)r.Id,
+                BlogId = r.BlogId,
+                CommentId = r.CommentId,
+                UserId = r.UserId,
+                Reason = (ReportTypeDto)(int)r.Reason,
+                AdditionalInfo = r.AdditionalInfo,
+                CreatedAt = r.CreatedAt,
+                ReportStatus = (AdminReportStatusDto)(int)r.ReportStatus,
+                ReviewedAt = r.ReviewedAt,
+                ReviewerId = r.ReviewerId,
+                AdminNote = r.AdminNote,
+
+                CommentAuthorId = comment?.UserId ?? 0,
+                CommentAuthorName = comment?.AuthorName ?? "[deleted]",
+                CommentText = comment?.Text ?? "",
+                CommentCreatedAt = comment?.CreatedAt ?? default
+            };
+        }).ToList();
+
+        return new PagedResult<CommentReportDto>(items, total);
+    }
+
+    public void ApproveCommentReport(long reportId, long adminId, string? note)
+    {
+        var report = _reportRepository.GetById(reportId);
+        if (report == null) throw new NotFoundException("Report not found");
+
+        var blog = _blogRepository.GetById(report.BlogId);
+        if (blog == null) throw new NotFoundException("Blog not found");
+
+        report.Approve(adminId, note);
+        _reportRepository.Update(report);
+
+        blog.HideComment(report.CommentId, adminId);
+        _blogRepository.Update(blog);
+
+        _reportRepository.DeleteOpenByComment(report.BlogId, report.CommentId);
+        
+    }
+
+    public void DismissCommentReport(long reportId, long adminId, string? note)
+    {
+        var report = _reportRepository.GetById(reportId);
+        if (report == null) throw new NotFoundException("Report not found");
+
+        report.Dismiss(adminId, note);
+        _reportRepository.Update(report);
     }
 
     public PagedResult<BlogDto> GetFollowingBlogs(int page, int pageSize, long userId)

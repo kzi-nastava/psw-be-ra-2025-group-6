@@ -11,4 +11,5 @@ public interface IBlogRepository
     BlogPost GetById(long id);
     void Delete(BlogPost blog);
     List<BlogPost> GetAll();
+    int CountVisibleComments(long blogId);
 }

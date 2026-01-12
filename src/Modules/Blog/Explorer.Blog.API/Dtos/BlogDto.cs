@@ -16,5 +16,6 @@ public class BlogDto
     public string AuthorProfilePicture { get; set; }
     public List<BlogContentItemDto> ContentItems { get; set; } = new();
     public BlogLocationDto? Location { get; set; }
+    public int VisibleCommentCount { get; set; }
 
 }

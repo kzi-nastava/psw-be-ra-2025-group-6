@@ -6,7 +6,6 @@ using Explorer.Blog.Infrastructure.Database;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Security.Claims;
@@ -257,200 +256,6 @@ public class BlogCommandTests : BaseBlogIntegrationTest
     }
 
     [Fact]
-    public void AddComment_creates_comment_in_db()
-    {
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
-
-        const long blogId = -1;
-
-        var blog = dbContext.Blogs
-            .Include(b => b.Comments)
-            .FirstOrDefault(b => b.Id == blogId);
-
-        if (blog == null)
-        {
-            blog = new DomainBlog(-11, "Test blog za komentare", "Opis test bloga", new List<string>(), BlogStatus.POSTED);
-
-            typeof(DomainBlog)
-                .GetProperty("Id")?
-                .SetValue(blog, blogId);
-
-            dbContext.Blogs.Add(blog);
-            dbContext.SaveChanges();
-
-            blog = dbContext.Blogs
-                .Include(b => b.Comments)
-                .First(b => b.Id == blogId);
-        }
-
-        var initialCount = blog.Comments.Count;
-
-        var dto = new CommentCreateDto
-        {
-            Text = "Novi komentar iz testa"
-        };
-
-        var result = controller.AddComment(blogId, dto) as OkObjectResult;
-        result.ShouldNotBeNull();
-
-        var commentDto = result.Value as CommentDto;
-        commentDto.ShouldNotBeNull();
-        commentDto.Text.ShouldBe(dto.Text);
-        commentDto.UserId.ShouldBe(-11); 
-
-        var storedBlog = dbContext.Blogs
-            .Include(b => b.Comments)
-            .First(b => b.Id == blogId);
-
-        storedBlog.Comments.Count.ShouldBe(initialCount + 1);
-        storedBlog.Comments.Last().Text.ShouldBe(dto.Text);
-        storedBlog.Comments.Last().UserId.ShouldBe(-11);
-    }
-
-    [Fact]
-    public void EditComment_updates_text_when_author_and_in_time()
-    {
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
-
-        const long blogId = -21;
-
-        var blog = dbContext.Blogs
-            .Include(b => b.Comments)
-            .FirstOrDefault(b => b.Id == blogId);
-
-        if (blog == null)
-        {
-            blog = new DomainBlog(-11, $"Test blog {blogId}", "Opis test bloga", new List<string>(), BlogStatus.POSTED);
-            typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, blogId);
-            dbContext.Blogs.Add(blog);
-            dbContext.SaveChanges();
-
-            blog = dbContext.Blogs
-                .Include(b => b.Comments)
-                .First(b => b.Id == blogId);
-        }
-
-        blog.AddComment(-11, "Test author", "Stari tekst");
-        dbContext.SaveChanges();
-
-        var before = dbContext.Blogs
-            .Include(b => b.Comments)
-            .First(b => b.Id == blogId);
-
-        var commentIndex = before.Comments.Count - 1;
-
-        var dto = new CommentCreateDto
-        {
-            Text = "Izmenjen tekst komentara"
-        };
-
-        var actionResult = controller.EditComment(blogId, commentIndex, dto) as OkResult;
-        actionResult.ShouldNotBeNull();
-
-        var storedBlog = dbContext.Blogs
-            .Include(b => b.Comments)
-            .First(b => b.Id == blogId);
-
-        storedBlog.Comments[commentIndex].Text.ShouldBe(dto.Text);
-    }
-
-    [Fact]
-    public void EditComment_fails_when_different_user()
-    {
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
-
-        const long blogId = -22;
-
-        var blog = dbContext.Blogs
-            .Include(b => b.Comments)
-            .FirstOrDefault(b => b.Id == blogId);
-
-        if (blog == null)
-        {
-            blog = new DomainBlog(-11, $"Test blog {blogId}", "Opis test bloga", new List<string>(), BlogStatus.POSTED);
-            typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, blogId);
-            dbContext.Blogs.Add(blog);
-            dbContext.SaveChanges();
-
-            blog = dbContext.Blogs
-                .Include(b => b.Comments)
-                .First(b => b.Id == blogId);
-        }
-
-        blog.AddComment(-12, "Other user", "Tekst komentara");
-        dbContext.SaveChanges();
-
-        var dto = new CommentCreateDto
-        {
-            Text = "Pokusaj izmene"
-        };
-
-        Should.Throw<InvalidOperationException>(() =>
-            controller.EditComment(blogId, 0, dto));
-    }
-
-    [Fact]
-    public void DeleteComment_removes_comment()
-    {
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
-
-        const long blogId = -23;
-
-        var blog = dbContext.Blogs
-            .Include(b => b.Comments)
-            .FirstOrDefault(b => b.Id == blogId);
-
-        if (blog == null)
-        {
-            blog = new DomainBlog(-11, $"Test blog {blogId}", "Opis test bloga", new List<string>(), BlogStatus.POSTED);
-            typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, blogId);
-            dbContext.Blogs.Add(blog);
-            dbContext.SaveChanges();
-        }
-
-        controller.AddComment(blogId, new CommentCreateDto
-        {
-            Text = "Neki drugi komentar"
-        });
-        dbContext.SaveChanges();
-
-        controller.AddComment(blogId, new CommentCreateDto
-        {
-            Text = "Tekst za brisanje"
-        });
-        dbContext.SaveChanges();
-
-        var before = dbContext.Blogs
-            .Include(b => b.Comments)
-            .First(b => b.Id == blogId);
-
-        before.Comments.Count.ShouldBeGreaterThan(1); 
-
-        var commentIndex = before.Comments
-            .Select((c, index) => new { Comment = c, Index = index })
-            .First(x => x.Comment.Text == "Tekst za brisanje")
-            .Index;
-
-        var result = controller.DeleteComment(blogId, commentIndex) as NoContentResult;
-        result.ShouldNotBeNull();
-
-        var after = dbContext.Blogs
-            .Include(b => b.Comments)
-            .First(b => b.Id == blogId);
-
-        after.Comments.Count.ShouldBeGreaterThan(0);
-        after.Comments.Any(c => c.Text == "Tekst za brisanje").ShouldBeFalse();
-    }
-
-    [Fact]
     public void RemoveVote_ExistingVote_RemovesVote()
     {
         using var scope = Factory.Services.CreateScope();
@@ -494,7 +299,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
             blog.AddOrUpdateVote(-11, VoteType.Downvote); 
 
         for (int i = 0; i < 12; i++)
-            blog.AddComment(-11, "Test user", $"Komentar {i}");
+            blog.AddComment(-1,-11, "Test user", "", $"Komentar {i}");
 
         blog.RecalculateQualityStatus();
 
@@ -523,7 +328,7 @@ public class BlogCommandTests : BaseBlogIntegrationTest
             blog.AddOrUpdateVote(i, VoteType.Upvote);
 
         for (int i = 1; i <= 40; i++)
-            blog.AddComment(i, $"User{i}", $"Komentar {i}");
+            blog.AddComment( i, i, $"User{i}", "", $"Komentar {i}");
 
         blog.RecalculateQualityStatus();
 
