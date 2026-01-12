@@ -80,4 +80,9 @@ public class BlogDbRepository : IBlogRepository
             .Include(b => b.Location)
             .ToList();
     }
+
+    public int CountVisibleComments(long blogId)
+    {
+        return DbContext.Comments.Count(c => c.BlogId == blogId && !c.IsHidden);
+    }
 }

@@ -317,6 +317,7 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
         var dto = _mapper.Map<BlogDto>(blog);
         dto.Username = _stakeholderService.GetUsername(blog.UserId);
         dto.AuthorProfilePicture = _stakeholderService.GetProfilePicture(blog.UserId);
+        dto.VisibleCommentCount = _blogRepository.CountVisibleComments(blog.Id);
         return dto;
     }
     public bool ToggleCommentLike(long blogId, long commentId, long userId)
