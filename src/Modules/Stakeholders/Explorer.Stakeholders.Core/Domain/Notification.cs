@@ -32,10 +32,10 @@ namespace Explorer.Stakeholders.Core.Domain
 
         private void Validate()
         {
-            if (RecipientId <= 0) throw new ArgumentException("Invalid RecipientId");
-            if (SenderId <= 0) throw new ArgumentException("Invalid SenderId");
+            if (RecipientId == 0) throw new ArgumentException("Invalid RecipientId");
+            if (SenderId == 0) throw new ArgumentException("Invalid SenderId");
             if (string.IsNullOrWhiteSpace(Content)) throw new ArgumentException("Content cannot be empty");
-            if (ReferenceId <= 0) throw new ArgumentException("Invalid ReferenceId");
+            if (ReferenceId == 0) throw new ArgumentException("Invalid ReferenceId");
         }
     }
 
