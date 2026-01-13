@@ -55,6 +55,8 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
 
     private static AuthenticationController CreateController(IServiceScope scope)
     {
-        return new AuthenticationController(scope.ServiceProvider.GetRequiredService<IAuthenticationService>());
+        return new AuthenticationController(
+            scope.ServiceProvider.GetRequiredService<IAuthenticationService>(),
+            scope.ServiceProvider.GetRequiredService<Explorer.Payments.API.Public.IWalletService>());
     }
 }

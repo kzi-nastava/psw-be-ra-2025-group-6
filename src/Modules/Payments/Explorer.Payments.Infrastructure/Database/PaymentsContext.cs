@@ -7,6 +7,7 @@ public class PaymentsContext : DbContext
 {
     public DbSet<ShoppingCart> ShoppingCarts { get; set; }
     public DbSet<TourPurchaseToken> TourPurchaseTokens { get; set; }
+    public DbSet<Wallet> Wallets { get; set; }
 
     public PaymentsContext(DbContextOptions<PaymentsContext> options) : base(options) { }
 
@@ -21,5 +22,9 @@ public class PaymentsContext : DbContext
     {
         modelBuilder.Entity<ShoppingCart>()
             .OwnsMany(s => s.Items);
+
+        modelBuilder.Entity<Wallet>()
+            .HasIndex(w => w.TouristId)
+            .IsUnique();
     }
 }

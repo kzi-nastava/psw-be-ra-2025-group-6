@@ -29,6 +29,7 @@ public class JwtGenerator : ITokenGenerator
 
         var jwt = CreateToken(claims, 60 * 24);
         authenticationResponse.Id = user.Id;
+        authenticationResponse.PersonId = personId;
         authenticationResponse.AccessToken = jwt;
 
         return authenticationResponse;
