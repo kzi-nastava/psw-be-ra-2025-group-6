@@ -26,11 +26,14 @@ namespace Explorer.Encounters.Infrastructure
         {
             services.AddScoped<IChallengeService, ChallengeService>();
             services.AddScoped<Explorer.Encounters.API.Public.IChallengePublicService, PublicChallengeService>();
+            services.AddScoped<ITouristEncounterService, TouristEncounterService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services)
         {
             services.AddScoped<IChallengeRepository, ChallengeDbRepository>();
+            services.AddScoped<ITouristXpProfileRepository, TouristXpProfileDbRepository>();
+            services.AddScoped<IEncounterCompletionRepository, EncounterCompletionDbRepository>();
 
             services.AddDbContext<EncountersContext>(opt =>
                 opt.UseNpgsql(DbConnectionStringBuilder.Build("encounters"),
