@@ -294,7 +294,7 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
         return  _mapper.Map<BlogDto>(updated);
     }
 
-    public List<BlogDto> GetBlogsByQualityStatus(BlogQualityStatusDto statusDto)
+    /*public List<BlogDto> GetBlogsByQualityStatus(BlogQualityStatusDto statusDto)
     {
         BlogQualityStatus status = statusDto switch
         {
@@ -310,7 +310,7 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
             .ToList();
 
         return blogs.Select(MapBlogWithUsername).ToList();
-    }
+    }*/
 
     private BlogDto MapBlogWithUsername(BlogPost blog)
     {
@@ -468,5 +468,70 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
             .ToList();
 
         return new PagedResult<BlogDto>(pagedItems, filteredBlogs.Count);
+    }
+
+    public List<BlogDto> GetFilteredBlogs(FilterBlogDto filter)
+    {
+        var query = _blogRepository.GetAll().AsQueryable();
+
+        if (filter.QualityStatus.HasValue)
+        {
+            var status = filter.QualityStatus.Value switch
+            {
+                BlogQualityStatusDto.None => BlogQualityStatus.None,
+                BlogQualityStatusDto.Active => BlogQualityStatus.Active,
+                BlogQualityStatusDto.Famous => BlogQualityStatus.Famous,
+                BlogQualityStatusDto.Closed => BlogQualityStatus.Closed,
+                _ => BlogQualityStatus.None
+            };
+
+            query = query.Where(b => b.QualityStatus == status);
+        }
+
+        if (filter.LocationId.HasValue)
+        {
+            query = query.Where(b => b.LocationId == filter.LocationId.Value);
+        }
+
+        if (filter.MinComments.HasValue)
+        {
+            query = query.Where(b => b.Comments.Count >= filter.MinComments.Value);
+        }
+
+        if (filter.MinScore.HasValue)
+        {
+            query = query.Where(b =>
+                b.Votes.Count(v => v.Type == VoteType.Upvote) -
+                b.Votes.Count(v => v.Type == VoteType.Downvote)
+                >= filter.MinScore.Value);
+        }
+
+        if (filter.CreatedFrom.HasValue)
+        {
+            query = query.Where(b => b.CreatedAt >= filter.CreatedFrom.Value);
+        }
+
+        if (filter.CreatedTo.HasValue)
+        {
+            query = query.Where(b => b.CreatedAt <= filter.CreatedFrom.Value);
+        }
+
+        query = (filter.SortBy, filter.SortDirection) switch
+        {
+            (BlogSortBy.CREATEDAT, SortDirection.ASC) => query.OrderBy(b => b.CreatedAt),
+            (BlogSortBy.CREATEDAT, SortDirection.DESC) => query.OrderByDescending(b => b.CreatedAt),
+
+            (BlogSortBy.COMMENTCOUNT, SortDirection.ASC) => query.OrderBy(b => b.Comments.Count),
+            (BlogSortBy.COMMENTCOUNT, SortDirection.DESC) => query.OrderByDescending(b => b.Comments.Count),
+
+            (BlogSortBy.SCORE, SortDirection.ASC) => query.OrderBy(b =>
+                b.Votes.Count(v => v.Type == VoteType.Upvote) - b.Votes.Count(v => v.Type == VoteType.Downvote)),
+            (BlogSortBy.SCORE, SortDirection.DESC) => query.OrderByDescending(b =>
+                b.Votes.Count(v => v.Type == VoteType.Upvote) - b.Votes.Count(v => v.Type == VoteType.Downvote)),
+
+            _ => query.OrderByDescending(b => b.CreatedAt)
+        };
+
+        return query.ToList().Select(MapBlogWithUsername).ToList();
     }
 }

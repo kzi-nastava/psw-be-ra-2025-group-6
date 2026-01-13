@@ -278,12 +278,12 @@ public class BlogController : ControllerBase
         }
     }
 
-    [HttpGet("filter-by-quality")]
-    public ActionResult<List<BlogDto>> GetBlogsByQuality([FromQuery] BlogQualityStatusDto status)
+    [HttpGet("filter")]
+    public ActionResult<List<BlogDto>> GetFilteredBlogs([FromQuery] FilterBlogDto filter)
     {
         try
         {
-            var blogs = _blogService.GetBlogsByQualityStatus(status);
+            var blogs = _blogService.GetFilteredBlogs(filter);
             return Ok(blogs);
         }
         catch (Exception ex)
