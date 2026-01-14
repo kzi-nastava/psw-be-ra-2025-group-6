@@ -22,11 +22,13 @@ public static class PaymentsStartup
         services.AddScoped<ITourPurchaseTokenService, TourPurchaseTokenService>();
         services.AddScoped<IInternalTourPurchaseTokenService, InternalTourPurchaseTokenService>();
         services.AddScoped<IWalletService, WalletService>();
+        services.AddScoped<IPaymentRecordService, PaymentRecordService>();
 
         // Repositories
         services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
         services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenRepository>();
         services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<IPaymentRecordRepository, PaymentRecordRepository>();
 
         services.AddDbContext<PaymentsContext>(opt =>
             opt.UseNpgsql(DbConnectionStringBuilder.Build("payments"),

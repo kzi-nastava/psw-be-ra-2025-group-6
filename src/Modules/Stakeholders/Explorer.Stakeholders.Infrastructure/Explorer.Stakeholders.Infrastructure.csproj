@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\Explorer.BuildingBlocks.Infrastructure\Explorer.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Payments\Explorer.Payments.API\Explorer.Payments.API.csproj" />
     <ProjectReference Include="..\Explorer.Stakeholders.Core\Explorer.Stakeholders.Core.csproj" />
   </ItemGroup>
 

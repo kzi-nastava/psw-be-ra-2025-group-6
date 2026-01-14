@@ -58,4 +58,20 @@ public class WalletService : IWalletService
 
         return _mapper.Map<WalletDto>(wallet);
     }
+
+    public WalletDto Pay(long touristId, double amount)
+    {
+        if (amount <= 0) throw new ArgumentException("Amount must be positive");
+
+        var wallet = _walletRepository.GetByTouristId(touristId);
+        if (wallet == null)
+        {
+            throw new InvalidOperationException("Wallet not found.");
+        }
+
+        wallet.DecreaseBalance(amount);
+        wallet = _walletRepository.Update(wallet);
+
+        return _mapper.Map<WalletDto>(wallet);
+    }
 }
