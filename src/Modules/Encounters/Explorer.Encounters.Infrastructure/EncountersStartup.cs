@@ -6,7 +6,6 @@ using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
 using Explorer.Encounters.Infrastructure.Database.Repositories;
 using Explorer.Encounters.Core.UseCases;
-using Explorer.Encounters.Core.Mappers;
 using AutoMapper;
 using Explorer.Encounters.API.Public;
 
