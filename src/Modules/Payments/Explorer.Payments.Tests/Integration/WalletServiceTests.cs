@@ -10,6 +10,7 @@ namespace Explorer.Payments.Tests.Integration
     public class WalletServiceTests : BasePaymentsIntegrationTest
     {
         private const long TOURIST_ID = -21;
+        private const long MISSING_TOURIST_ID = -9999;
 
         public WalletServiceTests(PaymentsTestFactory factory) : base(factory) { }
 
@@ -30,6 +31,24 @@ namespace Explorer.Payments.Tests.Integration
         }
 
         [Fact]
+        public void Top_up_rejects_zero_amount()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var walletService = scope.ServiceProvider.GetRequiredService<IWalletService>();
+
+            Should.Throw<ArgumentException>(() => walletService.TopUp(TOURIST_ID, 0));
+        }
+
+        [Fact]
+        public void Top_up_rejects_negative_amount()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var walletService = scope.ServiceProvider.GetRequiredService<IWalletService>();
+
+            Should.Throw<ArgumentException>(() => walletService.TopUp(TOURIST_ID, -10));
+        }
+
+        [Fact]
         public void Payment_succeeds()
         {
             // Arrange
@@ -44,6 +63,24 @@ namespace Explorer.Payments.Tests.Integration
             // Assert
             result.ShouldNotBeNull();
             result.BalanceAc.ShouldBe(initialBalance - 50);
+        }
+
+        [Fact]
+        public void Payment_rejects_zero_amount()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var walletService = scope.ServiceProvider.GetRequiredService<IWalletService>();
+
+            Should.Throw<ArgumentException>(() => walletService.Pay(TOURIST_ID, 0));
+        }
+
+        [Fact]
+        public void Payment_rejects_negative_amount()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var walletService = scope.ServiceProvider.GetRequiredService<IWalletService>();
+
+            Should.Throw<ArgumentException>(() => walletService.Pay(TOURIST_ID, -5));
         }
 
         [Fact]
@@ -64,6 +101,28 @@ namespace Explorer.Payments.Tests.Integration
             Should.Throw<ArgumentException>(() => walletService.Pay(TOURIST_ID, initialBalance + 50));
             var finalBalance = walletService.GetByTouristId(TOURIST_ID).BalanceAc;
             finalBalance.ShouldBe(initialBalance);
+        }
+
+        [Fact]
+        public void Payment_fails_when_wallet_missing()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var walletService = scope.ServiceProvider.GetRequiredService<IWalletService>();
+
+            Should.Throw<InvalidOperationException>(() => walletService.Pay(MISSING_TOURIST_ID, 10));
+        }
+
+        [Fact]
+        public void Create_for_tourist_returns_existing_wallet()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var walletService = scope.ServiceProvider.GetRequiredService<IWalletService>();
+
+            var existing = walletService.GetByTouristId(TOURIST_ID);
+            var created = walletService.CreateForTourist(TOURIST_ID);
+
+            created.Id.ShouldBe(existing.Id);
+            created.BalanceAc.ShouldBe(existing.BalanceAc);
         }
     }
 }

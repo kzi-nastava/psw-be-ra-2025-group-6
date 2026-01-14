@@ -74,6 +74,19 @@ namespace Explorer.Payments.Tests.Integration
             result.StatusCode.ShouldBe(400);
         }
 
+        [Fact]
+        public void Admin_top_up_rejects_zero_amount()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var controller = CreateAdminWalletController(scope, ADMIN_ID);
+
+            var actionResult = controller.TopUp(new WalletTopUpDto { TouristId = TOURIST_ID, Amount = 0 });
+            var result = actionResult.Result as BadRequestObjectResult;
+
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(400);
+        }
+
         private static WalletController CreateWalletController(IServiceScope scope, long personId)
         {
             return new WalletController(
