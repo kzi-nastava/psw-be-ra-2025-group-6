@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Explorer.Encounters.API\Explorer.Encounters.API.csproj" />
+	  <ProjectReference Include="..\Explorer.Encounters.API\Explorer.Encounters.API.csproj" />
+
   </ItemGroup>
 
 
