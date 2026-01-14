@@ -4,6 +4,8 @@ using Explorer.Blog.API.Public.Administration;
 using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Infrastructure.Database;
 using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -181,22 +183,31 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         var controller = CreateController(scope);
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
 
-        // Check if blog with ID -6 already exists, if so delete it first
-        var existingBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == -6);
-        if (existingBlog != null)
+        var stakeholdersContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+
+        var existingProfile = stakeholdersContext.UserProfiles.FirstOrDefault(p => p.UserId == -11);
+        if (existingProfile == null)
         {
-            dbContext.Blogs.Remove(existingBlog);
-            dbContext.SaveChanges();
+            var profile = new UserProfile(
+                -11,
+                "Test",
+                "Autor",
+                "test@author.com",
+                "Biografija",
+                "Citat"
+            );
+
+            stakeholdersContext.UserProfiles.Add(profile);
+            stakeholdersContext.SaveChanges();
         }
 
         var blog = new DomainBlog(-11, "Blog za brisanje", "Opis", new List<string>(), BlogStatus.POSTED);
-        //typeof(DomainBlog).GetProperty("Id")?.SetValue(blog, -116);
         dbContext.Blogs.Add(blog);
         dbContext.SaveChanges();
 
         var result = controller.DeleteBlog(blog.Id);
-        result.ShouldBeOfType<NoContentResult>();
 
+        result.ShouldBeOfType<NoContentResult>();
         var storedBlog = dbContext.Blogs.FirstOrDefault(b => b.Id == blog.Id);
         storedBlog.ShouldBeNull();
     }
