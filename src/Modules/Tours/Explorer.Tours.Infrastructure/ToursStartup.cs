@@ -1,5 +1,6 @@
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Payments.API.Internal;
+using Explorer.Tours.API.Internal;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Admin;
 using Explorer.Tours.API.Public.Administration;
@@ -56,6 +57,7 @@ public static class ToursStartup
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<ITourDataProvider, TourDataProvider>();
+        services.AddScoped<ISaleInfoProvider, SaleInfoProvider>();
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
         services.AddScoped<IJournalRepository, JournalDbRepository>();

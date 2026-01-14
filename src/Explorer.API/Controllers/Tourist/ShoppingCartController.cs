@@ -83,5 +83,43 @@ namespace Explorer.API.Controllers.Tourist
                 return NotFound(new { message = ex.Message });
             }
         }
+
+        [HttpPost("checkout-with-coupon")]
+        public ActionResult<List<TourPurchaseTokenDto>> CheckoutWithCoupon([FromBody] CheckoutWithCouponDto request)
+        {
+            try
+            {
+                var touristId = User.PersonId();
+                var result = _shoppingCartService.CheckoutWithCoupon(touristId, request.CouponCode);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("purchase-bundle/{bundleId:long}")]
+        public ActionResult<PaymentRecordDto> PurchaseBundle(long bundleId)
+        {
+            try
+            {
+                var touristId = User.PersonId();
+                var result = _shoppingCartService.PurchaseBundle(touristId, bundleId);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
     }
 }
