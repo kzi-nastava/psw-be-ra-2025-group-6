@@ -46,5 +46,12 @@ namespace Explorer.API.Controllers.Administrator.Administration
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpGet("{touristId:long}")]
+        public ActionResult<WalletDto> GetByTouristId(long touristId)
+        {
+            var result = _walletService.GetByTouristId(touristId);
+            return Ok(result);
+        }
     }
 }
