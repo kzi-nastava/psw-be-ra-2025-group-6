@@ -23,7 +23,7 @@ public interface IBlogService
     (int upvotes, int downvotes) GetVotes(long blogId);
     BlogVoteDto? GetUserVote(long userId, long blogId);
     BlogDto RecalculateQualityStatus(long blogId);
-    List<BlogDto> GetBlogsByQualityStatus(BlogQualityStatusDto status);
+    //List<BlogDto> GetBlogsByQualityStatus(BlogQualityStatusDto status);
     bool ToggleCommentLike(long blogId, long commentId, long userId);
     int CountCommentLikes(long blogId, long commentId);
     bool IsCommentLikedByUser(long blogId, long commentId, long userId);
@@ -33,5 +33,7 @@ public interface IBlogService
     void ApproveCommentReport(long reportId, long adminId, string note);
     void DismissCommentReport(long reportId, long adminId, string note);
     PagedResult<BlogDto> GetFollowingBlogs(int page, int pageSize, long userId);
+
+    List<BlogDto> GetFilteredBlogs(FilterBlogDto filter);
 }
 
