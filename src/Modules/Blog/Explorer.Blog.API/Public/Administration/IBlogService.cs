@@ -13,9 +13,9 @@ public interface IBlogService
     BlogDto Delete(long id);
     void AddImages(long blogId, List<string> imagePaths);
     CommentDto AddComment(long blogId, long userId, string text);
-    CommentDto EditComment(long blogId, int commentId, long userId, string text);
-    CommentDto DeleteComment(long blogId, int commentId, long userId);
-    List<CommentDto> GetComments(long id);
+    CommentDto EditComment(long blogId, long commentId, long userId, string text);
+    CommentDto DeleteComment(long blogId, long commentId, long userId);
+    List<CommentDto> GetComments(long id, long userId);
     void Archive(long blogId);
     BlogDto UpdateDescription(long blogId, string newDescription);
     void Vote(long userId, long blogId, VoteTypeDto voteType);
@@ -23,5 +23,17 @@ public interface IBlogService
     (int upvotes, int downvotes) GetVotes(long blogId);
     BlogVoteDto? GetUserVote(long userId, long blogId);
     BlogDto RecalculateQualityStatus(long blogId);
-    List<BlogDto> GetBlogsByQualityStatus(BlogQualityStatusDto status);
+    //List<BlogDto> GetBlogsByQualityStatus(BlogQualityStatusDto status);
+    bool ToggleCommentLike(long blogId, long commentId, long userId);
+    int CountCommentLikes(long blogId, long commentId);
+    bool IsCommentLikedByUser(long blogId, long commentId, long userId);
+    void ReportComment(long blogId, long commentId, long userId, ReportTypeDto reason, string? additionalInfo);
+    bool IsCommentReportedByUser(long blogId, long commentId, long userId);
+    PagedResult<CommentReportDto> GetByReportStatus(AdminReportStatusDto status, int page, int pageSize);
+    void ApproveCommentReport(long reportId, long adminId, string note);
+    void DismissCommentReport(long reportId, long adminId, string note);
+    PagedResult<BlogDto> GetFollowingBlogs(int page, int pageSize, long userId);
+
+    List<BlogDto> GetFilteredBlogs(FilterBlogDto filter);
 }
+

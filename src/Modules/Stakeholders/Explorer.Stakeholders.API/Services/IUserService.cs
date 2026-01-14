@@ -9,6 +9,8 @@ namespace Explorer.Stakeholders.API.Services
         // Vraća listu svih korisnika
         IEnumerable<UserDto> GetAllUsers();
 
+        UserDto GetUser(long userId);
+
         // Blokira korisnika po ID-u
         void BlockUser(long userId);
 
