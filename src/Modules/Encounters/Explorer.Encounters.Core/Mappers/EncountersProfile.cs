@@ -18,6 +18,13 @@ namespace Explorer.Encounters.Core.Mappers
             CreateMap<EncounterCompletion, EncounterCompletionDto>().ReverseMap();
             CreateMap<SocialEncounter, SocialEncounterDto>().ReverseMap();
             CreateMap<ActiveSocialParticipant, ActiveSocialParticipantDto>().ReverseMap();
+            CreateMap<TouristXpProfile, TouristXpProfileDto>()
+    .ForMember(d => d.XpProgressInCurrentLevel, opt => opt.MapFrom(s => s.GetXPProgressInCurrentLevel()))
+    .ForMember(d => d.XpNeededForNextLevel, opt => opt.MapFrom(s => s.GetXPNeededForNextLevel()))
+    .ForMember(d => d.XpRequiredForNextLevel, opt => opt.MapFrom(s => s.GetXPRequiredForNextLevel()))
+    .ForMember(d => d.CanCreateEncounters, opt => opt.MapFrom(s => s.CanCreateEncounters()))
+    .ForMember(d => d.LevelUpHistory, opt => opt.MapFrom(s => s.GetLevelUpHistory()));
+
         }
 
         private class ChallengeDtoToChallengeConverter : ITypeConverter<ChallengeDto, Challenge>
@@ -47,5 +54,6 @@ namespace Explorer.Encounters.Core.Mappers
                 );
             }
         }
+
     }
 }

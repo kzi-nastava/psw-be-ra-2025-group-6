@@ -1,8 +1,9 @@
 using Explorer.Encounters.API.Public;
-using Explorer.Encounters.API.Dtos;
+using Explorer.Encounters.API.Dtos; // <-- This using is required for ChallengeDto
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Explorer.Stakeholders.Infrastructure.Authentication;
+using Explorer.Encounters.Core.UseCases;
 
 namespace Explorer.API.Controllers.Encounters;
 
@@ -11,7 +12,7 @@ namespace Explorer.API.Controllers.Encounters;
 public class ChallengesController : ControllerBase
 {
     private readonly IChallengePublicService _publicService;
-    private readonly Explorer.Encounters.Core.UseCases.IChallengeService _adminService;
+    private readonly IChallengeService _adminService;
 
     public ChallengesController(IChallengePublicService publicService, Explorer.Encounters.Core.UseCases.IChallengeService adminService)
     {
@@ -48,12 +49,19 @@ public class ChallengesController : ControllerBase
         return Ok(_adminService.Create(dto));
     }
 
-    // Tourist: create challenge (requires level 10+)
     [HttpPost("create-by-tourist")]
     [Authorize(Policy = "touristPolicy")]
     public ActionResult<ChallengeDto> CreateByTourist([FromBody] ChallengeDto dto)
     {
         var touristId = User.PersonId();
+        if (touristId == 0)
+        {
+            Console.WriteLine("ERROR: PersonId from token is null or 0!");
+            return BadRequest(new { message = "Invalid token, cannot determine user ID." });
+        }
+
+        Console.WriteLine($" TouristId from token: {touristId}"); 
+
         try
         {
             var result = _adminService.CreateByTourist(dto, touristId);
@@ -61,6 +69,7 @@ public class ChallengesController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
+            Console.WriteLine($" Error: {ex.Message}"); 
             return BadRequest(new { message = ex.Message });
         }
     }

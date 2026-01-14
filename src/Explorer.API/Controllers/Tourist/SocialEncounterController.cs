@@ -54,5 +54,7 @@ namespace Explorer.API.Controllers.Tourist
                 return NotFound();
             return Ok(result);
         }
+
+
     }
 }

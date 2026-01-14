@@ -16,10 +16,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\BuildingBlocks\Explorer.BuildingBlocks.Tests\Explorer.BuildingBlocks.Tests.csproj" />
-    <ProjectReference Include="..\Explorer.API\Explorer.API.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
@@ -29,6 +25,12 @@
     <Content Include="TestData\**\*.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\Explorer.BuildingBlocks.Tests\Explorer.BuildingBlocks.Tests.csproj" />
+    <ProjectReference Include="..\..\..\Explorer.API\Explorer.API.csproj" />
+    <ProjectReference Include="..\Explorer.Encounters.API\Explorer.Encounters.API.csproj" />
   </ItemGroup>
 
 </Project>
