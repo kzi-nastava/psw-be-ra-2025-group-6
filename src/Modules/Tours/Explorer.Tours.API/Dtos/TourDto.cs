@@ -16,4 +16,10 @@ public class TourDto
     public double DistanceInKm { get; set; }
     public List<TourDurationDto>? Duration { get; set;  }
     public DateTime? PublishedTime { get; set; }
+    
+    // Sale/Discount information
+    public double? OriginalPrice { get; set; }
+    public double? DiscountedPrice { get; set; }
+    public int? DiscountPercent { get; set; }
+    public bool IsOnSale { get; set; }
 }

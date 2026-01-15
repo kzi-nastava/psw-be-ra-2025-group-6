@@ -1,3 +1,5 @@
+using Explorer.BuildingBlocks.Core.Integration;
+using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Payments.API.Internal;
 using Explorer.Stakeholders.API.Internal;
@@ -43,10 +45,15 @@ public static class StakeholdersStartup
         services.AddScoped<ITourProblemService, TourProblemService>();
         services.AddScoped<ITourProblemMessageService, TourProblemMessageService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IProfilePostService, ProfilePostService>();
+        services.AddScoped<IClubPostService, ClubPostService>();
+        services.AddScoped<IClubMembershipService, TemporaryClubMembershipService>();
 
         services.AddScoped<IInternalStakeholderService, InternalStakeholdersService>();
         services.AddScoped<INotificationDataProvider, NotificationDataProvider>();
 
+        // Register integration adapter
+        services.AddScoped<INotificationPublisher, StakeholdersNotificationPublisher>();
 
     }
 
@@ -62,6 +69,9 @@ public static class StakeholdersStartup
         services.AddScoped<ITourProblemMessageRepository, TourProblemMessageDatabaseRepository>();
         services.AddScoped<INotificationRepository, NotificationDatabaseRepository>();
         services.AddScoped<ITourInfoGateway, TourInfoGateway>();
+        services.AddScoped<IProfilePostRepository, ProfilePostDbRepository>();
+        services.AddScoped<IClubPostRepository, ClubPostDbRepository>();
+        services.AddScoped<IBlogInfoGateway, BlogInfoGateway>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();

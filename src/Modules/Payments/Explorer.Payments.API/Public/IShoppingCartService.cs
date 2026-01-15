@@ -8,4 +8,6 @@ public interface IShoppingCartService
     ShoppingCartDto AddItem(long touristId, long tourId, string tourName, double price);
     ShoppingCartDto RemoveItem(long touristId, long tourId);
     List<TourPurchaseTokenDto> Checkout(long touristId);
+    List<TourPurchaseTokenDto> CheckoutWithCoupon(long touristId, string couponCode);
+    PaymentRecordDto PurchaseBundle(long touristId, long bundleId);
 }

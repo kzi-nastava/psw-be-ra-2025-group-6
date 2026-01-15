@@ -3,6 +3,7 @@ DELETE FROM tours."QuizQuestions";
 DELETE FROM tours."Quizzes";
 DELETE FROM tours."TourReviews";
 DELETE FROM tours."TourExecutions";
+DELETE FROM tours."PublicEntityRequests";
 DELETE FROM payments."TourPurchaseTokens";
 DELETE FROM payments."OrderItem";
 DELETE FROM tours."TouristEquipment";
