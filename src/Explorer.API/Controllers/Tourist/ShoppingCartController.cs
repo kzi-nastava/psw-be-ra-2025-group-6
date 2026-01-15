@@ -82,6 +82,10 @@ namespace Explorer.API.Controllers.Tourist
             {
                 return NotFound(new { message = ex.Message });
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("checkout-with-coupon")]

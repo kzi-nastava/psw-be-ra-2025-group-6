@@ -21,6 +21,8 @@ public static class PaymentsStartup
         services.AddScoped<IShoppingCartService, ShoppingCartService>();
         services.AddScoped<ITourPurchaseTokenService, TourPurchaseTokenService>();
         services.AddScoped<IInternalTourPurchaseTokenService, InternalTourPurchaseTokenService>();
+        services.AddScoped<IWalletService, WalletService>();
+        services.AddScoped<IPaymentRecordService, PaymentRecordService>();
         services.AddScoped<IBundleService, BundleService>();
         services.AddScoped<ICouponService, CouponService>();
         services.AddScoped<ISaleService, SaleService>();
@@ -28,6 +30,8 @@ public static class PaymentsStartup
         // Repositories
         services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
         services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenRepository>();
+        services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<IPaymentRecordRepository, PaymentRecordRepository>();
         services.AddScoped<IBundleRepository, BundleDbRepository>();
         services.AddScoped<ICouponRepository, CouponDbRepository>();
         services.AddScoped<ISaleRepository, SaleDbRepository>();
