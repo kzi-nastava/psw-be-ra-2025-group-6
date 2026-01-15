@@ -107,8 +107,8 @@ public class ShoppingCartService : IShoppingCartService
             {
                 TouristId = touristId,
                 TourId = item.TourId,
-                Price = (float)item.Price,
-                PurchasedAt = DateTime.UtcNow
+                OriginalPrice = (float)item.Price,
+                PurchaseTime = DateTime.UtcNow
             };
             _paymentRecordService.Create(paymentRecord);
         }

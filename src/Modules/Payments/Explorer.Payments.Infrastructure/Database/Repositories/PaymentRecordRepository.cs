@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Payments.Core.Domain;
 using Explorer.Payments.Core.Domain.RepositoryInterfaces;
@@ -57,5 +59,10 @@ public class PaymentRecordRepository : IPaymentRecordRepository
         var entity = Get(id);
         _dbSet.Remove(entity);
         _dbContext.SaveChanges();
+    }
+
+    public List<PaymentRecord> GetByTourist(long touristId)
+    {
+        return _dbSet.Where(r => r.TouristId == touristId).ToList();
     }
 }
