@@ -50,6 +50,13 @@ public class CouponController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("by-author/{authorId}")]
+    public ActionResult<List<CouponDto>> GetByAuthorId(long authorId)
+    {
+        var result = _couponService.GetByAuthor(authorId);
+        return Ok(result);
+    }
+
     [HttpGet("{id}")]
     public ActionResult<CouponDto> Get(long id)
     {

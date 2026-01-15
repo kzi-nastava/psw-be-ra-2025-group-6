@@ -11,12 +11,14 @@ namespace Explorer.Payments.Core.UseCases;
 public class BundleService : IBundleService
 {
     private readonly IBundleRepository _bundleRepository;
+    private readonly IPaymentRecordRepository _paymentRecordRepository;
     private readonly ITourDataProvider _tourDataProvider;
     private readonly IMapper _mapper;
 
-    public BundleService(IBundleRepository bundleRepository, ITourDataProvider tourDataProvider, IMapper mapper)
+    public BundleService(IBundleRepository bundleRepository, IPaymentRecordRepository paymentRecordRepository, ITourDataProvider tourDataProvider, IMapper mapper)
     {
         _bundleRepository = bundleRepository;
+        _paymentRecordRepository = paymentRecordRepository;
         _tourDataProvider = tourDataProvider;
         _mapper = mapper;
     }
@@ -73,6 +75,22 @@ public class BundleService : IBundleService
     {
         var bundles = _bundleRepository.GetPublished();
         return _mapper.Map<List<BundleDto>>(bundles);
+    }
+
+    public List<BundleDto> GetAvailableForTourist(long touristId)
+    {
+        var publishedBundles = _bundleRepository.GetPublished();
+        var paymentRecords = _paymentRecordRepository.GetByTourist(touristId);
+        var purchasedBundleIds = paymentRecords
+            .Where(pr => pr.BundleId.HasValue)
+            .Select(pr => pr.BundleId.Value)
+            .ToHashSet();
+
+        var availableBundles = publishedBundles
+            .Where(b => !purchasedBundleIds.Contains(b.Id))
+            .ToList();
+
+        return _mapper.Map<List<BundleDto>>(availableBundles);
     }
 
     public BundleDto Publish(long authorId, long bundleId)

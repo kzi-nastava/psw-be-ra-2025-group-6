@@ -10,6 +10,7 @@ public interface IBundleService
     BundleDto Get(long id);
     List<BundleDto> GetByAuthor(long authorId);
     List<BundleDto> GetPublished();
+    List<BundleDto> GetAvailableForTourist(long touristId);
     BundleDto Publish(long authorId, long bundleId);
     BundleDto Archive(long authorId, long bundleId);
     double GetTotalToursPrice(List<long> tourIds);

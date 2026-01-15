@@ -1,5 +1,6 @@
 using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Public;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +21,8 @@ public class TouristBundleController : ControllerBase
     [HttpGet]
     public ActionResult<List<BundleDto>> GetPublished()
     {
-        var result = _bundleService.GetPublished();
+        var touristId = User.PersonId();
+        var result = _bundleService.GetAvailableForTourist(touristId);
         return Ok(result);
     }
 

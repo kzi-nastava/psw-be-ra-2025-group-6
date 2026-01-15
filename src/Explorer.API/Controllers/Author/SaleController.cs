@@ -42,6 +42,20 @@ public class SaleController : ControllerBase
         return Ok();
     }
 
+    [HttpGet("by-author/{authorId}")]
+    public ActionResult<List<SaleDto>> GetByAuthorId(long authorId)
+    {
+        var result = _saleService.GetByAuthor(authorId);
+        return Ok(result);
+    }
+
+    [HttpGet("active")]
+    public ActionResult<List<SaleDto>> GetActiveSales()
+    {
+        var result = _saleService.GetActiveSales();
+        return Ok(result);
+    }
+
     [HttpGet]
     public ActionResult<List<SaleDto>> GetAll()
     {
@@ -54,13 +68,6 @@ public class SaleController : ControllerBase
     public ActionResult<SaleDto> Get(long id)
     {
         var result = _saleService.Get(id);
-        return Ok(result);
-    }
-
-    [HttpGet("active")]
-    public ActionResult<List<SaleDto>> GetActiveSales()
-    {
-        var result = _saleService.GetActiveSales();
         return Ok(result);
     }
 }
