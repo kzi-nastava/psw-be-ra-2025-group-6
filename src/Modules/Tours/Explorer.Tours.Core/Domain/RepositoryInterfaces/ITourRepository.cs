@@ -8,6 +8,8 @@ public interface ITourRepository
     PagedResult<Tour> GetPaged(int page, int pageSize);
 
     List<Tour> GetAll();
+
+    List<Tour> GetByAuthorId(long authorId);
     Tour Get(long id);
     Tour GetWithKeyPoints(long id);
     Tour Create(Tour tour);

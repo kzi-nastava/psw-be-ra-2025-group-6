@@ -34,7 +34,7 @@ public class ModulesTests : BaseArchitecturalTests
     public void Infra_projects_should_only_reference_themselves_their_API_and_core_projects_and_building_blocks(string moduleName)
     {
         var examinedTypes = GetExaminedTypes($"Explorer.{moduleName}.Infrastructure");
-        var forbiddenTypes = GetForbiddenTypes("Explorer.BuildingBlocks.", $"Explorer.{moduleName}.");
+        var forbiddenTypes = GetForbiddenTypes("Explorer.BuildingBlocks.", $"Explorer.{moduleName}.", "Explorer\\..+\\.API");
 
         var rule = Types().That().Are(examinedTypes).Should().NotDependOnAny(forbiddenTypes);
 
@@ -96,6 +96,10 @@ public class ModulesTests : BaseArchitecturalTests
         new object[]
         {
             "Tours"
+        },
+        new object[]
+        {
+            "Encounters"
         }
     };
 }

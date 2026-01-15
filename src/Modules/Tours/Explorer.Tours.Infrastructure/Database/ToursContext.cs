@@ -19,12 +19,10 @@ public class ToursContext : DbContext
 
     public DbSet<TouristEquipment> TouristEquipment { get; set; }
 
-    public DbSet<TourPurchaseToken> TourPurchaseTokens { get; set; }
     public DbSet<Tour> Tours { get; set; }
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Meetup> Meetups { get; set; }
-    public DbSet<ShoppingCart> ShoppingCarts { get; set; }
-    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<TourPlanner> TourPlanners { get; set; }
 
     public DbSet<TourReview> TourReviews { get; set; }
     public DbSet<Facility> Facility { get; set; }
@@ -33,6 +31,8 @@ public class ToursContext : DbContext
 
     public DbSet<KeyPoint> KeyPoints { get; set; }
 
+    public DbSet<PublicEntityRequest> PublicEntityRequests { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -40,6 +40,7 @@ public class ToursContext : DbContext
         modelBuilder.HasDefaultSchema("tours");
 
         ConfigureTouristEquipment(modelBuilder);
+        ConfigureTourPlanner(modelBuilder);
 
         modelBuilder.Entity<Tour>()
     .HasMany(t => t.Equipment)
@@ -62,25 +63,16 @@ public class ToursContext : DbContext
             b.Property(e => e.CompletedKeyPointsJson).HasColumnType("jsonb");
             b.Property(e => e.ProgressPercentage).HasDefaultValue(0);
         });
-        ConfigureShoppingCart(modelBuilder);
-    }
-
-    private static void ConfigureShoppingCart(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<ShoppingCart>()
-            .OwnsMany(s => s.Items);
 
         modelBuilder.Entity<Tour>()
-    .Property(t => t.Duration)
-    .HasConversion(
-        v => JsonSerializer.Serialize(v, new JsonSerializerOptions()),
-        v => JsonSerializer.Deserialize<List<TourDuration>>(v, new JsonSerializerOptions())!
-    )
-    .HasColumnType("jsonb");
-
-
-
+            .Property(t => t.Duration)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, new JsonSerializerOptions()),
+                v => JsonSerializer.Deserialize<List<TourDuration>>(v, new JsonSerializerOptions())!
+            )
+            .HasColumnType("jsonb");
     }
+
 
     private static void ConfigureTouristEquipment(ModelBuilder modelBuilder)
     {
@@ -115,5 +107,15 @@ public class ToursContext : DbContext
         modelBuilder.Entity<Quiz>()
             .Property(q => q.Title)
             .IsRequired();
+    }
+
+    private static void ConfigureTourPlanner(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TourPlanner>(b =>
+        {
+            b.HasKey(tp => tp.Id);
+            b.HasIndex(tp => tp.UserId);
+            b.HasIndex(tp => tp.TourId);
+        });
     }
 }
