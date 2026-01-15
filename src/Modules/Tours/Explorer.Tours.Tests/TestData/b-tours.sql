@@ -63,7 +63,6 @@ VALUES
     );
 
 INSERT INTO tours."Tours"
-("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
 VALUES
     (
         -5,

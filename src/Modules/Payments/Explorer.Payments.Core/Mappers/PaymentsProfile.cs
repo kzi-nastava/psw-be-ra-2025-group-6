@@ -12,6 +12,14 @@ public class PaymentsProfile : Profile
         CreateMap<OrderItem, OrderItemDto>().ReverseMap();
         CreateMap<TourPurchaseToken, TourPurchaseTokenDto>().ReverseMap();
         CreateMap<Wallet, WalletDto>().ReverseMap();
+        
+        CreateMap<Bundle, BundleDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ReverseMap()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<BundleStatus>(src.Status)));
+        
+        CreateMap<Coupon, CouponDto>().ReverseMap();
+        CreateMap<Sale, SaleDto>().ReverseMap();
         CreateMap<PaymentRecord, PaymentRecordDto>().ReverseMap();
     }
 }

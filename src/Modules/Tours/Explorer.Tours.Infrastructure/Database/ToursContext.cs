@@ -30,6 +30,8 @@ public class ToursContext : DbContext
 
     public DbSet<KeyPoint> KeyPoints { get; set; }
 
+    public DbSet<PublicEntityRequest> PublicEntityRequests { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

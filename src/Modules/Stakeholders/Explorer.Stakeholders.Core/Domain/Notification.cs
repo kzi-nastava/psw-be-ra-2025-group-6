@@ -32,6 +32,7 @@ namespace Explorer.Stakeholders.Core.Domain
 
         private void Validate()
         {
+            // Tests use negative IDs for seeded users; only zero is considered invalid
             if (RecipientId == 0) throw new ArgumentException("Invalid RecipientId");
             if (SenderId == 0) throw new ArgumentException("Invalid SenderId");
             if (string.IsNullOrWhiteSpace(Content)) throw new ArgumentException("Content cannot be empty");

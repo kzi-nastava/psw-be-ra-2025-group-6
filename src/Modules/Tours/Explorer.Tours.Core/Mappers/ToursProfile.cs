@@ -26,6 +26,14 @@ public class ToursProfile : Profile
         CreateMap<MeetupDto, Meetup>().ReverseMap();
         CreateMap<TourReview, TourReviewDto>().ReverseMap();
         CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
+        
+        // Public entity request mappings
+        CreateMap<PublicEntityRequest, PublicEntityRequestDto>().ReverseMap();
+        CreateMap<PublicEntityType, PublicEntityTypeDto>().ReverseMap();
+        CreateMap<RequestStatus, RequestStatusDto>().ReverseMap();
+
+        CreateMap<KeyPoint, PublicKeyPointDto>().ReverseMap();
+        CreateMap<Facility, PublicFacilityDto>().ReverseMap();
         CreateMap<OrderItem, OrderItemDto>().ReverseMap();
         CreateMap<Quiz, QuizDto>().ReverseMap();
         CreateMap<QuizQuestion, QuizQuestionDto>().ReverseMap();
