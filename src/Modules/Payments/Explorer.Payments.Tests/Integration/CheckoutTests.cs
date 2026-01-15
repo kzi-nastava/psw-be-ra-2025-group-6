@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Explorer.Payments.Tests.Integration
 {
@@ -65,6 +66,36 @@ namespace Explorer.Payments.Tests.Integration
         }
 
         [Fact]
+        public void Checkout_succeeds_with_exact_balance()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var controller = CreateController(scope);
+            var walletService = scope.ServiceProvider.GetRequiredService<IWalletService>();
+            var tourService = scope.ServiceProvider.GetRequiredService<ITourService>();
+            ClearCart(scope);
+
+            var tour1 = tourService.Get(-3);
+            var tour2 = tourService.Get(-5);
+            controller.AddItem(tour1.Id);
+            controller.AddItem(tour2.Id);
+
+            var total = tour1.Price + tour2.Price;
+            EnsureWalletBalance(walletService, TOURIST_ID, total);
+
+            var response = controller.Checkout();
+            var okResult = response.Result as OkObjectResult;
+            var tokens = okResult?.Value as List<TourPurchaseTokenDto>;
+
+            tokens.ShouldNotBeNull();
+            tokens.Count.ShouldBe(2);
+            tokens.ShouldContain(t => t.TourId == tour1.Id && t.TourName == tour1.Name);
+            tokens.ShouldContain(t => t.TourId == tour2.Id && t.TourName == tour2.Name);
+
+            var updatedWallet = walletService.GetByTouristId(TOURIST_ID);
+            updatedWallet.BalanceAc.ShouldBe(0);
+        }
+
+        [Fact]
         public void Checkout_fails_due_to_insufficient_funds()
         {
             // Arrange
@@ -86,6 +117,28 @@ namespace Explorer.Payments.Tests.Integration
             response.Result.ShouldBeOfType<BadRequestObjectResult>();
             var objectResult = (BadRequestObjectResult)response.Result;
             objectResult.StatusCode.ShouldBe(400);
+        }
+
+        [Fact]
+        public void Checkout_after_success_returns_not_found()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var controller = CreateController(scope);
+            var walletService = scope.ServiceProvider.GetRequiredService<IWalletService>();
+            var tourService = scope.ServiceProvider.GetRequiredService<ITourService>();
+            ClearCart(scope);
+
+            var tour1 = tourService.Get(-3);
+            controller.AddItem(tour1.Id);
+            EnsureWalletBalance(walletService, TOURIST_ID, tour1.Price);
+
+            controller.Checkout();
+
+            var response = controller.Checkout();
+            var notFoundResult = response.Result as NotFoundObjectResult;
+
+            notFoundResult.ShouldNotBeNull();
+            notFoundResult.StatusCode.ShouldBe(404);
         }
 
         [Fact]
@@ -141,6 +194,23 @@ namespace Explorer.Payments.Tests.Integration
             {
                 cartService.RemoveItem(TOURIST_ID, item.TourId);
             }
+        }
+
+        private static void EnsureWalletBalance(IWalletService walletService, long touristId, double targetBalance)
+        {
+            var current = walletService.GetByTouristId(touristId).BalanceAc;
+            if (Math.Abs(current - targetBalance) < 0.01)
+            {
+                return;
+            }
+
+            if (current > targetBalance)
+            {
+                walletService.Pay(touristId, current - targetBalance);
+                return;
+            }
+
+            walletService.TopUp(touristId, targetBalance - current);
         }
     }
 }
