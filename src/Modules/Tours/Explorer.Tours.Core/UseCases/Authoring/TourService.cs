@@ -271,10 +271,14 @@ public class TourService : ITourService
             tour.OriginalPrice = tour.Price;
             tour.DiscountPercent = saleInfo.DiscountPercent;
             tour.DiscountedPrice = tour.Price * (1 - saleInfo.DiscountPercent / 100.0);
+            tour.SaleStartDate = saleInfo.StartDate;
+            tour.SaleEndDate = saleInfo.EndDate;
         }
         else
         {
             tour.IsOnSale = false;
+            tour.SaleStartDate = null;
+            tour.SaleEndDate = null;
         }
     }
 }

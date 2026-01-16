@@ -53,7 +53,9 @@ public class ShoppingCartService : IShoppingCartService
             cart = new ShoppingCart(touristId);
             cart = _cartRepository.Create(cart);
         }
-        return _mapper.Map<ShoppingCartDto>(cart);
+        var dto = _mapper.Map<ShoppingCartDto>(cart);
+        ApplySaleInfo(dto);
+        return dto;
     }
 
     public ShoppingCartDto AddItem(long touristId, long tourId, string tourName, double price)
@@ -69,8 +71,10 @@ public class ShoppingCartService : IShoppingCartService
 
         cart.AddItem(tourData.Id, tourData.Name, tourData.Price, tourData.Status);
         cart = _cartRepository.Update(cart);
-        
-        return _mapper.Map<ShoppingCartDto>(cart);
+
+        var dto = _mapper.Map<ShoppingCartDto>(cart);
+        ApplySaleInfo(dto);
+        return dto;
     }
 
     public ShoppingCartDto RemoveItem(long touristId, long tourId)
@@ -81,8 +85,10 @@ public class ShoppingCartService : IShoppingCartService
 
         cart.RemoveItem(tourId);
         cart = _cartRepository.Update(cart);
-        
-        return _mapper.Map<ShoppingCartDto>(cart);
+
+        var dto = _mapper.Map<ShoppingCartDto>(cart);
+        ApplySaleInfo(dto);
+        return dto;
     }
 
     public List<TourPurchaseTokenDto> Checkout(long touristId)
@@ -257,5 +263,32 @@ public class ShoppingCartService : IShoppingCartService
         _tokenRepository.CreateBulk(tokens);
 
         return _mapper.Map<PaymentRecordDto>(createdRecord);
+    }
+
+    private void ApplySaleInfo(ShoppingCartDto cart)
+    {
+        if (cart?.Items == null || cart.Items.Count == 0) return;
+
+        foreach (var item in cart.Items)
+        {
+            item.OriginalPrice = item.Price;
+            var saleInfo = _tourDataProvider.GetActiveSaleForTour(item.TourId);
+            if (saleInfo != null)
+            {
+                item.IsOnSale = true;
+                item.DiscountPercent = saleInfo.DiscountPercent;
+                item.DiscountedPrice = item.Price * (1 - saleInfo.DiscountPercent / 100.0);
+                item.SaleStartDate = saleInfo.StartDate;
+                item.SaleEndDate = saleInfo.EndDate;
+            }
+            else
+            {
+                item.IsOnSale = false;
+                item.DiscountPercent = null;
+                item.DiscountedPrice = null;
+                item.SaleStartDate = null;
+                item.SaleEndDate = null;
+            }
+        }
     }
 }
