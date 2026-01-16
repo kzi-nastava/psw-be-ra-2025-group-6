@@ -258,4 +258,119 @@ public class ShoppingCartService : IShoppingCartService
 
         return _mapper.Map<PaymentRecordDto>(createdRecord);
     }
+
+    public CheckoutPreviewDto GetCheckoutPreview(long touristId)
+    {
+        var cart = _cartRepository.GetByTouristId(touristId);
+        if (cart == null || cart.Items.Count == 0)
+            throw new KeyNotFoundException($"Shopping cart is empty or not found for tourist {touristId}");
+
+        var preview = new CheckoutPreviewDto
+        {
+            OriginalTotalPrice = cart.TotalPrice,
+            FinalTotalPrice = cart.TotalPrice,
+            TotalDiscount = 0,
+            HasDiscount = false,
+            Items = cart.Items.Select(item => new CheckoutItemPreviewDto
+            {
+                TourId = item.TourId,
+                TourName = item.TourName,
+                OriginalPrice = item.Price,
+                FinalPrice = item.Price,
+                HasDiscount = false
+            }).ToList()
+        };
+
+        return preview;
+    }
+
+    public CheckoutPreviewDto GetCheckoutPreviewWithCoupon(long touristId, string couponCode)
+    {
+        var cart = _cartRepository.GetByTouristId(touristId);
+        if (cart == null || cart.Items.Count == 0)
+            throw new KeyNotFoundException($"Shopping cart is empty or not found for tourist {touristId}");
+
+        var coupon = _couponRepository.GetByCode(couponCode);
+        if (coupon == null || !coupon.IsValid())
+            throw new InvalidOperationException("Invalid or expired coupon");
+
+        var items = cart.Items.ToList();
+        var previewItems = new List<CheckoutItemPreviewDto>();
+        double originalTotal = 0;
+        double finalTotal = 0;
+
+        if (coupon.TourId.HasValue)
+        {
+            // Coupon applies to specific tour
+            foreach (var item in items)
+            {
+                double finalPrice = item.Price;
+                int? discountPercent = null;
+                bool hasDiscount = false;
+
+                if (item.TourId == coupon.TourId.Value)
+                {
+                    finalPrice = item.Price * (1 - coupon.DiscountPercent / 100.0);
+                    discountPercent = coupon.DiscountPercent;
+                    hasDiscount = true;
+                }
+
+                originalTotal += item.Price;
+                finalTotal += finalPrice;
+
+                previewItems.Add(new CheckoutItemPreviewDto
+                {
+                    TourId = item.TourId,
+                    TourName = item.TourName,
+                    OriginalPrice = item.Price,
+                    FinalPrice = finalPrice,
+                    DiscountPercent = discountPercent,
+                    HasDiscount = hasDiscount
+                });
+            }
+        }
+        else
+        {
+            // Coupon applies to most expensive tour from the author
+            var mostExpensiveItem = items.OrderByDescending(i => i.Price).First();
+
+            foreach (var item in items)
+            {
+                double finalPrice = item.Price;
+                int? discountPercent = null;
+                bool hasDiscount = false;
+
+                if (item.TourId == mostExpensiveItem.TourId)
+                {
+                    finalPrice = item.Price * (1 - coupon.DiscountPercent / 100.0);
+                    discountPercent = coupon.DiscountPercent;
+                    hasDiscount = true;
+                }
+
+                originalTotal += item.Price;
+                finalTotal += finalPrice;
+
+                previewItems.Add(new CheckoutItemPreviewDto
+                {
+                    TourId = item.TourId,
+                    TourName = item.TourName,
+                    OriginalPrice = item.Price,
+                    FinalPrice = finalPrice,
+                    DiscountPercent = discountPercent,
+                    HasDiscount = hasDiscount
+                });
+            }
+        }
+
+        return new CheckoutPreviewDto
+        {
+            OriginalTotalPrice = originalTotal,
+            FinalTotalPrice = finalTotal,
+            TotalDiscount = originalTotal - finalTotal,
+            DiscountPercent = coupon.DiscountPercent,
+            CouponCode = couponCode,
+            HasDiscount = true,
+            Items = previewItems
+        };
+    }
 }

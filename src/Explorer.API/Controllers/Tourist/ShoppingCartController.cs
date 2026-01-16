@@ -125,5 +125,39 @@ namespace Explorer.API.Controllers.Tourist
                 return NotFound(new { message = ex.Message });
             }
         }
+
+        [HttpGet("checkout-preview")]
+        public ActionResult<CheckoutPreviewDto> GetCheckoutPreview()
+        {
+            try
+            {
+                var touristId = User.PersonId();
+                var result = _shoppingCartService.GetCheckoutPreview(touristId);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("checkout-preview-with-coupon")]
+        public ActionResult<CheckoutPreviewDto> GetCheckoutPreviewWithCoupon([FromBody] CheckoutWithCouponDto request)
+        {
+            try
+            {
+                var touristId = User.PersonId();
+                var result = _shoppingCartService.GetCheckoutPreviewWithCoupon(touristId, request.CouponCode);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
     }
 }
