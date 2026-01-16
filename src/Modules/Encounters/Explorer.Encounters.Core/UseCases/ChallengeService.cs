@@ -4,6 +4,7 @@ using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
 using Explorer.Encounters.API.Dtos;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 namespace Explorer.Encounters.Core.UseCases
 {
@@ -32,9 +33,18 @@ namespace Explorer.Encounters.Core.UseCases
 
         public ChallengeDto Create(ChallengeDto dto)
         {
+            Console.WriteLine($"[SERVICE] Create called with ImagePath: {dto.ImagePath ?? "NULL"}");
+            
             var domain = _mapper.Map<Challenge>(dto);
+            Console.WriteLine($"[SERVICE] Mapped domain ImagePath: {domain.ImagePath ?? "NULL"}");
+            
             var created = _repository.Create(domain);
-            return _mapper.Map<ChallengeDto>(created);
+            Console.WriteLine($"[SERVICE] Repository returned ImagePath: {created.ImagePath ?? "NULL"}");
+            
+            var result = _mapper.Map<ChallengeDto>(created);
+            Console.WriteLine($"[SERVICE] Final DTO ImagePath: {result.ImagePath ?? "NULL"}");
+            
+            return result;
         }
 
         public ChallengeDto CreateByTourist(ChallengeDto dto, long touristId)
@@ -59,7 +69,9 @@ namespace Explorer.Encounters.Core.UseCases
                 dto.Latitude,
                 dto.XP,
                 parsedType,
-                touristId
+                touristId,
+                dto.ImagePath,
+                dto.ActivationRadiusMeters > 0 ? dto.ActivationRadiusMeters : 50
             );
 
             var created = _repository.Create(challenge);
@@ -69,6 +81,13 @@ namespace Explorer.Encounters.Core.UseCases
         public List<ChallengeDto> GetPendingApproval()
         {
             return _mapper.Map<List<ChallengeDto>>(_repository.GetPendingApproval());
+        }
+        
+        public List<ChallengeDto> GetAllDraft()
+        {
+            return _mapper.Map<List<ChallengeDto>>(
+                _repository.GetAll().Where(c => c.Status == ChallengeStatus.Draft).ToList()
+            );
         }
 
         public ChallengeDto ApproveChallenge(long id)
@@ -92,9 +111,8 @@ namespace Explorer.Encounters.Core.UseCases
             if (!challenge.IsCreatedByTourist)
                 throw new InvalidOperationException("Only tourist-created challenges can be rejected.");
 
-            challenge.Archive();
-            var updated = _repository.Update(challenge);
-            return _mapper.Map<ChallengeDto>(updated);
+            _repository.Delete(id);
+            return _mapper.Map<ChallengeDto>(challenge);
         }
 
         public ChallengeDto Update(long id, ChallengeDto dto)
@@ -105,8 +123,17 @@ namespace Explorer.Encounters.Core.UseCases
             if (!Enum.TryParse<ChallengeType>(dto.Type, true, out var parsedType))
                 throw new ArgumentException("Invalid challenge type.");
 
-            // Update data
-            existing.Update(dto.Title, dto.Description, dto.Longitude, dto.Latitude, dto.XP, parsedType);
+            // Update data - UKLJU?UJU?I ImagePath!
+            existing.Update(
+                dto.Title, 
+                dto.Description, 
+                dto.Longitude, 
+                dto.Latitude, 
+                dto.XP, 
+                parsedType, 
+                dto.ImagePath, // ? PROSLE?UJE ImagePath!
+                dto.ActivationRadiusMeters > 0 ? dto.ActivationRadiusMeters : 50
+            );
 
             // Allow status change if provided
             if (!string.IsNullOrWhiteSpace(dto.Status) && Enum.TryParse<ChallengeStatus>(dto.Status, true, out var parsedStatus))

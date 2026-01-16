@@ -12,5 +12,7 @@ namespace Explorer.Encounters.API.Dtos
         public string Type { get; set; }
         public long? CreatorId { get; set; }
         public bool IsCreatedByTourist { get; set; }
+        public string? ImagePath { get; set; }
+        public int ActivationRadiusMeters { get; set; }
     }
 }

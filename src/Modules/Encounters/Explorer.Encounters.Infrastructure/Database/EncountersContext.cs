@@ -15,8 +15,12 @@ namespace Explorer.Encounters.Infrastructure.Database
         public DbSet<Challenge> Challenges { get; set; }
         public DbSet<TouristXpProfile> TouristXpProfiles { get; set; }
         public DbSet<EncounterCompletion> EncounterCompletions { get; set; }
+
         public DbSet<SocialEncounter> SocialEncounters { get; set; }
         public DbSet<ActiveSocialParticipant> ActiveSocialParticipants { get; set; }
+
+        public DbSet<HiddenLocationAttempt> HiddenLocationAttempts { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +35,8 @@ namespace Explorer.Encounters.Infrastructure.Database
                 b.Property(c => c.Type).HasConversion<string>();
                 b.Property(c => c.CreatorId);
                 b.Property(c => c.IsCreatedByTourist);
+                b.Property(c => c.ImagePath);
+                b.Property(c => c.ActivationRadiusMeters).HasDefaultValue(50);
             });
 
             modelBuilder.Entity<TouristXpProfile>(b =>
@@ -53,6 +59,7 @@ namespace Explorer.Encounters.Infrastructure.Database
                 b.HasIndex(c => new { c.UserId, c.ChallengeId }).IsUnique();
             });
 
+
             // Konfiguriši SocialEncounter
             modelBuilder.Entity<SocialEncounter>().HasKey(x => x.Id);
             modelBuilder.Entity<SocialEncounter>()
@@ -64,6 +71,19 @@ namespace Explorer.Encounters.Infrastructure.Database
             modelBuilder.Entity<ActiveSocialParticipant>()
                 .HasIndex(x => new { x.UserId, x.SocialEncounterId })
                 .IsUnique();
+
+            modelBuilder.Entity<HiddenLocationAttempt>(b =>
+            {
+                b.HasKey(a => a.Id);
+                b.Property(a => a.UserId).IsRequired();
+                b.Property(a => a.ChallengeId).IsRequired();
+                b.Property(a => a.StartedAt).IsRequired();
+                b.Property(a => a.CompletedAt);
+                b.Property(a => a.IsSuccessful).IsRequired();
+                b.Property(a => a.SecondsInRadius).IsRequired();
+                b.Property(a => a.LastPositionUpdate).IsRequired();
+            });
+
         }
     }
 }

@@ -44,14 +44,93 @@ public class ChallengesController : ControllerBase
     // Admin: create challenge
     [HttpPost]
     [Authorize(Policy = "administratorPolicy")]
-    public ActionResult<ChallengeDto> Create([FromBody] ChallengeDto dto)
+    public async Task<ActionResult<ChallengeDto>> Create(
+        [FromForm] string title,
+        [FromForm] string description,
+        [FromForm] string longitude,
+        [FromForm] string latitude,
+        [FromForm] int xp,
+        [FromForm] string type,
+        [FromForm] string status,
+        [FromForm] int activationRadiusMeters,
+        IFormFile? image = null)
     {
-        return Ok(_adminService.Create(dto));
+        Console.WriteLine($"=== BACKEND CREATE ===");
+        Console.WriteLine($"Title: '{title}'");
+        Console.WriteLine($"Longitude RAW: '{longitude}'");
+        Console.WriteLine($"Latitude RAW: '{latitude}'");
+        Console.WriteLine($"Image: {image?.FileName ?? "NULL"}");
+
+        try
+        {
+            if (!double.TryParse(longitude, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var lng))
+            {
+                return BadRequest(new { message = $"Invalid Longitude format: '{longitude}'" });
+            }
+
+            if (!double.TryParse(latitude, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var lat))
+            {
+                return BadRequest(new { message = $"Invalid Latitude format: '{latitude}'" });
+            }
+
+            Console.WriteLine($"Parsed: Longitude={lng}, Latitude={lat}");
+
+            var dto = new ChallengeDto
+            {
+                Title = title,
+                Description = description,
+                Longitude = lng,
+                Latitude = lat,
+                XP = xp,
+                Type = type,
+                Status = status,
+                ActivationRadiusMeters = activationRadiusMeters
+            };
+
+            if (image != null && image.Length > 0)
+            {
+                var root = Directory.GetCurrentDirectory();
+                var folder = Path.Combine(root, "wwwroot/uploads/challenges");
+                Directory.CreateDirectory(folder);
+
+                var fileName = $"{Guid.NewGuid()}_{image.FileName}";
+                var path = Path.Combine(folder, fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await image.CopyToAsync(stream);
+                }
+
+                dto.ImagePath = $"/uploads/challenges/{fileName}";
+                Console.WriteLine($"IMAGE UPLOADED: {dto.ImagePath}");
+            }
+
+            var result = _adminService.Create(dto);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            Console.WriteLine($"[ERROR] {ex.Message}");
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] {ex.Message}");
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPost("create-by-tourist")]
     [Authorize(Policy = "touristPolicy")]
-    public ActionResult<ChallengeDto> CreateByTourist([FromBody] ChallengeDto dto)
+    public async Task<ActionResult<ChallengeDto>> CreateByTourist(
+        [FromForm] string title,
+        [FromForm] string description,
+        [FromForm] string longitude,
+        [FromForm] string latitude,
+        [FromForm] int xp,
+        [FromForm] string type,
+        [FromForm] int activationRadiusMeters,
+        IFormFile? image)
     {
         var touristId = User.PersonId();
         if (touristId == 0)
@@ -60,10 +139,46 @@ public class ChallengesController : ControllerBase
             return BadRequest(new { message = "Invalid token, cannot determine user ID." });
         }
 
-        Console.WriteLine($" TouristId from token: {touristId}"); 
-
         try
         {
+            if (!double.TryParse(longitude, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var lng))
+            {
+                return BadRequest(new { message = $"Invalid Longitude format: '{longitude}'" });
+            }
+
+            if (!double.TryParse(latitude, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var lat))
+            {
+                return BadRequest(new { message = $"Invalid Latitude format: '{latitude}'" });
+            }
+
+            var dto = new ChallengeDto
+            {
+                Title = title,
+                Description = description,
+                Longitude = lng,
+                Latitude = lat,
+                XP = xp,
+                Type = type,
+                ActivationRadiusMeters = activationRadiusMeters
+            };
+
+            if (image != null && image.Length > 0)
+            {
+                var root = Directory.GetCurrentDirectory();
+                var folder = Path.Combine(root, "wwwroot/uploads/challenges");
+                Directory.CreateDirectory(folder);
+
+                var fileName = $"{Guid.NewGuid()}_{image.FileName}";
+                var path = Path.Combine(folder, fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await image.CopyToAsync(stream);
+                }
+
+                dto.ImagePath = $"/uploads/challenges/{fileName}";
+            }
+
             var result = _adminService.CreateByTourist(dto, touristId);
             return Ok(result);
         }
@@ -79,7 +194,9 @@ public class ChallengesController : ControllerBase
     [Authorize(Policy = "administratorPolicy")]
     public ActionResult<List<ChallengeDto>> GetPendingApproval()
     {
-        return Ok(_adminService.GetPendingApproval());
+        var pending = _adminService.GetPendingApproval(); // Only tourist-created Draft challenges
+        Console.WriteLine($"[PENDING APPROVAL] Returning {pending.Count} tourist-created Draft challenges");
+        return Ok(pending);
     }
 
     // Admin: approve tourist-created challenge
@@ -114,9 +231,82 @@ public class ChallengesController : ControllerBase
 
     [HttpPut("{id:long}")]
     [Authorize(Policy = "administratorPolicy")]
-    public ActionResult<ChallengeDto> Update(long id, [FromBody] ChallengeDto dto)
+    public async Task<ActionResult<ChallengeDto>> Update(
+        long id,
+        [FromForm] string title,
+        [FromForm] string description,
+        [FromForm] string longitude,
+        [FromForm] string latitude,
+        [FromForm] int xp,
+        [FromForm] string type,
+        [FromForm] string status,
+        [FromForm] int activationRadiusMeters,
+        IFormFile? image = null)
     {
-        return Ok(_adminService.Update(id, dto));
+        Console.WriteLine($"=== BACKEND UPDATE {id} ===");
+        Console.WriteLine($"Longitude RAW: '{longitude}'");
+        Console.WriteLine($"Latitude RAW: '{latitude}'");
+
+        try
+        {
+            if (!double.TryParse(longitude, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var lng))
+            {
+                return BadRequest(new { message = $"Invalid Longitude format: '{longitude}'" });
+            }
+
+            if (!double.TryParse(latitude, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var lat))
+            {
+                return BadRequest(new { message = $"Invalid Latitude format: '{latitude}'" });
+            }
+
+            var updateDto = new ChallengeDto
+            {
+                Id = id,
+                Title = title,
+                Description = description,
+                Longitude = lng,
+                Latitude = lat,
+                XP = xp,
+                Type = type,
+                Status = status,
+                ActivationRadiusMeters = activationRadiusMeters
+            };
+
+            if (image != null && image.Length > 0)
+            {
+                var root = Directory.GetCurrentDirectory();
+                var folder = Path.Combine(root, "wwwroot/uploads/challenges");
+                Directory.CreateDirectory(folder);
+
+                var fileName = $"{Guid.NewGuid()}_{image.FileName}";
+                var path = Path.Combine(folder, fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await image.CopyToAsync(stream);
+                }
+
+                updateDto.ImagePath = $"/uploads/challenges/{fileName}";
+            }
+            else
+            {
+                var existing = _adminService.Get(id);
+                updateDto.ImagePath = existing.ImagePath;
+            }
+
+            var result = _adminService.Update(id, updateDto);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            Console.WriteLine($"[ERROR] {ex.Message}");
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] {ex.Message}");
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpDelete("{id:long}")]
