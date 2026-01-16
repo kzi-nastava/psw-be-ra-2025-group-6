@@ -1,11 +1,11 @@
 ﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
-using Explorer.Blog.Core.Domain;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection.Metadata;
 
 namespace Explorer.API.Controllers;
 
@@ -33,14 +33,28 @@ public class BlogController : ControllerBase
     public async Task<ActionResult<BlogDto>> CreateBlog([FromForm] string title,
                                                         [FromForm] string description,
                                                         [FromForm] List<IFormFile>? images,
-                                                        [FromForm] BlogStatusDto status)
+                                                        [FromForm] BlogStatusDto status,
+                                                        [FromForm] string? city = null,
+                                                        [FromForm] string? country = null,
+                                                        [FromForm] string? region = null,
+                                                        [FromForm] double? latitude = null,
+                                                        [FromForm] double? longitude = null)
     {
         var userId = User.PersonId();
         var userRole = User.Role();
         if (userRole != UserRole.Author && userRole != UserRole.Tourist)
             return Forbid();
 
-        var blogDto = new BlogCreateDto { Title = title, Description = description, Status = status };
+        var blogDto = new BlogCreateDto { 
+            Title = title, 
+            Description = description, 
+            Status = status,
+            City = city,
+            Country = country,
+            Region = region,
+            Latitude = latitude,
+            Longitude = longitude
+        };
         var createdBlog = _blogService.Create(blogDto, userId);
 
         if (images == null || !images.Any())
@@ -156,8 +170,8 @@ public class BlogController : ControllerBase
         return Ok(created);
     }
 
-    [HttpPut("{id:long}/comments/{commentId:int}")]
-    public IActionResult EditComment(long id, int commentId, [FromBody] CommentCreateDto dto)
+    [HttpPut("{id:long}/comments/{commentId}")]
+    public IActionResult EditComment(long id, long commentId, [FromBody] CommentEditDto dto)
     {
         var userId = User.PersonId();
         _blogService.EditComment(id, commentId, userId, dto.Text);
@@ -165,8 +179,8 @@ public class BlogController : ControllerBase
         return Ok();
     }
 
-    [HttpDelete("{id:long}/comments/{commentId:int}")]
-    public IActionResult DeleteComment(long id, int commentId)
+    [HttpDelete("{id:long}/comments/{commentId}")]
+    public IActionResult DeleteComment(long id, long commentId)
     {
         var userId = User.PersonId();
         _blogService.DeleteComment(id, commentId, userId);
@@ -177,7 +191,8 @@ public class BlogController : ControllerBase
     [HttpGet("{id:long}/comments")]
     public IActionResult GetComment(long id)
     {
-        var comments = _blogService.GetComments(id);
+        var userId = User.PersonId();
+        var comments = _blogService.GetComments(id, userId);
         return Ok(comments);
     }
 
@@ -263,17 +278,65 @@ public class BlogController : ControllerBase
         }
     }
 
-    [HttpGet("filter-by-quality")]
-    public ActionResult<List<BlogDto>> GetBlogsByQuality([FromQuery] BlogQualityStatusDto status)
+    [HttpGet("filter")]
+    public ActionResult<List<BlogDto>> GetFilteredBlogs([FromQuery] FilterBlogDto filter)
     {
         try
         {
-            var blogs = _blogService.GetBlogsByQualityStatus(status);
+            var blogs = _blogService.GetFilteredBlogs(filter);
             return Ok(blogs);
         }
         catch (Exception ex)
         {
             return BadRequest(ex.Message);
         }
+    }
+
+    [HttpPost("{blogId:long}/comments/{commentId:long}/like")]
+    public IActionResult ToggleCommentLike(long blogId, long commentId)
+    {
+        var userId = User.PersonId();
+
+        var liked = _blogService.ToggleCommentLike(blogId, commentId, userId);
+        var count = _blogService.CountCommentLikes(blogId, commentId);
+
+        return Ok(new {liked, count});
+    }
+
+    [HttpGet("{blogId:long}/comments/{commentId:long}/likes")]
+    public IActionResult GetCommentLikes(long blogId, long commentId)
+    {
+        var userId = User.PersonId();
+
+        var count = _blogService.CountCommentLikes(blogId, commentId);
+        var liked = _blogService.IsCommentLikedByUser(blogId, commentId, userId);
+
+        return Ok(new {liked, count});
+    }
+
+    [HttpPost("{blogId:long}/comments/{commentId:long}/report")]
+    public IActionResult ReportComment(long blogId, long commentId, [FromBody] CommentReportCreateDto dto)
+    {
+        var userId = User.PersonId();
+
+        _blogService.ReportComment(blogId, commentId, userId, dto.Reason, dto.AdditionalInfo);
+        return NoContent(); // 204
+    }
+
+    [HttpGet("{blogId:long}/comments/{commentId:long}/report/status")]
+    public IActionResult GetReportStatus(long blogId, long commentId)
+    {
+        var userId = User.PersonId();
+
+        var alreadyReported = _blogService.IsCommentReportedByUser(blogId, commentId, userId);
+        return Ok(new { alreadyReported });
+    }
+
+    [HttpGet("following")]
+    public ActionResult<PagedResult<BlogDto>> GetFollowingBlogs([FromQuery] int page, [FromQuery] int pageSize)
+    {
+        var userId = User.PersonId();
+        var result = _blogService.GetFollowingBlogs(page, pageSize, userId);
+        return Ok(result);
     }
 }

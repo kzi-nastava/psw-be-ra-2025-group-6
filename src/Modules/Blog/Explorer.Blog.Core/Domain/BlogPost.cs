@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using Explorer.BuildingBlocks.Core.Domain;
 
 namespace Explorer.Blog.Core.Domain;
@@ -10,13 +11,16 @@ public class BlogPost : AggregateRoot
     public DateTime CreatedAt { get; private set; }
     public List<string> Images { get; private set; }
     public List<Comment> Comments { get; private set; } = new();
-
     public BlogStatus Status { get; set; }
     public DateTime? LastModifiedAt { get; private set; }
     public BlogQualityStatus QualityStatus { get; private set; } = BlogQualityStatus.None;
 
     private readonly List<BlogVote> _votes = new();
     public IReadOnlyCollection<BlogVote> Votes => _votes.AsReadOnly();
+    public long? LocationId { get; private set; }
+    public BlogLocation? Location { get; private set; }
+    public List<BlogContentItem> ContentItems { get; private set; } = new();
+
 
     private BlogPost() { }
 
@@ -46,25 +50,24 @@ public class BlogPost : AggregateRoot
         Images = Images.Concat(imagePaths).ToList();
     }
 
-    public void AddComment(long userId, string authorName, string text)
+    public void AddComment(long blogId, long userId, string authorName, string authorProfilePicture, string text)
     {
         if (Comments == null)
         {
             Comments = new List<Comment>();
         }
 
-        var comment = new Comment(userId, authorName, text);
+        var comment = new Comment(blogId, userId, authorName, authorProfilePicture, text);
         Comments.Add(comment);
 
         RecalculateQualityStatus();
     }
 
-    public void EditComment(int id, long userId, string text)
+    public void EditComment(long commentId, long userId, string text)
     {
-        if (Comments == null || id < 0 || id >= Comments.Count)
+        var comment = Comments?.FirstOrDefault(c => c.Id == commentId);
+        if (comment is null)
             throw new InvalidOperationException("Comment does not exist.");
-
-        var comment = Comments[id];
 
         if (comment.UserId != userId)
             throw new InvalidOperationException("Only authors can edit their comments.");
@@ -75,12 +78,12 @@ public class BlogPost : AggregateRoot
         comment.Edit(text);
     }
 
-    public void DeleteComment(int id, long userId)
+    public void DeleteComment(long commentId, long userId)
     {
-        if (Comments == null || id < 0 || id >= Comments.Count)
-            throw new InvalidOperationException("Comment does not exist.");
+        var comment = Comments?.FirstOrDefault(c => c.Id == commentId);
 
-        var comment = Comments[id];
+        if (comment == null)
+        throw new InvalidOperationException("Comment does not exist.");
 
         if (comment.UserId != userId)
             throw new InvalidOperationException("Only authors can delete their comments.");
@@ -88,7 +91,7 @@ public class BlogPost : AggregateRoot
         if (DateTime.UtcNow - comment.CreatedAt > TimeSpan.FromMinutes(15))
             throw new InvalidOperationException("Delete time expired.");
 
-        Comments.RemoveAt(id);
+        Comments.Remove(comment);
     }
     public void UpdateDescription(string newDescription)
     {
@@ -163,5 +166,69 @@ public class BlogPost : AggregateRoot
         int commentCount = Comments.Count;
 
         UpdateQualityStatus(score, commentCount);
+    }
+
+    public void HideComment(long commentId, long adminId)
+    {
+        var comment = Comments.FirstOrDefault(c => c.Id == commentId);
+        if (comment == null)
+        {
+            throw new ArgumentException("Comment not found.");
+        }
+
+        comment.Hide(adminId);
+    }
+
+    public void AddContentItem(ContentType type, string content)
+    {
+        int nextOrder = ContentItems.Count > 0 ? ContentItems.Max(c => c.Order) + 1 : 0;
+        ContentItems.Add(new BlogContentItem(nextOrder, type, content));
+    }
+
+    public void UpdateContentItem(int order, string newContent)
+    {
+        var item = ContentItems.FirstOrDefault(c => c.Order == order);
+
+        if (item == null)
+            throw new InvalidOperationException("Content item not found.");
+        if (string.IsNullOrWhiteSpace(newContent))
+            throw new ArgumentException("Content cannot be empty.");
+
+        ContentItems[ContentItems.IndexOf(item)] = new BlogContentItem(order, item.Type, newContent);
+    }
+
+    public void RemoveContentItem(int order)
+    {
+        var item = ContentItems.FirstOrDefault(c => c.Order == order);
+        if (item != null)
+        {
+            ContentItems.Remove(item);
+        }
+    }
+
+    public void ClearContentItems()
+    {
+        ContentItems.Clear();
+    }
+
+    public void SetLocation(BlogLocation location)
+    {
+        if (location == null) throw new ArgumentNullException(nameof(location));
+        Location = location;
+        LocationId = location.Id;
+    }
+
+    public void SetLocationId(long locationId)
+    {
+        if (locationId <= 0) throw new ArgumentException("Invalid LocationId.");
+        this.LocationId = locationId;
+    }
+
+    public void UpdateLocation(string city, string country, double latitude, double longitude, string? region = null)
+    {
+        if (Location == null)
+            throw new InvalidOperationException("Location not set yet.");
+
+        Location.UpdateLocation(city, country, latitude, longitude, region);
     }
 }
