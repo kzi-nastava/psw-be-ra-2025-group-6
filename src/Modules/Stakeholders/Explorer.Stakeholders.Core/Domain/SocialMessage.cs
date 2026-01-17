@@ -16,7 +16,7 @@ public class SocialMessage : Entity
         SenderId = senderId;
         ReceiverId = receiverId;
         Content = content;
-        Timestamp = DateTime.Now;
+        Timestamp = DateTime.UtcNow;
         Validate();
     }
 

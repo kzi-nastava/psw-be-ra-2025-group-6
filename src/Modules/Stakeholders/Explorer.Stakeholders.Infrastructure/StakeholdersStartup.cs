@@ -51,6 +51,8 @@ public static class StakeholdersStartup
 
         services.AddScoped<IInternalStakeholderService, InternalStakeholdersService>();
 
+        services.AddScoped<ISocialMessageService, SocialMessageService>();
+
         // Register integration adapter
         services.AddScoped<INotificationPublisher, StakeholdersNotificationPublisher>();
 
@@ -72,6 +74,7 @@ public static class StakeholdersStartup
         services.AddScoped<IClubPostRepository, ClubPostDbRepository>();
         services.AddScoped<IBlogInfoGateway, BlogInfoGateway>();
         services.AddScoped<IFollowRepository, FollowDbRepository>();
+        services.AddScoped<ISocialMessageRepository, SocialMessageDatabaseRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();
