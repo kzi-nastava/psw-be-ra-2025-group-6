@@ -17,6 +17,7 @@ public class StakeholdersContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<ProfilePost> ProfilePosts { get; set; }
     public DbSet<ClubPost> ClubPosts { get; set; }
+    public DbSet<SocialMessage> SocialMessages { get; set; }
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
@@ -45,6 +46,7 @@ public class StakeholdersContext : DbContext
         ConfigureProfilePosts(modelBuilder);
         ConfigureClubPosts(modelBuilder);
         ConfigureFollowing(modelBuilder);
+        ConfigureSocialMessages(modelBuilder);
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)
@@ -140,6 +142,7 @@ public class StakeholdersContext : DbContext
             builder.HasIndex(p => p.ClubId);
         });
     }
+
     private static void ConfigureFollowing(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Follow>(builder =>
@@ -160,6 +163,23 @@ public class StakeholdersContext : DbContext
                    .WithMany()
                    .HasForeignKey(f => f.FollowedId)
                    .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
+
+    private static void ConfigureSocialMessages(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SocialMessage>(builder =>
+        {
+            builder.ToTable("SocialMessages");
+
+            builder.HasKey(m => m.Id);
+
+            builder.Property(m => m.SenderId).IsRequired();
+            builder.Property(m => m.ReceiverId).IsRequired();
+            builder.Property(m => m.Content).IsRequired().HasMaxLength(2000);
+            builder.Property(m => m.Timestamp).IsRequired();
+
+            builder.HasIndex(m => new { m.SenderId, m.ReceiverId });
         });
     }
 }
