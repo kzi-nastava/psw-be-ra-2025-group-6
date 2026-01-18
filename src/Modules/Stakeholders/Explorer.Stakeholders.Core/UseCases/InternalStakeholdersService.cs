@@ -18,7 +18,7 @@ public class InternalStakeholdersService : IInternalStakeholderService
     public string GetUsername(long userId)
     {
         var user = _userRepository.GetById(userId);
-        if (user == null) throw new Exception("User not found.");
+        if (user == null) return "Unknown";
 
         return user.Username;
     }

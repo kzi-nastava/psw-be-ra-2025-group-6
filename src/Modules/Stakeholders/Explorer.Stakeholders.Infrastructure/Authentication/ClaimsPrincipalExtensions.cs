@@ -20,8 +20,10 @@ public static class ClaimsPrincipalExtensions
     public static bool TryPersonId(this ClaimsPrincipal user, out long personId)
     {
         personId = 0;
-        var value = user.Claims.FirstOrDefault(i => i.Type == "personId")?.Value;
-        return long.TryParse(value, out personId) && personId > 0;
+        var value = user.Claims.FirstOrDefault(i => i.Type == "personId")?.Value
+            ?? user.Claims.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier)?.Value
+            ?? user.Claims.FirstOrDefault(i => i.Type == "id")?.Value;
+        return long.TryParse(value, out personId) && personId != 0;
     }
 
     public static bool TryRole(this ClaimsPrincipal user, out UserRole role)
