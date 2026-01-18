@@ -1,6 +1,7 @@
 ﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public.Administration;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.API.Contracts;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -41,7 +42,14 @@ public class BlogController : ControllerBase
                                                         [FromForm] double? longitude = null)
     {
         var userId = User.PersonId();
-        var userRole = User.Role();
+        if (!User.TryRole(out var userRole))
+        {
+            return Unauthorized(ApiErrorFactory.Create(
+                HttpContext,
+                ApiErrorCodes.AuthRequired,
+                "Login required to create a blog.",
+                "User role claim is missing."));
+        }
         if (userRole != UserRole.Author && userRole != UserRole.Tourist)
             return Forbid();
 
@@ -240,7 +248,7 @@ public class BlogController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(ApiErrorFactory.Create(HttpContext, ApiErrorCodes.ValidationError, "Archiving blog failed.", ex.Message));
         }
     }
 
@@ -260,7 +268,7 @@ public class BlogController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(ApiErrorFactory.Create(HttpContext, ApiErrorCodes.ValidationError, "Updating blog description failed.", ex.Message));
         }
     }
 
@@ -274,7 +282,7 @@ public class BlogController : ControllerBase
         }
         catch(Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(ApiErrorFactory.Create(HttpContext, ApiErrorCodes.ValidationError, "Recalculating blog quality failed.", ex.Message));
         }
     }
 
@@ -288,7 +296,7 @@ public class BlogController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(ApiErrorFactory.Create(HttpContext, ApiErrorCodes.ValidationError, "Filtering blogs failed.", ex.Message));
         }
     }
 

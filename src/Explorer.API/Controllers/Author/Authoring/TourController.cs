@@ -1,5 +1,5 @@
-﻿using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.API.Contracts;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
@@ -61,7 +61,7 @@ public class TourController : ControllerBase
         var existingTour = _tourService.Get(id);
         if (existingTour.AuthorId != User.PersonId())
         {
-            throw new ForbiddenException("You're not allowed to edit this tour");
+            return StatusCode(StatusCodes.Status403Forbidden, ApiErrorFactory.Create(HttpContext, ApiErrorCodes.Forbidden, "Editing this tour is not allowed.", "You're not allowed to edit this tour."));
         }
 
         tour.Id = id;
@@ -75,7 +75,7 @@ public class TourController : ControllerBase
     {
         if (_tourService.Get(id).AuthorId != User.PersonId())
         {
-            throw new ForbiddenException("You're not allowed to delete this tour");
+            return StatusCode(StatusCodes.Status403Forbidden, ApiErrorFactory.Create(HttpContext, ApiErrorCodes.Forbidden, "Deleting this tour is not allowed.", "You're not allowed to delete this tour."));
         }
 
         _tourService.Delete(id);
@@ -118,7 +118,7 @@ public class TourController : ControllerBase
         var tour = _tourService.Get(tourId);
         if (tour.AuthorId != User.PersonId())
         {
-            throw new ForbiddenException("You're not allowed to add key points to this tour.");
+            return StatusCode(StatusCodes.Status403Forbidden, ApiErrorFactory.Create(HttpContext, ApiErrorCodes.Forbidden, "Adding key points is not allowed.", "You're not allowed to add key points to this tour."));
         }
 
         keyPoint.TourId = tourId;
@@ -131,7 +131,7 @@ public class TourController : ControllerBase
         var tour = _tourService.Get(tourId);
         if (tour.AuthorId != User.PersonId())
         {
-            throw new ForbiddenException("You're not allowed to edit this tour.");
+            return StatusCode(StatusCodes.Status403Forbidden, ApiErrorFactory.Create(HttpContext, ApiErrorCodes.Forbidden, "Editing this tour is not allowed.", "You're not allowed to edit this tour."));
         }
 
         var result = _tourService.UpdateTourDistance(tourId, distance);
@@ -143,7 +143,7 @@ public class TourController : ControllerBase
     {
         var tour = _tourService.Get(tourId);
         if (tour.AuthorId != User.PersonId())
-            throw new ForbiddenException("You're not allowed to edit this tour.");
+            return StatusCode(StatusCodes.Status403Forbidden, ApiErrorFactory.Create(HttpContext, ApiErrorCodes.Forbidden, "Editing this tour is not allowed.", "You're not allowed to edit this tour."));
 
         var result = _tourService.UpdateDuration(tourId, durations);
         return Ok(result);
