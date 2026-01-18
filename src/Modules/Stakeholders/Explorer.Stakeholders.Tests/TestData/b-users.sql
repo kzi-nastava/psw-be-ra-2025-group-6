@@ -20,6 +20,9 @@ INSERT INTO stakeholders."Users"("Id", "Username", "Password", "Role", "IsActive
 VALUES (-23, 'turista3@gmail.com', 'turista3', 'Tourist', true);
 
 INSERT INTO stakeholders."Users"("Id", "Username", "Password", "Role", "IsActive")
+VALUES (-24, 'turista4@gmail.com', 'turista4', 'Tourist', true);
+
+INSERT INTO stakeholders."Users"("Id", "Username", "Password", "Role", "IsActive")
 VALUES (-100, 'profileuser1@gmail.com', 'test1234', 'Tourist', true);
 
 INSERT INTO stakeholders."Users"("Id", "Username", "Password", "Role", "IsActive")

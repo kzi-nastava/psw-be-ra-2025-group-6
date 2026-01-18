@@ -76,3 +76,51 @@ VALUES
         0,
         '[]'::jsonb
     );
+
+INSERT INTO tours."Tours"
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
+VALUES
+(
+    -10,
+    'Novi Sad Center Walk',
+    'Setnja kroz centar Novog Sada',
+    0,
+    ARRAY['city', 'short'],
+    0,
+    1,
+    3,
+    0,
+    '[]'::jsonb
+);
+
+INSERT INTO tours."Tours"
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
+VALUES
+(
+    -11,
+    'Novi Sad Riverside',
+    'Setnja uz Dunav',
+    1,
+    ARRAY['river', 'easy'],
+    0,
+    1,
+    4,
+    0,
+    '[]'::jsonb
+);
+
+INSERT INTO tours."Tours"
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
+VALUES
+(
+    -12,
+    'Subotica Scenic Tour',
+    'Duz Subotice',
+    1,
+    ARRAY['north', 'day'],
+    0,
+    1,
+    4,
+    0,
+    '[]'::jsonb
+);
