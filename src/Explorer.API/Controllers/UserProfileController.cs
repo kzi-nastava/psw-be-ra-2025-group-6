@@ -31,6 +31,13 @@ namespace Explorer.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{id:long}")]
+        public ActionResult<UserProfileDto> GetOthersProfile(long id)
+        {
+            var result = _userProfileService.Get(id);
+            return Ok(result);
+        }
+
         [HttpPut]
         public ActionResult<UserProfileDto> Update([FromBody] UserProfileDto profile)
         {

@@ -13,5 +13,9 @@ public class BlogDto
     public DateTime? LastModifiedAt { get; set; }
     public BlogQualityStatusDto QualityStatus { get; set; }
     public string Username { get; set; }
+    public string AuthorProfilePicture { get; set; }
+    public List<BlogContentItemDto> ContentItems { get; set; } = new();
+    public BlogLocationDto? Location { get; set; }
+    public int VisibleCommentCount { get; set; }
 
 }

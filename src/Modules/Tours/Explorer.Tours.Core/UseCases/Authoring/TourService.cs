@@ -39,6 +39,22 @@ public class TourService : ITourService
         var items = result.Results.Select(_mapper.Map<TourDto>).ToList();
         return new PagedResult<TourDto>(items, result.TotalCount);
     }
+
+    public List<TourDto> GetByAuthorId(long authorId)
+    {
+        var result = _tourRepository.GetByAuthorId(authorId);
+
+        var items = _mapper.Map<List<TourDto>>(result);
+        return new List<TourDto>(items);
+    }
+
+    public List<TourDto> GetPublishedByAuthorId(long authorId)
+    {
+        var result = _tourRepository.GetByAuthorId(authorId).Where(t=> t.Status== TourStatus.CONFIRMED);
+
+        var items = _mapper.Map<List<TourDto>>(result);
+        return new List<TourDto>(items);
+    }
     public TourDto Get(long id)
     {
         var result = _tourRepository.Get(id);
@@ -193,6 +209,9 @@ public class TourService : ITourService
         return _mapper.Map<List<TourDto>>(
             confirmedTours.Where(t => !purchasedTourIds.Contains(t.Id)).ToList()
         );
+        /*return _mapper.Map<List<TourDto>>(
+            confirmedTours
+        );*/
     }
 
     public PagedResult<TourDto> GetAvailableForTouristPaged(long touristId, int page, int pageSize)

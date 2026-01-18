@@ -1,5 +1,6 @@
 using Explorer.API.Middleware;
 using Explorer.API.Startup;
+using Search;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ builder.Services.ConfigureCors(corsPolicy);
 builder.Services.ConfigureAuth();
 
 builder.Services.RegisterModules();
+
+builder.Services.AddScoped<ISearchService, SearchService>();
 
 var app = builder.Build();
 

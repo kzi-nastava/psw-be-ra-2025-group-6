@@ -20,6 +20,7 @@ namespace Explorer.Stakeholders.Core.Domain
             Validate();
         }
 
+
         public void Update(int rating, string? comment)
         {
             Rating = rating;

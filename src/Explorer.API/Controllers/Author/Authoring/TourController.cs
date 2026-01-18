@@ -151,8 +151,27 @@ public class TourController : ControllerBase
     [HttpPut("{id:long}/publish")]
     public ActionResult<TourDto> Publish(long id)
     {
-        var result = _tourService.Publish(id, User.PersonId());
-        return Ok(result);
+        try
+        {
+            var result = _tourService.Publish(id, User.PersonId());
+            return Ok(result);
+        }
+        catch (ForbiddenException e)
+        {
+            return StatusCode(403, new { message = e.Message });
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(new { message = e.Message });
+        }
+        catch (ArgumentException e)
+        {
+            return BadRequest(new { message = e.Message });
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, new { message = "An unexpected error occurred on the server." });
+        }
     }
 
 

@@ -48,9 +48,11 @@ public static class ToursStartup
         services.AddScoped<IPublicEntityService, PublicEntityService>();
         services.AddScoped<IKeyPointService, KeyPointService>();
         services.AddScoped<ITourReviewService, TourReviewService>();
+        services.AddScoped<ITourPlannerService, TourPlannerService>();
 
         services.AddScoped<ITouristViewService, TouristViewService>();
         services.AddScoped<IQuizService, QuizService>();
+        services.AddScoped<ITourSearchService, TourSearchService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -66,7 +68,7 @@ public static class ToursStartup
         services.AddScoped<IMeetupRepository, MeetupRepository>();
         services.AddScoped<IPublicEntityRequestRepository, PublicEntityRequestDbRepository>();
         services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
-
+        services.AddScoped<ITourPlannerRepository, TourPlannerDbRepository>();
 
 
         // Repo for executions
