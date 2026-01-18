@@ -46,6 +46,13 @@ namespace Explorer.Encounters.Infrastructure.Database.Repositories
                 .FirstOrDefault(se => se.ChallengeId == challengeId);
         }
 
+        public List<SocialEncounter> GetAll()
+        {
+            return _dbContext.SocialEncounters
+                .AsNoTracking()
+                .ToList();
+        }
+
         public void Delete(long id)
         {
             var encounter = Get(id);

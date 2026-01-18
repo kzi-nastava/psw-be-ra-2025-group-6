@@ -12,6 +12,7 @@ namespace Explorer.Encounters.Core.Domain.RepositoryInterfaces
         SocialEncounter Update(SocialEncounter encounter);
         SocialEncounter? Get(long id);
         SocialEncounter? GetByChallengeId(long challengeId);
+        List<SocialEncounter> GetAll();
         void Delete(long id);
     }
 }

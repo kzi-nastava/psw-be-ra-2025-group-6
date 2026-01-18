@@ -16,16 +16,19 @@ namespace Explorer.Encounters.Core.Domain
         public ChallengeType Type { get; private set; }
         public long? CreatorId { get; private set; }
         public bool IsCreatedByTourist { get; private set; }
+        public string? ImagePath { get; private set; }
+        public int ActivationRadiusMeters { get; private set; }
 
         private Challenge() { }
 
-        public Challenge(string title, string description, double longitude, double latitude, int xp, ChallengeType type, ChallengeStatus status = ChallengeStatus.Draft)
+        public Challenge(string title, string description, double longitude, double latitude, int xp, ChallengeType type, string? imagePath = null, int activationRadiusMeters = 50, ChallengeStatus status = ChallengeStatus.Draft)
         {
             if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("Invalid Title.");
             if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
             if (longitude < -180 || longitude > 180) throw new ArgumentException("Invalid Longitude.");
             if (latitude < -90 || latitude > 90) throw new ArgumentException("Invalid Latitude.");
             if (xp < 0) throw new ArgumentException("XP must be non-negative.");
+            if (activationRadiusMeters <= 0) throw new ArgumentException("Activation radius must be positive.");
 
             Title = title;
             Description = description;
@@ -35,10 +38,11 @@ namespace Explorer.Encounters.Core.Domain
             Type = type;
             Status = status;
             IsCreatedByTourist = false;
+            ImagePath = imagePath;
+            ActivationRadiusMeters = activationRadiusMeters;
         }
 
-        // Constructor for tourist-created challenges
-        public Challenge(string title, string description, double longitude, double latitude, int xp, ChallengeType type, long creatorId)
+        public Challenge(string title, string description, double longitude, double latitude, int xp, ChallengeType type, long creatorId, string? imagePath = null, int activationRadiusMeters = 50)
         {
             if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("Invalid Title.");
             if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
@@ -46,6 +50,7 @@ namespace Explorer.Encounters.Core.Domain
             if (latitude < -90 || latitude > 90) throw new ArgumentException("Invalid Latitude.");
             if (xp < 0) throw new ArgumentException("XP must be non-negative.");
             if (creatorId <= 0) throw new ArgumentException("Invalid CreatorId.");
+            if (activationRadiusMeters <= 0) throw new ArgumentException("Activation radius must be positive.");
 
             Title = title;
             Description = description;
@@ -53,9 +58,11 @@ namespace Explorer.Encounters.Core.Domain
             Latitude = latitude;
             XP = xp;
             Type = type;
-            Status = ChallengeStatus.Draft; // Tourist-created challenges start as Draft
+            Status = ChallengeStatus.Draft;
             CreatorId = creatorId;
             IsCreatedByTourist = true;
+            ImagePath = imagePath;
+            ActivationRadiusMeters = activationRadiusMeters;
         }
 
         public void Publish()
@@ -70,20 +77,24 @@ namespace Explorer.Encounters.Core.Domain
             Status = ChallengeStatus.Archived;
         }
 
-        public void Update(string title, string description, double longitude, double latitude, int xp, ChallengeType type)
+        public void Update(string title, string description, double longitude, double latitude, int xp, ChallengeType type, string? imagePath = null, int activationRadiusMeters = 50)
         {
             if (Status == ChallengeStatus.Archived) throw new InvalidOperationException("Cannot modify archived challenge.");
             if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("Invalid Title.");
+            if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
+            if (longitude < -180 || longitude > 180) throw new ArgumentException("Invalid Longitude.");
+            if (latitude < -90 || latitude > 90) throw new ArgumentException("Invalid Latitude.");
+            if (xp < 0) throw new ArgumentException("XP must be non-negative.");
+            if (activationRadiusMeters <= 0) throw new ArgumentException("Activation radius must be positive.");
 
             Title = title;
             Description = description;
-            if (longitude < -180 || longitude > 180) throw new ArgumentException("Invalid Longitude.");
-            if (latitude < -90 || latitude > 90) throw new ArgumentException("Invalid Latitude.");
             Longitude = longitude;
             Latitude = latitude;
-            if (xp < 0) throw new ArgumentException("XP must be non-negative.");
             XP = xp;
             Type = type;
+            ImagePath = imagePath;
+            ActivationRadiusMeters = activationRadiusMeters;
         }
 
         // Allow admin to change status via service. Uses existing domain rules where applicable.

@@ -26,7 +26,11 @@ namespace Explorer.Encounters.Infrastructure
             services.AddScoped<IChallengeService, ChallengeService>();
             services.AddScoped<Explorer.Encounters.API.Public.IChallengePublicService, PublicChallengeService>();
             services.AddScoped<ITouristEncounterService, TouristEncounterService>();
+
             services.AddScoped<ISocialEncounterService, SocialEncounterService>();
+
+            services.AddScoped<IHiddenLocationService, HiddenLocationService>();
+
         }
 
         private static void SetupInfrastructure(IServiceCollection services)
@@ -34,8 +38,13 @@ namespace Explorer.Encounters.Infrastructure
             services.AddScoped<IChallengeRepository, ChallengeDbRepository>();
             services.AddScoped<ITouristXpProfileRepository, TouristXpProfileDbRepository>();
             services.AddScoped<IEncounterCompletionRepository, EncounterCompletionDbRepository>();
+
             services.AddScoped<ISocialEncounterRepository, SocialEncounterDatabaseRepository>();
             services.AddScoped<IActiveSocialParticipantRepository, ActiveSocialParticipantDatabaseRepository>();
+
+            services.AddScoped<IHiddenLocationAttemptRepository, HiddenLocationAttemptDbRepository>();
+
+
             services.AddDbContext<EncountersContext>(opt =>
                 opt.UseNpgsql(DbConnectionStringBuilder.Build("encounters"),
                     x => x.MigrationsHistoryTable("__EFMigrationsHistory", "encounters")));

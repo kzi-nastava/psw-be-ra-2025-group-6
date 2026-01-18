@@ -13,6 +13,7 @@ namespace Explorer.Encounters.Core.UseCases
         ChallengeDto Get(long id);
         ChallengeDto CreateByTourist(ChallengeDto dto, long touristId);
         List<ChallengeDto> GetPendingApproval();
+        List<ChallengeDto> GetAllDraft();
         ChallengeDto ApproveChallenge(long id);
         ChallengeDto RejectChallenge(long id);
     }
