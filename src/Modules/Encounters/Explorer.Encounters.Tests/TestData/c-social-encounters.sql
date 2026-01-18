@@ -12,14 +12,14 @@ DELETE FROM encounters."Challenges" WHERE "Id" IN (-4, -5, -6, -7, -8, -9);
 -- Type: 0=Location, 1=Social, 2=Misc (proveri u svom projektu!)
 -- =========================
 INSERT INTO encounters."Challenges" 
-("Id", "Title", "Description", "Longitude", "Latitude", "XP", "Status", "Type", "CreatorId", "IsCreatedByTourist")
+("Id", "Title", "Description", "Longitude", "Latitude", "XP", "Status", "Type", "CreatorId", "IsCreatedByTourist", "ActivationRadiusMeters")
 VALUES
-(-4, 'Activation Test', 'Test challenge for activation', 19.8453, 45.2671, 100, 0, 1, NULL, false),
-(-5, 'Distance Test', 'Test challenge for distance', 19.8453, 45.2671, 100, 0, 1, NULL, false),
-(-6, 'Heartbeat Test', 'Test challenge for heartbeat', 19.8453, 45.2671, 100, 0, 1, NULL, false),
-(-7, 'Leave Radius Test', 'Test challenge for leaving radius', 19.8453, 45.2671, 100, 0, 1, NULL, false),
-(-8, 'Deactivate Test', 'Test challenge for deactivation', 19.8453, 45.2671, 100, 0, 1, NULL, false),
-(-9, 'Already Completed Test', 'Test challenge for completed', 19.8453, 45.2671, 100, 0, 1, NULL, false);
+(-4, 'Activation Test', 'Test challenge for activation', 19.8453, 45.2671, 100, 0, 1, NULL, false, 50),
+(-5, 'Distance Test', 'Test challenge for distance', 19.8453, 45.2671, 100, 0, 1, NULL, false, 50),
+(-6, 'Heartbeat Test', 'Test challenge for heartbeat', 19.8453, 45.2671, 100, 0, 1, NULL, false, 50),
+(-7, 'Leave Radius Test', 'Test challenge for leaving radius', 19.8453, 45.2671, 100, 0, 1, NULL, false, 50),
+(-8, 'Deactivate Test', 'Test challenge for deactivation', 19.8453, 45.2671, 100, 0, 1, NULL, false, 50),
+(-9, 'Already Completed Test', 'Test challenge for completed', 19.8453, 45.2671, 100, 0, 1, NULL, false, 50);
 
 -- Resetuj sekvencu
 SELECT setval(pg_get_serial_sequence('encounters."Challenges"', 'Id'), 
