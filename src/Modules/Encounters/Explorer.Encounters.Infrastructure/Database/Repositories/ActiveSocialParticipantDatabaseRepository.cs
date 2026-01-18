@@ -1,5 +1,6 @@
 ﻿using Explorer.Encounters.Core.Domain;
 using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +46,7 @@ namespace Explorer.Encounters.Infrastructure.Database.Repositories
         public List<ActiveSocialParticipant> GetAllActiveForEncounter(long socialEncounterId)
         {
             return _dbContext.ActiveSocialParticipants
+                .AsNoTracking()
                 .Where(p => p.SocialEncounterId == socialEncounterId)
                 .ToList();
         }

@@ -111,8 +111,9 @@ namespace Explorer.Encounters.Core.UseCases
             if (!challenge.IsCreatedByTourist)
                 throw new InvalidOperationException("Only tourist-created challenges can be rejected.");
 
-            _repository.Delete(id);
-            return _mapper.Map<ChallengeDto>(challenge);
+            challenge.Archive();
+            var updated = _repository.Update(challenge);
+            return _mapper.Map<ChallengeDto>(updated);
         }
 
         public ChallengeDto Update(long id, ChallengeDto dto)
@@ -123,7 +124,7 @@ namespace Explorer.Encounters.Core.UseCases
             if (!Enum.TryParse<ChallengeType>(dto.Type, true, out var parsedType))
                 throw new ArgumentException("Invalid challenge type.");
 
-            // Update data - UKLJU?UJU?I ImagePath!
+            // Update data - UKLJU?UJE?I ImagePath!
             existing.Update(
                 dto.Title, 
                 dto.Description, 

@@ -14,6 +14,7 @@ namespace Explorer.Encounters.API.Public
         SocialEncounterDto UpdateSocialEncounter(long id, SocialEncounterDto dto);
         SocialEncounterDto GetSocialEncounter(long id);
         SocialEncounterDto GetByChallengeId(long challengeId);
+        List<SocialEncounterDto> GetAll();
         void DeleteSocialEncounter(long id);
 
         // Tourist methods - za aktiviranje i praćenje

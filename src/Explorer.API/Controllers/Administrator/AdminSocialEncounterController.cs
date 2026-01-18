@@ -31,6 +31,13 @@ namespace Explorer.API.Controllers.Administrator
             return Ok(result);
         }
 
+        [HttpGet]
+        public ActionResult<List<SocialEncounterDto>> GetAll()
+        {
+            var result = _socialEncounterService.GetAll();
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         public ActionResult<SocialEncounterDto> Get(long id)
         {

@@ -91,11 +91,6 @@ namespace Explorer.Encounters.Core.UseCases
                     newLevel = completionResult.NewLevel;
                     
                     Console.WriteLine($"[HIDDEN LOCATION] XP awarded: {xpAwarded}, LeveledUp: {leveledUp}, NewLevel: {newLevel}");
-                    
-                    // Archive the challenge after successful completion
-                    challenge.Archive();
-                    _challengeRepository.Update(challenge);
-                    Console.WriteLine($"[HIDDEN LOCATION] Challenge {challenge.Id} archived");
                 }
                 else
                 {

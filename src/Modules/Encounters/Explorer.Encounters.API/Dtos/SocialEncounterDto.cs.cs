@@ -27,6 +27,9 @@ namespace Explorer.Encounters.API.Dtos
         public int CurrentActiveCount { get; set; }
         public int RequiredPeople { get; set; }
         public bool IsWithinRadius { get; set; }
+        public bool AlreadyCompleted { get; set; }
+        public bool IsCompleted { get; set; }
+        public int? XpAwarded { get; set; }
     }
 
     public class SocialEncounterHeartbeatRequestDto

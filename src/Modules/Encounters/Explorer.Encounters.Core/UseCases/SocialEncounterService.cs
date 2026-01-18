@@ -87,6 +87,12 @@ namespace Explorer.Encounters.Core.UseCases
             return _mapper.Map<SocialEncounterDto>(socialEncounter);
         }
 
+        public List<SocialEncounterDto> GetAll()
+        {
+            var socialEncounters = _socialEncounterRepository.GetAll();
+            return _mapper.Map<List<SocialEncounterDto>>(socialEncounters);
+        }
+
         public void DeleteSocialEncounter(long id)
         {
             _socialEncounterRepository.Delete(id);
@@ -131,17 +137,7 @@ namespace Explorer.Encounters.Core.UseCases
                 };
             }
 
-            // 3. Provera da li turista već ima completed ovaj challenge
-            if (_completionRepository.HasUserCompletedChallenge(userId, challengeId))
-            {
-                return new ActivateSocialEncounterResponseDto
-                {
-                    Success = false,
-                    Message = "You have already completed this challenge."
-                };
-            }
-
-            // 4. Nalaženje Social Encounter konfiguracije
+            // 3. Nalaženje Social Encounter konfiguracije PRVO
             var socialEncounter = _socialEncounterRepository.GetByChallengeId(challengeId);
             if (socialEncounter == null)
             {
@@ -149,6 +145,20 @@ namespace Explorer.Encounters.Core.UseCases
                 {
                     Success = false,
                     Message = "Social Encounter configuration not found."
+                };
+            }
+
+            // 4. Provera da li turista već ima completed ovaj challenge
+            if (_completionRepository.HasUserCompletedChallenge(userId, challengeId))
+            {
+                return new ActivateSocialEncounterResponseDto
+                {
+                    Success = true,
+                    Message = "You have already completed this challenge.",
+                    AlreadyCompleted = true,
+                    IsWithinRadius = true,
+                    CurrentActiveCount = 0,
+                    RequiredPeople = socialEncounter.RequiredPeople
                 };
             }
 
@@ -172,7 +182,10 @@ namespace Explorer.Encounters.Core.UseCases
                 };
             }
 
-            // 6. Provera da li je turista već aktivan u ovom encounter-u
+            // 6. Prvo očistimo stare participante PRIJE dodavanja novog
+            CleanupStaleParticipants(socialEncounter.Id);
+
+            // 7. Provera da li je turista već aktivan u ovom encounter-u
             var existingParticipant = _participantRepository.GetByUserAndEncounter(userId, socialEncounter.Id);
             if (existingParticipant != null)
             {
@@ -192,11 +205,26 @@ namespace Explorer.Encounters.Core.UseCases
                 _participantRepository.Create(newParticipant);
             }
 
-            // 7. Čistimo stare (neaktivne) participante
-            CleanupStaleParticipants(socialEncounter.Id);
-
             // 8. Brojimo aktivne participante koji su u radijusu
             var activeCount = CountActiveParticipantsInRadius(socialEncounter.Id, challenge.Latitude, challenge.Longitude, socialEncounter.RadiusMeters);
+
+            // 9. PROVERA DA LI JE ENCOUNTER COMPLETED ODMAH!
+            if (activeCount >= socialEncounter.RequiredPeople)
+            {
+                // Dovoljno ljudi - complete encounter za sve!
+                var completionResult = CompleteEncounterForAllParticipants(socialEncounter.Id, challenge, activeCount);
+                
+                return new ActivateSocialEncounterResponseDto
+                {
+                    Success = true,
+                    Message = completionResult.Message,
+                    IsWithinRadius = true,
+                    CurrentActiveCount = activeCount,
+                    RequiredPeople = socialEncounter.RequiredPeople,
+                    IsCompleted = true,
+                    XpAwarded = completionResult.XpAwarded
+                };
+            }
 
             return new ActivateSocialEncounterResponseDto
             {
@@ -204,7 +232,8 @@ namespace Explorer.Encounters.Core.UseCases
                 Message = $"Social Encounter activated! {activeCount}/{socialEncounter.RequiredPeople} people are here.",
                 IsWithinRadius = true,
                 CurrentActiveCount = activeCount,
-                RequiredPeople = socialEncounter.RequiredPeople
+                RequiredPeople = socialEncounter.RequiredPeople,
+                IsCompleted = false
             };
         }
 
