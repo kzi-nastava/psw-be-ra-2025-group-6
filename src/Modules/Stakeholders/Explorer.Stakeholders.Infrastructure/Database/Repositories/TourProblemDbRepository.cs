@@ -1,12 +1,7 @@
 ﻿using Explorer.BuildingBlocks.Core.Exceptions;
-using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Explorer.Stakeholders.Infrastructure.Database;
 
 namespace Explorer.Stakeholders.Infrastructure.Database.Repositories;
 
@@ -21,10 +16,22 @@ public class TourProblemDbRepository : ITourProblemRepository
         _dbSet = DbContext.Set<TourProblem>();
     }
 
+    public async Task<List<TourProblem>> GetAll()
+    {
+        return await _dbSet.ToListAsync();
+    }
+
     public async Task<List<TourProblem>> GetByTourist(long touristId)
     {
         return await _dbSet
             .Where(p => p.TouristId == touristId)
+            .ToListAsync();
+    }
+
+    public async Task<List<TourProblem>> GetByTourIds(List<long> tourIds)
+    {
+        return await _dbSet
+            .Where(p => tourIds.Contains(p.TourId))
             .ToListAsync();
     }
 
@@ -61,5 +68,12 @@ public class TourProblemDbRepository : ITourProblemRepository
         var entity = await GetById(id);
         _dbSet.Remove(entity);
         await DbContext.SaveChangesAsync();
+    }
+
+    public async Task<int> CountByTourAndStatus(long tourId, ProblemStatus status)
+    {
+        return await _dbSet
+            .Where(p => p.TourId == tourId && p.Status == status)
+            .CountAsync();
     }
 }

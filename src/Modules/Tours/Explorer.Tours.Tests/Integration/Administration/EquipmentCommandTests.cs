@@ -28,13 +28,13 @@ public class EquipmentCommandTests : BaseToursIntegrationTest
         };
 
         // Act
-        var result = ((ObjectResult)controller.Create(newEntity).Result)?.Value as EquipmentDto;
+        var result = ((ObjectResult?)controller.Create(newEntity).Result)?.Value as EquipmentDto;
 
         // Assert - Response
         result.ShouldNotBeNull();
         result.Id.ShouldNotBe(0);
         result.Name.ShouldBe(newEntity.Name);
-        
+
         // Assert - Database
         var storedEntity = dbContext.Equipment.FirstOrDefault(i => i.Name == newEntity.Name);
         storedEntity.ShouldNotBeNull();
@@ -71,7 +71,7 @@ public class EquipmentCommandTests : BaseToursIntegrationTest
         };
 
         // Act
-        var result = ((ObjectResult)controller.Update(updatedEntity).Result)?.Value as EquipmentDto;
+        var result = ((ObjectResult?)controller.Update(updatedEntity).Result)?.Value as EquipmentDto;
 
         // Assert - Response
         result.ShouldNotBeNull();
@@ -112,7 +112,7 @@ public class EquipmentCommandTests : BaseToursIntegrationTest
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         // Act
-        var result = (OkResult)controller.Delete(-3);
+        var result = controller.Delete(-3) as OkResult;
 
         // Assert - Response
         result.ShouldNotBeNull();
@@ -122,7 +122,7 @@ public class EquipmentCommandTests : BaseToursIntegrationTest
         var storedCourse = dbContext.Equipment.FirstOrDefault(i => i.Id == -3);
         storedCourse.ShouldBeNull();
     }
-    
+
     [Fact]
     public void Delete_fails_invalid_id()
     {
@@ -133,7 +133,7 @@ public class EquipmentCommandTests : BaseToursIntegrationTest
         // Act & Assert
         Should.Throw<NotFoundException>(() => controller.Delete(-1000));
     }
-    
+
     private static EquipmentController CreateController(IServiceScope scope)
     {
         return new EquipmentController(scope.ServiceProvider.GetRequiredService<IEquipmentService>())

@@ -12,6 +12,8 @@ public class KeyPoint : Entity
     public double Latitude { get; init; }
     public string ImagePath { get; init; }
     public string Secret { get; init; }
+    public bool IsPublic { get; private set; }
+    public long? PublicRequestId { get; private set; }
 
     public KeyPoint(long tourId, string name, string description, double longitude, double latitude, string imagePath, string secret)
     {
@@ -29,5 +31,22 @@ public class KeyPoint : Entity
         Latitude = latitude;
         ImagePath = imagePath;
         Secret = secret;
+        IsPublic = false;
+    }
+
+    public void MarkAsPublicRequested(long requestId)
+    {
+        if (PublicRequestId.HasValue)
+            throw new InvalidOperationException("Public request already exists for this keypoint.");
+
+        PublicRequestId = requestId;
+    }
+
+    public void ApprovePublic()
+    {
+        if (!PublicRequestId.HasValue)
+            throw new InvalidOperationException("No public request exists for this keypoint.");
+
+        IsPublic = true;
     }
 }

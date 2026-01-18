@@ -1,9 +1,4 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Explorer.Stakeholders.Core.Domain
 {
@@ -24,6 +19,7 @@ namespace Explorer.Stakeholders.Core.Domain
             UpdatedAt = null;
             Validate();
         }
+
 
         public void Update(int rating, string? comment)
         {

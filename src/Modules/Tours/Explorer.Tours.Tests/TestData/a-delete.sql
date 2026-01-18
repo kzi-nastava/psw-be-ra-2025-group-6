@@ -1,3 +1,11 @@
+DELETE FROM tours."QuizAnswerOptions";
+DELETE FROM tours."QuizQuestions";
+DELETE FROM tours."Quizzes";
+DELETE FROM tours."TourReviews";
+DELETE FROM tours."TourExecutions";
+DELETE FROM tours."PublicEntityRequests";
+DELETE FROM payments."TourPurchaseTokens";
+DELETE FROM payments."OrderItem";
 CREATE SCHEMA IF NOT EXISTS tours;
 
 DO $$
@@ -21,7 +29,21 @@ $$;
 
 ALTER TABLE IF EXISTS tours."Equipment" ADD COLUMN IF NOT EXISTS "TourId" bigint NULL;
 CREATE INDEX IF NOT EXISTS "IX_Equipment_TourId" ON tours."Equipment" ("TourId");
-ALTER TABLE IF EXISTS tours."Equipment" ADD CONSTRAINT IF NOT EXISTS "FK_Equipment_Tours_TourId" FOREIGN KEY ("TourId") REFERENCES tours."Tours"("Id") ON DELETE SET NULL;
+DO $$
+BEGIN
+    IF to_regclass('tours."Equipment"') IS NOT NULL THEN
+        IF NOT EXISTS (
+            SELECT 1
+            FROM pg_constraint
+            WHERE conname = 'FK_Equipment_Tours_TourId'
+        ) THEN
+            ALTER TABLE tours."Equipment"
+                ADD CONSTRAINT "FK_Equipment_Tours_TourId"
+                FOREIGN KEY ("TourId") REFERENCES tours."Tours"("Id") ON DELETE SET NULL;
+        END IF;
+    END IF;
+END
+$$;
 
 ALTER TABLE IF EXISTS tours."Tours" ADD COLUMN IF NOT EXISTS "DistanceInKm" double precision NOT NULL DEFAULT 0;
 ALTER TABLE IF EXISTS tours."Tours" ADD COLUMN IF NOT EXISTS "Duration" jsonb;
@@ -34,12 +56,13 @@ ALTER TABLE IF EXISTS tours."KeyPoints" ADD COLUMN IF NOT EXISTS "ImagePath" tex
 ALTER TABLE IF EXISTS tours."KeyPoints" ADD COLUMN IF NOT EXISTS "Secret" text NOT NULL DEFAULT '';
 
 DELETE FROM tours."TouristEquipment";
+DELETE FROM tours."TourPlanners";
 DELETE FROM tours."Journals";
 DELETE FROM tours."Meetups";
-DELETE FROM tours."Facility";
-DELETE FROM tours."Equipment";
 DELETE FROM tours."AnnualAwards";
-DELETE FROM tours."Monuments";
 DELETE FROM tours."KeyPoints";
+DELETE FROM tours."Equipment";
+DELETE FROM tours."Facility";
+DELETE FROM tours."Monuments";
 DELETE FROM tours."Tours";
 ALTER SEQUENCE tours."Facility_Id_seq" RESTART WITH 100;

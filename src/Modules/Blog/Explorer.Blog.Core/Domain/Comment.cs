@@ -1,18 +1,20 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
-using System.Text.Json.Serialization;
 
 namespace Explorer.Blog.Core.Domain;
 
-public class Comment : ValueObject
+public class Comment : Entity
 {
+    public long BlogId { get; private set; }
     public long UserId { get; private set; }
     public string AuthorName { get; private set; }
+    public string AuthorProfilePicture { get; private set; }
     public string Text { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? LastUpdatedAt { get; private set; }
+    public bool IsHidden { get; private set; }
 
     private Comment() { }
-    public Comment(long userId, string authorName, string text)
+    public Comment(long blogId, long userId, string authorName, string authorProfilePicture, string text)
     {
         if (userId == 0)
             throw new ArgumentException("Invalid user.");
@@ -23,20 +25,25 @@ public class Comment : ValueObject
         if (string.IsNullOrWhiteSpace(authorName))
             throw new ArgumentException("Author name required.");
 
+        BlogId = blogId;
         UserId = userId;
         AuthorName = authorName;
+        AuthorProfilePicture = authorProfilePicture;
         Text = text;
         CreatedAt = DateTime.UtcNow;
+        IsHidden = false;
     }
 
-    [JsonConstructor]
-    public Comment(long userId, string authorName, string text, DateTime createdAt, DateTime? lastUpdatedAt)
+    public Comment(long blogId, long userId, string authorName, string authorProfilePicture, string text, DateTime createdAt, DateTime? lastUpdatedAt)
     {
+        BlogId = blogId;
         UserId = userId;
         AuthorName = authorName;
+        AuthorProfilePicture = authorProfilePicture;
         Text = text;
         CreatedAt = createdAt;
         LastUpdatedAt = lastUpdatedAt;
+        IsHidden = false;
     }
 
     public void Edit(string newText)
@@ -47,12 +54,9 @@ public class Comment : ValueObject
         Text = newText.Trim();
         LastUpdatedAt = DateTime.UtcNow;
     }
-    protected override IEnumerable<object> GetEqualityComponents()
+
+    public void Hide(long adminId)
     {
-        yield return UserId;
-        yield return AuthorName;
-        yield return Text;
-        yield return CreatedAt;
-        yield return LastUpdatedAt;
+        IsHidden = true;
     }
 }

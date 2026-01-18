@@ -3,8 +3,6 @@ using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Services;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using System;
-using System.Collections.Generic;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {
@@ -52,6 +50,12 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             user.Block();
             _userRepository.Update(user);
+        }
+
+        public UserDto GetUser(long userId)
+        {
+            var user = _userRepository.Get(userId);
+            return _mapper.Map<UserDto>(user);
         }
     }
 }

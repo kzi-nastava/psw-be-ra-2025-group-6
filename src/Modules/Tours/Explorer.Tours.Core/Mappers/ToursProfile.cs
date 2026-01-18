@@ -1,9 +1,11 @@
-﻿using AutoMapper;
+﻿﻿using AutoMapper;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.Quiz;
 using System.Linq;
 
 namespace Explorer.Tours.Core.Mappers;
+
 public class ToursProfile : Profile
 {
     public ToursProfile()
@@ -18,7 +20,9 @@ public class ToursProfile : Profile
         CreateMap<TourStatus, TourStatusDto>().ReverseMap();
         CreateMap<TravelType, TravelTypeDto>().ReverseMap();
         CreateMap<TourDuration, TourDurationDto>().ReverseMap();
-        CreateMap<Tour, TourDto>().ReverseMap();
+        CreateMap<TourDto, Tour>()
+            .ForMember(dest => dest.PublishedTime, opt => opt.Ignore())
+            .ReverseMap(); 
         CreateMap<Tour, TourSummaryDto>()
             .ForMember(d => d.FirstKeyPointLatitude,
                 opt => opt.MapFrom(s => s.KeyPoints != null
@@ -30,6 +34,23 @@ public class ToursProfile : Profile
                     : null));
         CreateMap<MonumentDto, Monument>().ReverseMap();
         CreateMap<MeetupDto, Meetup>().ReverseMap();
+        CreateMap<TourReview, TourReviewDto>().ReverseMap();
         CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
+        CreateMap<TourPlanner, TourPlannerDto>().ReverseMap();
+        
+        // Public entity request mappings
+        CreateMap<PublicEntityRequest, PublicEntityRequestDto>().ReverseMap();
+        CreateMap<PublicEntityType, PublicEntityTypeDto>().ReverseMap();
+        CreateMap<RequestStatus, RequestStatusDto>().ReverseMap();
+
+        CreateMap<KeyPoint, PublicKeyPointDto>().ReverseMap();
+        CreateMap<Facility, PublicFacilityDto>().ReverseMap();
+        CreateMap<OrderItem, OrderItemDto>().ReverseMap();
+        CreateMap<Quiz, QuizDto>().ReverseMap();
+        CreateMap<QuizQuestion, QuizQuestionDto>().ReverseMap();
+        CreateMap<QuizAnswerOption, QuizAnswerOptionDto>().ReverseMap();
+        CreateMap<Tour, TouristTourDto>()
+           .ForMember(dest => dest.FirstKeyPoint, opt => opt.MapFrom(src => src.GetFirstKeyPoint()))
+           .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.Duration));
     }
 }

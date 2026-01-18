@@ -8,9 +8,13 @@ public interface ITourService
     List<TourDto> GetAll();
     PagedResult<TourDto> GetPaged(int page, int pageSize);
     TourDto Get(long id);
+    List<TourDto> GetByAuthorId(long authorId);
+    List<TourDto> GetPublishedByAuthorId(long authorId);
     TourDto Create(TourDto tour);
     TourDto Update(TourDto tour);
     void Delete(long id);
+    List<TourDto> GetAvailableForTourist(long touristId);
+    PagedResult<TourDto> GetAvailableForTouristPaged(long touristId, int page, int pageSize);
     TourDto Archive(long tourId, long authorId);
     TourDto Activate(long tourId, long authorId);
 
@@ -20,4 +24,5 @@ public interface ITourService
     TourDto AddKeyPoint(long tourId, KeyPointDto keyPoint);
     TourDto UpdateTourDistance(long tourId, double distance);
     TourDto UpdateDuration(long tourId, List<TourDurationDto> durations);
+    TourDto Publish(long tourId, long authorId);
 }

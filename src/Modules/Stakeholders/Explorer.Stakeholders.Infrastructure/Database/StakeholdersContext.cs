@@ -10,12 +10,15 @@ public class StakeholdersContext : DbContext
     public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<ReviewApp> ReviewApps { get; set; }
     public DbSet<Club> Clubs { get; set; }
-
+    public DbSet<Follow> Following { get; set; }
     public DbSet<TouristPosition> TouristPositions { get; set; }
     public DbSet<TourProblem> TourProblems { get; set; }
+    public DbSet<TourProblemMessage> TourProblemMessages { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<ProfilePost> ProfilePosts { get; set; }
+    public DbSet<ClubPost> ClubPosts { get; set; }
 
-
-    public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
+    public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,12 +33,18 @@ public class StakeholdersContext : DbContext
        .HasConversion<string>();
 
         ConfigureStakeholder(modelBuilder);
-        
+
         modelBuilder.Entity<UserProfile>()
             .HasOne<User>()
             .WithOne()
             .HasForeignKey<UserProfile>(s => s.UserId);
         ConfigureReview(modelBuilder);
+        ConfigureTourProblemMessage(modelBuilder);
+        ConfigureNotification(modelBuilder);
+        ConfigureTourProblems(modelBuilder);
+        ConfigureProfilePosts(modelBuilder);
+        ConfigureClubPosts(modelBuilder);
+        ConfigureFollowing(modelBuilder);
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)
@@ -44,6 +53,20 @@ public class StakeholdersContext : DbContext
             .HasOne<User>()
             .WithOne()
             .HasForeignKey<Person>(s => s.UserId);
+    }
+
+    private static void ConfigureTourProblems(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TourProblem>(builder =>
+        {
+            builder.Property(p => p.Status).IsRequired();
+            builder.Property(p => p.ReportedAt).IsRequired();
+            builder.Property(p => p.DeadlineAt).IsRequired(false);
+            builder.Property(p => p.ResolvedAt).IsRequired(false);
+            builder.Property(p => p.ResolutionFeedback).IsRequired();
+            builder.Property(p => p.ResolutionComment).HasMaxLength(1000).IsRequired(false);
+            builder.Property(p => p.ResolutionAt).IsRequired(false);
+        });
     }
 
     private static void ConfigureReview(ModelBuilder modelBuilder)
@@ -65,6 +88,78 @@ public class StakeholdersContext : DbContext
                 .WithOne()
                 .HasForeignKey<ReviewApp>(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
+
+    private static void ConfigureTourProblemMessage(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TourProblemMessage>()
+            .HasOne<TourProblem>()
+            .WithMany()
+            .HasForeignKey(s => s.TourProblemId);
+    }
+
+    private static void ConfigureNotification(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Notification>()
+            .Property(n => n.Status)
+            .HasConversion<string>();
+    }
+
+    private static void ConfigureProfilePosts(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ProfilePost>(builder =>
+        {
+            builder.ToTable("ProfilePosts");
+            builder.HasKey(p => p.Id);
+            builder.Property(p => p.AuthorId).IsRequired();
+            builder.Property(p => p.Text).IsRequired().HasMaxLength(280);
+            builder.Property(p => p.CreatedAt).IsRequired();
+            builder.Property(p => p.UpdatedAt).IsRequired();
+            builder.Property(p => p.ResourceType)
+                .HasConversion<string?>()
+                .HasMaxLength(20);
+            builder.HasIndex(p => p.AuthorId);
+        });
+    }
+
+    private static void ConfigureClubPosts(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ClubPost>(builder =>
+        {
+            builder.ToTable("ClubPosts");
+            builder.HasKey(p => p.Id);
+            builder.Property(p => p.AuthorId).IsRequired();
+            builder.Property(p => p.ClubId).IsRequired();
+            builder.Property(p => p.Text).IsRequired().HasMaxLength(280);
+            builder.Property(p => p.CreatedAt).IsRequired();
+            builder.Property(p => p.UpdatedAt);
+            builder.Property(p => p.ResourceType)
+                .HasConversion<string?>()
+                .HasMaxLength(20);
+            builder.HasIndex(p => p.ClubId);
+        });
+    }
+    private static void ConfigureFollowing(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Follow>(builder =>
+        {
+            builder.ToTable("Following");
+
+            builder.HasKey(f => f.Id);
+
+            builder.HasIndex(f => new { f.FollowerId, f.FollowedId })
+                   .IsUnique();
+
+            builder.HasOne<User>()
+                   .WithMany()
+                   .HasForeignKey(f => f.FollowerId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne<User>()
+                   .WithMany()
+                   .HasForeignKey(f => f.FollowedId)
+                   .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
