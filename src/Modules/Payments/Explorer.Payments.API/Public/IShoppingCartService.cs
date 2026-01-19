@@ -10,4 +10,6 @@ public interface IShoppingCartService
     List<TourPurchaseTokenDto> Checkout(long touristId);
     List<TourPurchaseTokenDto> CheckoutWithCoupon(long touristId, string couponCode);
     PaymentRecordDto PurchaseBundle(long touristId, long bundleId);
+    CheckoutPreviewDto GetCheckoutPreview(long touristId);
+    CheckoutPreviewDto GetCheckoutPreviewWithCoupon(long touristId, string couponCode);
 }
