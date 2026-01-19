@@ -1,4 +1,5 @@
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.API.Contracts;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
