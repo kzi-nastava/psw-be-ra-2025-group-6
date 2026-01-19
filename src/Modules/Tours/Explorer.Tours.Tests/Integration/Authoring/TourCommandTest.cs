@@ -289,8 +289,12 @@ public class TourCommandTests : BaseToursIntegrationTest
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        // Act & Assert
-        Should.Throw<ForbiddenException>(() => controller.Delete(-3));
+        // Act
+        var result = controller.Delete(-3) as ObjectResult;
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.StatusCode.ShouldBe(StatusCodes.Status403Forbidden);
     }
 
     private static TourController CreateController(IServiceScope scope)

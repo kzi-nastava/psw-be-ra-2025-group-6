@@ -1,5 +1,6 @@
 using Explorer.Payments.API.Public;
 using Explorer.Tours.API.Dtos;
+using Explorer.API.Contracts;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,14 @@ public class PurchasesController : ControllerBase
     [HttpGet("tours")]
     public ActionResult<List<TourDto>> GetMyPurchasedTours()
     {
-        var touristId = User.PersonId();
+        if (!User.TryPersonId(out var touristId))
+        {
+            return Unauthorized(ApiErrorFactory.Create(
+                HttpContext,
+                ApiErrorCodes.AuthRequired,
+                "Login required to view purchases.",
+                "User is not recognized (missing tourist profile)."));
+        }
         var tokens = _purchaseService.GetByTouristId(touristId);
 
         var tourIds = tokens.Select(t => t.TourId).Distinct();

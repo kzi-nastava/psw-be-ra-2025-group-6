@@ -3,6 +3,7 @@ using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Infrastructure.Database;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -97,11 +98,12 @@ public class TourKeyPointIntegrationTests : BaseToursIntegrationTest
             Secret = "x"
         };
 
-        // Act & Assert
-        Should.Throw<ForbiddenException>(() =>
-        {
-            controller.AddKeyPoint(tourId, keyPointDto);
-        });
+        // Act
+        var result = controller.AddKeyPoint(tourId, keyPointDto).Result as ObjectResult;
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.StatusCode.ShouldBe(StatusCodes.Status403Forbidden);
     }
 
     [Fact]
