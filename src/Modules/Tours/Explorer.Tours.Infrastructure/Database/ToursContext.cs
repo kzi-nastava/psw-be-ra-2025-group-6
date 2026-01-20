@@ -22,6 +22,7 @@ public class ToursContext : DbContext
     public DbSet<Tour> Tours { get; set; }
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Meetup> Meetups { get; set; }
+    public DbSet<TourPlanner> TourPlanners { get; set; }
 
     public DbSet<TourReview> TourReviews { get; set; }
     public DbSet<Facility> Facility { get; set; }
@@ -39,6 +40,7 @@ public class ToursContext : DbContext
         modelBuilder.HasDefaultSchema("tours");
 
         ConfigureTouristEquipment(modelBuilder);
+        ConfigureTourPlanner(modelBuilder);
 
         modelBuilder.Entity<Tour>()
     .HasMany(t => t.Equipment)
@@ -105,5 +107,15 @@ public class ToursContext : DbContext
         modelBuilder.Entity<Quiz>()
             .Property(q => q.Title)
             .IsRequired();
+    }
+
+    private static void ConfigureTourPlanner(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TourPlanner>(b =>
+        {
+            b.HasKey(tp => tp.Id);
+            b.HasIndex(tp => tp.UserId);
+            b.HasIndex(tp => tp.TourId);
+        });
     }
 }
