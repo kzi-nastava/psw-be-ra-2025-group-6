@@ -12,15 +12,18 @@ public class FollowService : IFollowService
 {
     private readonly IFollowRepository _followRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IUserProfileRepository _profileRepository;
     private readonly IMapper _mapper;
 
     public FollowService(
         IFollowRepository followRepository,
         IUserRepository userRepository,
+        IUserProfileRepository profileRepository,   
         IMapper mapper)
     {
         _followRepository = followRepository;
         _userRepository = userRepository;
+        _profileRepository = profileRepository;
         _mapper = mapper;
     }
 
@@ -77,5 +80,58 @@ public class FollowService : IFollowService
     public bool IsFollowing(long followerId, long followedId)
     {
         return _followRepository.IsFollowing(followerId, followedId);
+    }
+
+    public List<UserProfileDto> GetFollowersList(long userId, long currentUserId)
+    {
+        var followers = _followRepository.GetFollowers(userId);
+
+        var result = new List<UserProfileDto>();
+
+        foreach (var follower in followers)
+        {
+            var profile = _profileRepository.Get(follower.Id);
+
+            var dto = new UserProfileDto
+            {
+                UserId = follower.Id,
+                Name = profile?.Name ?? "Unknown",
+                Surname = profile?.Surname ?? "",
+                ProfilePicture = profile?.ProfilePicture ?? "",
+                Biography = profile?.Biography ?? "",
+                Quote = profile?.Quote ?? "",
+                IsFollowedByMe = _followRepository.IsFollowing(currentUserId, follower.Id)
+            };
+
+            result.Add(dto);
+        }
+
+        return result;
+    }
+
+    public List<UserProfileDto> GetFollowingList(long userId, long currentUserId)
+    {
+        var following = _followRepository.GetFollowing(userId);
+        var result = new List<UserProfileDto>();
+
+        foreach (var followedUser in following)
+        {
+            var profile = _profileRepository.Get(followedUser.Id);
+
+            var dto = new UserProfileDto
+            {
+                UserId = followedUser.Id,
+                Name = profile?.Name ?? "Unknown",
+                Surname = profile?.Surname ?? "",
+                ProfilePicture = profile?.ProfilePicture ?? "",
+                Biography = profile?.Biography ?? "",
+                Quote = profile?.Quote ?? "",
+                IsFollowedByMe = _followRepository.IsFollowing(currentUserId, followedUser.Id)
+            };
+
+            result.Add(dto);
+        }
+
+        return result;
     }
 }
