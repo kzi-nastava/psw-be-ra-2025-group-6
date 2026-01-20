@@ -101,7 +101,8 @@ public class FollowService : IFollowService
                     ProfilePicture = profile.ProfilePicture,
                     Biography = profile.Biography,
                     Quote = profile.Quote,
-                    IsFollowedByMe = _followRepository.IsFollowing(currentUserId, follower.Id)
+                    IsFollowedByMe = _followRepository.IsFollowing(currentUserId, follower.Id),
+                    Username = follower.Username
                 });
             }
             catch (NotFoundException)
@@ -131,7 +132,8 @@ public class FollowService : IFollowService
                     ProfilePicture = profile.ProfilePicture,
                     Biography = profile.Biography,
                     Quote = profile.Quote,
-                    IsFollowedByMe = _followRepository.IsFollowing(currentUserId, followedUser.Id)
+                    IsFollowedByMe = _followRepository.IsFollowing(currentUserId, followedUser.Id),
+                    Username = followedUser.Username
                 });
             }
             catch (NotFoundException)

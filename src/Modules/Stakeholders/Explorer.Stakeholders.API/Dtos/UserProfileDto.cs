@@ -9,4 +9,5 @@ public class UserProfileDto
     public string Biography { get; set; }
     public string Quote { get; set; }
     public bool IsFollowedByMe { get; set; }
+    public string Username { get; set; }
 }
