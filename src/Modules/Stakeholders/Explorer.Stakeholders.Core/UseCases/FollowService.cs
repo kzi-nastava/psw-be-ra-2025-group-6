@@ -85,27 +85,30 @@ public class FollowService : IFollowService
     public List<UserProfileDto> GetFollowersList(long userId, long currentUserId)
     {
         var followers = _followRepository.GetFollowers(userId);
-
         var result = new List<UserProfileDto>();
 
         foreach (var follower in followers)
         {
-            var profile = _profileRepository.Get(follower.Id);
-
-            var dto = new UserProfileDto
+            try
             {
-                UserId = follower.Id,
-                Name = profile?.Name ?? "Unknown",
-                Surname = profile?.Surname ?? "",
-                ProfilePicture = profile?.ProfilePicture ?? "",
-                Biography = profile?.Biography ?? "",
-                Quote = profile?.Quote ?? "",
-                IsFollowedByMe = _followRepository.IsFollowing(currentUserId, follower.Id)
-            };
+                var profile = _profileRepository.Get(follower.Id);
 
-            result.Add(dto);
+                result.Add(new UserProfileDto
+                {
+                    UserId = follower.Id,
+                    Name = profile.Name,
+                    Surname = profile.Surname,
+                    ProfilePicture = profile.ProfilePicture,
+                    Biography = profile.Biography,
+                    Quote = profile.Quote,
+                    IsFollowedByMe = _followRepository.IsFollowing(currentUserId, follower.Id)
+                });
+            }
+            catch (NotFoundException)
+            {
+                continue;
+            }
         }
-
         return result;
     }
 
@@ -116,22 +119,26 @@ public class FollowService : IFollowService
 
         foreach (var followedUser in following)
         {
-            var profile = _profileRepository.Get(followedUser.Id);
-
-            var dto = new UserProfileDto
+            try
             {
-                UserId = followedUser.Id,
-                Name = profile?.Name ?? "Unknown",
-                Surname = profile?.Surname ?? "",
-                ProfilePicture = profile?.ProfilePicture ?? "",
-                Biography = profile?.Biography ?? "",
-                Quote = profile?.Quote ?? "",
-                IsFollowedByMe = _followRepository.IsFollowing(currentUserId, followedUser.Id)
-            };
+                var profile = _profileRepository.Get(followedUser.Id);
 
-            result.Add(dto);
+                result.Add(new UserProfileDto
+                {
+                    UserId = followedUser.Id,
+                    Name = profile.Name,
+                    Surname = profile.Surname,
+                    ProfilePicture = profile.ProfilePicture,
+                    Biography = profile.Biography,
+                    Quote = profile.Quote,
+                    IsFollowedByMe = _followRepository.IsFollowing(currentUserId, followedUser.Id)
+                });
+            }
+            catch (NotFoundException)
+            {
+                continue;
+            }
         }
-
         return result;
     }
 }
