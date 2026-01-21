@@ -158,6 +158,15 @@ public class Tour : AggregateRoot
 
         KeyPoints.Add(keyPoint);
     }
+
+    /// <summary>
+    /// Returns the first key point as the reference point for distance calculations.
+    /// This keeps distance search consistent when tours only store coordinates on key points.
+    /// </summary>
+    public KeyPoint? GetReferenceKeyPoint()
+    {
+        return KeyPoints?.FirstOrDefault();
+    }
     public void SetDistance(double distance)
     {
         if (distance < 0) throw new ArgumentException("Distance cannot be negative.");
@@ -189,6 +198,37 @@ public class Tour : AggregateRoot
             Duration.Add(duration);
         }
     }
+    
+
+    public bool IsWithinRadius(double centerLat, double centerLon, double radiusInKm)
+    {
+        var referencePoint = GetReferenceKeyPoint();
+        if (referencePoint == null) return false;
+
+        var distance = HaversineDistanceInKm(centerLat, centerLon, referencePoint.Latitude, referencePoint.Longitude);
+        return distance <= radiusInKm;
+    }
+
+    public double DistanceTo(double centerLat, double centerLon)
+    {
+        var referencePoint = GetReferenceKeyPoint();
+        if (referencePoint == null) return double.PositiveInfinity;
+
+        return HaversineDistanceInKm(centerLat, centerLon, referencePoint.Latitude, referencePoint.Longitude);
+    }
+
+    private static double HaversineDistanceInKm(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double R = 6371.0;
+        var dLat = ToRadians(lat2 - lat1);
+        var dLon = ToRadians(lon2 - lon1);
+        var a =
+            Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+            Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+            Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        return R * c;
+    }
     public KeyPoint? GetFirstKeyPoint()
     {
         return KeyPoints.FirstOrDefault();
@@ -214,5 +254,6 @@ public class Tour : AggregateRoot
         PublishedTime = DateTime.UtcNow;
     }
 
+    private static double ToRadians(double angle) => Math.PI * angle / 180.0;
 
 }

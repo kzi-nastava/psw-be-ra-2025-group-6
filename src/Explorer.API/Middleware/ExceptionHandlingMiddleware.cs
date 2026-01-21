@@ -1,3 +1,4 @@
+using Explorer.API.Contracts;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using System.Net;
 using System.Text.Json;
@@ -32,23 +33,25 @@ public class ExceptionHandlingMiddleware
     {
         context.Response.ContentType = "application/json";
 
-        var (statusCode, message) = exception switch
+        var (statusCode, errorCode, message, details) = exception switch
         {
-            ArgumentException ex => (HttpStatusCode.BadRequest, ex.Message),
-            UnauthorizedAccessException ex => (HttpStatusCode.Unauthorized, ex.Message),
-            ForbiddenException ex => (HttpStatusCode.Forbidden, ex.Message),
-            NotFoundException ex => (HttpStatusCode.NotFound, ex.Message),
-            EntityValidationException ex => (HttpStatusCode.UnprocessableEntity, ex.Message),
-            _ => (HttpStatusCode.InternalServerError, "An internal server error occurred.")
+            ArgumentException ex => (HttpStatusCode.BadRequest, ApiErrorCodes.ValidationError, "Request validation failed.", ex.Message),
+            UnauthorizedAccessException ex => (HttpStatusCode.Unauthorized, ApiErrorCodes.AuthRequired, "Login required to perform this action.", ex.Message),
+            ForbiddenException ex => (HttpStatusCode.Forbidden, ApiErrorCodes.Forbidden, "You don't have permission for this action.", ex.Message),
+            NotFoundException ex => (HttpStatusCode.NotFound, ApiErrorCodes.NotFound, "Requested resource not found.", ex.Message),
+            EntityValidationException ex => (HttpStatusCode.UnprocessableEntity, ApiErrorCodes.ValidationError, "Request validation failed.", ex.Message),
+            InvalidOperationException ex => (HttpStatusCode.Conflict, ApiErrorCodes.Conflict, "Operation is not allowed in the current state.", ex.Message),
+            _ => (HttpStatusCode.InternalServerError, ApiErrorCodes.ServerError, "Server error. Try later.", exception.Message)
         };
 
         context.Response.StatusCode = (int)statusCode;
 
-        var response = new
+        var response = new ApiErrorResponse
         {
-            title = "An error occurred",
-            status = (int)statusCode,
-            detail = message
+            ErrorCode = errorCode,
+            Message = message,
+            Details = details,
+            TraceId = context.TraceIdentifier
         };
 
         var jsonResponse = JsonSerializer.Serialize(response);

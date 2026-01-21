@@ -30,6 +30,9 @@ public class TourRepository : ITourRepository
 
     public PagedResult<Tour> GetPaged(int page, int pageSize)
     {
+        var realPage = page < 1 ? 1 : page;
+        var realPageSize = pageSize < 1 ? 10 : pageSize;
+
         var query = DbContext.Tours
             .Include(t => t.Equipment)
             .Include(t => t.TourReviews)
@@ -39,8 +42,8 @@ public class TourRepository : ITourRepository
         var totalCount = query.Count();
 
         var items = query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((realPage - 1) * realPageSize)
+            .Take(realPageSize)
             .ToList();
 
         return new PagedResult<Tour>(items, totalCount);
@@ -126,14 +129,22 @@ public class TourRepository : ITourRepository
         _dbSet.Remove(entity);
         DbContext.SaveChanges();
     }
-    public List<Tour> GetPublishedTours()
+
+    public List<Tour> GetPublishedWithKeyPoints()
     {
         return DbContext.Tours
-            .Include(t => t.Equipment)
             .Include(t => t.KeyPoints)
             .Where(t => t.Status == TourStatus.CONFIRMED)
             .ToList();
     }
 
+    public List<Tour> GetPublishedTours()
+    {
+        return DbContext.Tours
+            .Include(t => t.Equipment)
+            .Include(t => t.KeyPoints)
+            .Where(t => t.Status == TourStatus.CONFIRMED && t.PublishedTime != null)
+            .ToList();
+    }
 
 }
