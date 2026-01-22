@@ -60,5 +60,13 @@ namespace Explorer.API.Controllers.Tourist
 
             return review.UserId == User.PersonId();
         }
+
+        [HttpGet("tour/{tourId}")]
+        [AllowAnonymous]
+        public ActionResult<List<TourReviewDto>> GetByTour(long tourId)
+        {
+            var result = _tourReviewService.GetByTour(tourId);
+            return Ok(result);
+        }
     }
 }
