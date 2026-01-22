@@ -10,18 +10,24 @@ namespace Explorer.Stakeholders.Core.UseCases;
 public class UserProfileService : IUserProfileService
 {
     private readonly IUserProfileRepository _userProfileRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
 
-    public UserProfileService(IUserProfileRepository userProfileRepository, IMapper mapper)
+    public UserProfileService(IUserProfileRepository userProfileRepository, IUserRepository userRepository, IMapper mapper)
     {
         _userProfileRepository = userProfileRepository;
+        _userRepository = userRepository;
         _mapper = mapper;
     }
 
     public UserProfileDto Get(long userId)
     {
         var userProfile = _userProfileRepository.Get(userId);
-        return _mapper.Map<UserProfileDto>(userProfile);
+        var user = _userRepository.GetById(userId);
+        var dto = _mapper.Map<UserProfileDto>(userProfile);
+        dto.Username = user?.Username;
+
+        return dto;
     }
 
     public UserProfileDto Update(UserProfileDto userProfileDto)

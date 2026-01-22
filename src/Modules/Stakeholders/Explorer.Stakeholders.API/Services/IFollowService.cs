@@ -16,4 +16,6 @@ public interface IFollowService
     int GetFollowersCount(long userId);
     int GetFollowingCount(long userId);
     bool IsFollowing(long followerId, long followedId);
+    List<UserProfileDto> GetFollowersList(long userId, long currentUserId);
+    List<UserProfileDto> GetFollowingList(long userId, long currentUserId);
 }
