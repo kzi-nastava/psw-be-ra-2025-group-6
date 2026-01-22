@@ -1,6 +1,7 @@
 using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Public;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.API.Contracts;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,14 @@ namespace Explorer.API.Controllers.Tourist
         [HttpGet]
         public ActionResult<List<TourPurchaseTokenDto>> Get()
         {
-            var touristId = User.PersonId();
+            if (!User.TryPersonId(out var touristId))
+            {
+                return Unauthorized(ApiErrorFactory.Create(
+                    HttpContext,
+                    ApiErrorCodes.AuthRequired,
+                    "Login required to view purchases.",
+                    "User is not recognized (missing tourist profile)."));
+            }
             var result = _tourPurchaseTokenService.GetByTouristId(touristId);
             return Ok(result);
         }
@@ -30,7 +38,14 @@ namespace Explorer.API.Controllers.Tourist
         [HttpGet("paged")]
         public ActionResult<PagedResult<TourPurchaseTokenDto>> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
         {
-            var touristId = User.PersonId();
+            if (!User.TryPersonId(out var touristId))
+            {
+                return Unauthorized(ApiErrorFactory.Create(
+                    HttpContext,
+                    ApiErrorCodes.AuthRequired,
+                    "Login required to view purchases.",
+                    "User is not recognized (missing tourist profile)."));
+            }
             var tokens = _tourPurchaseTokenService.GetByTouristId(touristId);
             var totalCount = tokens.Count;
             var items = tokens
