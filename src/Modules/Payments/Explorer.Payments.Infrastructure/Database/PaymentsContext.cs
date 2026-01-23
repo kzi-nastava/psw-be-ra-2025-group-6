@@ -27,6 +27,9 @@ public class PaymentsContext : DbContext
         modelBuilder.Entity<ShoppingCart>()
             .OwnsMany(s => s.Items);
 
+        modelBuilder.Entity<ShoppingCart>()
+            .OwnsMany(s => s.BundleItems);
+
         modelBuilder.Entity<Wallet>()
             .HasIndex(w => w.TouristId)
             .IsUnique();

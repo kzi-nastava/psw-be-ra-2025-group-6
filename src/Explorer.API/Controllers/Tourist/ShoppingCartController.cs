@@ -65,6 +65,44 @@ namespace Explorer.API.Controllers.Tourist
             }
         }
 
+        [HttpPost("bundles/{bundleId:long}")]
+        public ActionResult<ShoppingCartDto> AddBundle(long bundleId)
+        {
+            try
+            {
+                var touristId = User.PersonId();
+                var result = _shoppingCartService.AddBundle(touristId, bundleId);
+                return Ok(result);
+            }
+            catch (ArgumentException ex) when (ex.Message.Contains("already in the cart"))
+            {
+                return Conflict(new { message = ex.Message }); 
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message }); 
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("bundles/{bundleId:long}")]
+        public ActionResult<ShoppingCartDto> RemoveBundle(long bundleId)
+        {
+            try
+            {
+                var touristId = User.PersonId();
+                var result = _shoppingCartService.RemoveBundle(touristId, bundleId);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
         [HttpPost("checkout")]
         public ActionResult<List<TourPurchaseTokenDto>> Checkout()
         {

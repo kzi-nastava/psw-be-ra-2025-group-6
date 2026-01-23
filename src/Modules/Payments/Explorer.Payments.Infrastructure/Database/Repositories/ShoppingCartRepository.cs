@@ -18,7 +18,10 @@ public class ShoppingCartRepository : IShoppingCartRepository
 
     public ShoppingCart? GetByTouristId(long touristId)
     {
-        return _dbSet.Include(s => s.Items).FirstOrDefault(s => s.TouristId == touristId);
+        return _dbSet
+            .Include(s => s.Items)
+            .Include(s => s.BundleItems)  // ? Dodato
+            .FirstOrDefault(s => s.TouristId == touristId);
     }
 
     public ShoppingCart Create(ShoppingCart cart)
