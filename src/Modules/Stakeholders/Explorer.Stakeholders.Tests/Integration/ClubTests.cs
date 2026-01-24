@@ -70,13 +70,6 @@ namespace Explorer.Stakeholders.Tests.Integration
         [Fact]
         public void Retrieves_all_clubs()
         {
-            /*using var scope = Factory.Services.CreateScope();
-            var controller = CreateController(scope);
-
-            var result = ((ObjectResult)controller.GetAll().Result)?.Value as List<ClubDto>;
-
-            result.ShouldNotBeNull();
-            result.Count.ShouldBe(3);*/
             // Arrange
             using var scope = Factory.Services.CreateScope();
             var controller = CreateController(scope);
@@ -125,7 +118,8 @@ namespace Explorer.Stakeholders.Tests.Integration
             {
                 Name = "Klub za azuriranje",
                 Description = "Originalni opis.",
-                ImageUris = new List<string> { "orig.png" }
+                ImageUris = new List<string> { "orig.png" },
+                IsActive = true
             };
 
             var createdClub = ((ObjectResult)controller.Create(clubToCreate).Result)?.Value as ClubDto;
@@ -136,7 +130,8 @@ namespace Explorer.Stakeholders.Tests.Integration
                 Name = "AZURIRANO IME",
                 Description = createdClub.Description,
                 ImageUris = createdClub.ImageUris,
-                OwnerId = createdClub.OwnerId
+                OwnerId = createdClub.OwnerId,
+                IsActive = false
             };
 
             var result = ((ObjectResult)controller.Update(clubToUpdate).Result)?.Value as ClubDto;
@@ -144,10 +139,12 @@ namespace Explorer.Stakeholders.Tests.Integration
             result.ShouldNotBeNull();
             result.Id.ShouldBe(createdClub.Id);
             result.Name.ShouldBe("AZURIRANO IME");
+            result.IsActive.ShouldBe(false);
 
             var entityInDb = dbContext.Clubs.Find(createdClub.Id);
             entityInDb.ShouldNotBeNull();
             entityInDb.Name.ShouldBe("AZURIRANO IME");
+            entityInDb.IsActive.ShouldBe(false);
         }
 
         [Fact]
@@ -161,13 +158,17 @@ namespace Explorer.Stakeholders.Tests.Integration
             {
                 Name = "Klub za brisanje",
                 Description = "Opis.",
-                ImageUris = new List<string> { "del.png" }
+                ImageUris = new List<string> { "del.png" },
+                IsActive = true
             };
 
             var createdClub = ((ObjectResult)controller.Create(clubToCreate).Result)?.Value as ClubDto;
 
+            createdClub.IsActive = false;
+            controller.Update(createdClub);
+            // Act
             var deleteResult = (OkResult)controller.Delete(createdClub.Id);
-
+            //Assert
             deleteResult.StatusCode.ShouldBe(200);
 
             var entityInDb = dbContext.Clubs.Find(createdClub.Id);

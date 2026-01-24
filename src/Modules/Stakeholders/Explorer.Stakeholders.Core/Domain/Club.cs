@@ -8,13 +8,15 @@ namespace Explorer.Stakeholders.Core.Domain
         public string Description { get; private set; }
         public List<string> ImageUris { get; private set; }
         public long OwnerId { get; private set; }
+        public bool IsActive { get; private set; }
 
-        public Club(string name, string description, List<string> imageUris, long ownerId)
+        public Club(string name, string description, List<string> imageUris, long ownerId, bool isActive=true)
         {
             Name = name;
             Description = description;
             ImageUris = imageUris;
             OwnerId = ownerId;
+            IsActive = isActive;
 
             Validate();
         }
@@ -26,7 +28,7 @@ namespace Explorer.Stakeholders.Core.Domain
             if (OwnerId == 0) throw new ArgumentException("Invalid OwnerId.");
             if (ImageUris == null || !ImageUris.Any()) throw new ArgumentException("At least one image URI is required.");
         }
-        public void Update(string name, string description, List<string> imageUris)
+        public void Update(string name, string description, List<string> imageUris, bool isActive)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Invalid Name.");
             if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
@@ -35,6 +37,7 @@ namespace Explorer.Stakeholders.Core.Domain
             Name = name;
             Description = description;
             ImageUris = imageUris;
+            IsActive = isActive;
         }
     }
 }
