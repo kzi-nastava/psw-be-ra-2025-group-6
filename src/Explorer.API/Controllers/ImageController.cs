@@ -15,7 +15,7 @@ namespace Explorer.API.Controllers
                 return BadRequest("No file uploaded.");
 
             var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetExtension(file.FileName);
-            var imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profile");
+            var imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "tours");
             var filePath = Path.Combine(imagesPath, uniqueFileName);
 
             if (!Directory.Exists(imagesPath))
@@ -28,10 +28,9 @@ namespace Explorer.API.Controllers
                 await file.CopyToAsync(stream);
             }
 
-            var fileUrl = Path.Combine("/images/profile", uniqueFileName).Replace("\\", "/");
-            var absoluteUrl = $"{Request.Scheme}://{Request.Host}{fileUrl}";
+            var dbPath = $"/images/tours/{uniqueFileName}";
 
-            return Ok(new { url = absoluteUrl });
+            return Ok(dbPath);
         }
     }
 }

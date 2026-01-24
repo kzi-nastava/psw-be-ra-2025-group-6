@@ -4,6 +4,7 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.Stakeholders.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases
 {
@@ -11,11 +12,19 @@ namespace Explorer.Tours.Core.UseCases
     {
         private readonly ITourRepository _tourRepository;
         private readonly IMapper _mapper;
+        private readonly IInternalStakeholderService _stakeholderService;
+        private readonly ITourReviewHelpfulRepository _helpfulRepository;
 
-        public TourReviewService(ITourRepository tourRepository, IMapper mapper)
+        public TourReviewService(
+            ITourRepository tourRepository,
+            IMapper mapper,
+            IInternalStakeholderService stakeholderService,
+            ITourReviewHelpfulRepository helpfulRepository)
         {
-             _tourRepository = tourRepository;
-             _mapper = mapper;
+            _tourRepository = tourRepository;
+            _mapper = mapper;
+            _stakeholderService = stakeholderService;
+            _helpfulRepository = helpfulRepository;
         }
 
         public TourReviewDto Create(TourReviewDto tourRev)
@@ -28,10 +37,12 @@ namespace Explorer.Tours.Core.UseCases
                tourRev.CompletedPercent,
                tourRev.PictureUrl
            );
+
             var tour = _tourRepository.Get(tourRev.TourId);
             tour.AddTourReview(review);
             _tourRepository.Update(tour);
-            return _mapper.Map<TourReviewDto>(review);
+
+            return MapWithUserName(review);
         }
 
         public TourReviewDto Update(TourReviewDto tourRev)
@@ -43,25 +54,25 @@ namespace Explorer.Tours.Core.UseCases
             rev.Update(tourRev.Rating, tourRev.Comment, tourRev.CompletedPercent, tourRev.PictureUrl);
 
             _tourRepository.Update(tour);
-            return _mapper.Map<TourReviewDto>(rev);
+            return MapWithUserName(rev);
         }
 
         public void Delete(long id)
         {
-             var tour = _tourRepository.GetByReviewId(id);
-             if (tour == null) throw new NotFoundException("Tour review not found: " + id);
+            var tour = _tourRepository.GetByReviewId(id);
+            if (tour == null) throw new NotFoundException("Tour review not found: " + id);
 
-             var rev = tour.TourReviews.FirstOrDefault(r => r.Id == id);
-             tour.TourReviews.Remove(rev);
-             _tourRepository.Update(tour);
+            var rev = tour.TourReviews.FirstOrDefault(r => r.Id == id);
+            tour.TourReviews.Remove(rev);
+            _tourRepository.Update(tour);
         }
 
         public TourReviewDto Get(long id)
         {
-             var tour = _tourRepository.GetByReviewId(id);
-             if (tour == null) throw new NotFoundException("Tour review not found: " + id);
-             var rev = tour.TourReviews.FirstOrDefault(r => r.Id == id);
-             return _mapper.Map<TourReviewDto>(rev);
+            var tour = _tourRepository.GetByReviewId(id);
+            if (tour == null) throw new NotFoundException("Tour review not found: " + id);
+            var rev = tour.TourReviews.FirstOrDefault(r => r.Id == id);
+            return MapWithUserName(rev);
         }
 
         public List<TourReviewDto> GetByUser(long userId)
@@ -72,22 +83,89 @@ namespace Explorer.Tours.Core.UseCases
             var reviewDtos = new List<TourReviewDto>();
             foreach (var rev in reviews)
             {
-                reviewDtos.Add(_mapper.Map<TourReviewDto>(rev));
+                reviewDtos.Add(MapWithUserName(rev));
             }
             return reviewDtos;
         }
 
         public List<TourReviewDto> GetByTour(long tourId)
         {
-             var tour = _tourRepository.Get(tourId);
-             var reviews = tour.TourReviews;
+            var tour = _tourRepository.Get(tourId);
+            var reviews = tour.TourReviews;
 
-             var reviewDtos = new List<TourReviewDto>();
-             foreach (var rev in reviews)
-             {
-                 reviewDtos.Add(_mapper.Map<TourReviewDto>(rev));
-             }
-             return reviewDtos;
+            var reviewDtos = new List<TourReviewDto>();
+            foreach (var rev in reviews)
+            {
+                reviewDtos.Add(MapWithUserName(rev));
+            }
+            return reviewDtos;
+        }
+
+        public (int helpfulCount, bool isHelpful) ToggleHelpful(long reviewId, long userId)
+        {
+            // Validate review exists
+            var tour = _tourRepository.GetByReviewId(reviewId);
+            if (tour == null) throw new NotFoundException("Tour review not found: " + reviewId);
+
+            // If already exists remove (toggle off), otherwise add
+            var already = _helpfulRepository.Exists(reviewId, userId);
+            if (already)
+            {
+                _helpfulRepository.RemoveByReviewAndUser(reviewId, userId);
+                var countAfter = _helpfulRepository.CountByReview(reviewId);
+                return (countAfter, false);
+            }
+            else
+            {
+                var vote = new TourReviewHelpfulVote(reviewId, userId);
+                _helpfulRepository.Add(vote);
+                var countAfter = _helpfulRepository.CountByReview(reviewId);
+                return (countAfter, true);
+            }
+        }
+
+        // NEW: explicit remove helpful (used by DELETE endpoint)
+        public (int helpfulCount, bool isHelpful) RemoveHelpful(long reviewId, long userId)
+        {
+            var tour = _tourRepository.GetByReviewId(reviewId);
+            if (tour == null) throw new NotFoundException("Tour review not found: " + reviewId);
+
+            var exists = _helpfulRepository.Exists(reviewId, userId);
+            if (!exists)
+            {
+                // nothing to remove; return current count and isHelpful=false
+                return (_helpfulRepository.CountByReview(reviewId), false);
+            }
+
+            _helpfulRepository.RemoveByReviewAndUser(reviewId, userId);
+            var countAfter = _helpfulRepository.CountByReview(reviewId);
+            return (countAfter, false);
+        }
+
+        private TourReviewDto MapWithUserName(TourReview rev)
+        {
+            var dto = _mapper.Map<TourReviewDto>(rev);
+            try
+            {
+                // IInternalStakeholderService returns a username string; use it instead of returning full user
+                dto.UserName = _stakeholderService.GetUsername(rev.UserId) ?? "Anonymous";
+            }
+            catch
+            {
+                dto.UserName = "Anonymous";
+            }
+
+            // Populate helpful count
+            try
+            {
+                dto.HelpfulCount = _helpfulRepository.CountByReview(rev.Id);
+            }
+            catch
+            {
+                dto.HelpfulCount = 0;
+            }
+
+            return dto;
         }
     }
 }
