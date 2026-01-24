@@ -13,5 +13,8 @@
         public string PictureUrl { get; set; } = "";
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+
+        public int HelpfulCount { get; set; }
+        public bool IsHelpfulByMe { get; set; } = false;
     }
 }

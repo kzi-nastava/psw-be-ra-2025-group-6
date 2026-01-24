@@ -68,5 +68,22 @@ namespace Explorer.API.Controllers.Tourist
             var result = _tourReviewService.GetByTour(tourId);
             return Ok(result);
         }
+
+        // NEW: toggle helpful
+        [HttpPost("{id}/helpful")]
+        public ActionResult ToggleHelpful(long id)
+        {
+            var userId = User.PersonId();
+            var (helpfulCount, isHelpful) = _tourReviewService.ToggleHelpful(id, userId);
+            return Ok(new { helpfulCount, isHelpful });
+        }
+        // NEW: explicit remove helpful via DELETE
+        [HttpDelete("{id}/helpful")]
+        public ActionResult RemoveHelpful(long id)
+        {
+            var userId = User.PersonId();
+            var (helpfulCount, isHelpful) = _tourReviewService.RemoveHelpful(id, userId);
+            return Ok(new { helpfulCount, isHelpful });
+        }
     }
 }

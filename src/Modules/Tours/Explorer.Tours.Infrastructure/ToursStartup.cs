@@ -81,6 +81,7 @@ public static class ToursStartup
         services.AddScoped<Core.Domain.RepositoryInterfaces.ITourExecutionRepository, Tours.Infrastructure.Database.Repositories.TourExecutionDbRepository>();
 
         services.AddScoped<IQuizRepository, QuizDbRepository>();
+        services.AddScoped<ITourReviewHelpfulRepository, TourReviewHelpfulDbRepository>();
 
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
