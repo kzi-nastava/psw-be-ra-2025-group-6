@@ -11,6 +11,8 @@ using Xunit;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 using System.Linq;
+using Explorer.Tours.API.Public.Authoring;
+using Explorer.Blog.API.Public.Administration;
 
 namespace Explorer.Stakeholders.Tests.Integration
 {
@@ -166,7 +168,11 @@ namespace Explorer.Stakeholders.Tests.Integration
 
         private static ClubPostController CreateController(IServiceScope scope, string userId)
         {
-            var controller = new ClubPostController(scope.ServiceProvider.GetRequiredService<IClubPostService>());
+            var clubPostService = scope.ServiceProvider.GetRequiredService<IClubPostService>();
+            var tourService = scope.ServiceProvider.GetRequiredService<ITourService>();
+            var blogService = scope.ServiceProvider.GetRequiredService<IBlogService>();
+
+            var controller = new ClubPostController(clubPostService, tourService, blogService);
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {

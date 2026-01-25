@@ -12,6 +12,7 @@ namespace Explorer.Stakeholders.Core.Domain
         public ResourceType? ResourceType { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
+       
 
         public ClubPost(long authorId, long clubId, string text, long? resourceId, ResourceType? resourceType, DateTime createdAt, DateTime? updatedAt)
         {
@@ -23,6 +24,7 @@ namespace Explorer.Stakeholders.Core.Domain
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
             Validate();
+           
         }
 
         private void Validate()
@@ -39,6 +41,7 @@ namespace Explorer.Stakeholders.Core.Domain
             ResourceId = resourceId;
             ResourceType = resourceType;
             UpdatedAt = updatedAt;
+           
             Validate();
         }
     }
