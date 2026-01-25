@@ -48,10 +48,10 @@ public class TourExecutionController : ControllerBase
 
 
     [HttpPut("{executionId}/complete")]
-    public ActionResult<TourExecutionResultDto> Complete(long executionId)
+    public async Task<ActionResult<TourExecutionResultDto>> Complete(long executionId)
     {
         var touristId = GetTouristId();
-        var result = _executionService.CompleteExecution(executionId, touristId);
+        var result = await _executionService.CompleteExecution(executionId, touristId);
         return Ok(result);
     }
 

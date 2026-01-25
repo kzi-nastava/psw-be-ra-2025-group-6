@@ -5,6 +5,7 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Execution;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.Encounters.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Execution;
 
@@ -13,6 +14,7 @@ public class TourExecutionService : ITourExecutionService
     private readonly ITourRepository _tourRepository;
     private readonly ITourExecutionRepository _executionRepository;
     private readonly IInternalTourPurchaseTokenService _tokenService;
+    private readonly IInternalLeaderboardService _leaderboardService;
     private readonly IMapper _mapper;
     private const double ProximityThresholdMeters = 50.0;
 
@@ -20,11 +22,13 @@ public class TourExecutionService : ITourExecutionService
         ITourRepository tourRepository,
         ITourExecutionRepository executionRepository,
         IInternalTourPurchaseTokenService tokenService,
+        IInternalLeaderboardService leaderboardService,
         IMapper mapper)
     {
         _tourRepository = tourRepository;
         _executionRepository = executionRepository;
         _tokenService = tokenService;
+        _leaderboardService = leaderboardService;
         _mapper = mapper;
     }
 
@@ -242,7 +246,7 @@ public class TourExecutionService : ITourExecutionService
         return new UnlockedSecretsDto { Secrets = secrets };
     }
 
-    public TourExecutionResultDto CompleteExecution(long executionId, long touristId)
+    public async Task<TourExecutionResultDto> CompleteExecution(long executionId, long touristId)
     {
         var execution = _executionRepository.GetById(executionId);
         if (execution == null) throw new NotFoundException($"Tour execution with id {executionId} not found");
@@ -253,6 +257,18 @@ public class TourExecutionService : ITourExecutionService
 
         // Mark token as used ONLY when tour is completed (not abandoned)
         _tokenService.MarkTokenAsUsed(touristId, execution.TourId);
+
+        // ? UPDATE LEADERBOARD STATS ?
+        var tour = _tourRepository.Get(execution.TourId);
+        var xpGained = CalculateXP(tour);
+        var coinsEarned = CalculateCoins(tour);
+        
+        await _leaderboardService.UpdateUserStatsAsync(
+            touristId,
+            xpGained,
+            challengesCompleted: 0,
+            toursCompleted: 1,
+            coinsEarned);
 
         return new TourExecutionResultDto
         {
@@ -344,5 +360,28 @@ public class TourExecutionService : ITourExecutionService
             new TrackPointDto { Latitude = startLat, Longitude = startLng },
             new TrackPointDto { Latitude = endLat, Longitude = endLng }
         };
+    }
+
+    private int CalculateXP(Tour tour)
+    {
+        // Base XP calculation based on tour difficulty and length
+        var baseXP = tour.Difficulty switch
+        {
+            TourDifficulty.EASY => 50,
+            TourDifficulty.MEDIUM => 100,
+            TourDifficulty.HARD => 150,
+            _ => 50
+        };
+
+        // Bonus XP for longer tours
+        var distanceBonus = (int)(tour.DistanceInKm * 10);
+        
+        return baseXP + distanceBonus;
+    }
+
+    private int CalculateCoins(Tour tour)
+    {
+        // Adventure Coins = XP / 2
+        return CalculateXP(tour) / 2;
     }
 }
