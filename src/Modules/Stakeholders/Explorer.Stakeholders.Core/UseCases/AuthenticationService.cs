@@ -1,4 +1,5 @@
 ﻿using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Encounters.API.Internal;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
@@ -12,13 +13,20 @@ public class AuthenticationService : IAuthenticationService
     private readonly IUserRepository _userRepository;
     private readonly IPersonRepository _personRepository;
     private readonly IUserProfileRepository _userProfileRepository;
+    private readonly IInternalLeaderboardService _leaderboardService;
 
-    public AuthenticationService(IUserRepository userRepository, IPersonRepository personRepository, ITokenGenerator tokenGenerator, IUserProfileRepository userProfileRepository)
+    public AuthenticationService(
+        IUserRepository userRepository,
+        IPersonRepository personRepository,
+        ITokenGenerator tokenGenerator,
+        IUserProfileRepository userProfileRepository,
+        IInternalLeaderboardService leaderboardService)
     {
         _tokenGenerator = tokenGenerator;
         _userRepository = userRepository;
         _personRepository = personRepository;
         _userProfileRepository = userProfileRepository;
+        _leaderboardService = leaderboardService;
     }
 
     public AuthenticationTokensDto Login(CredentialsDto credentials)
@@ -49,6 +57,16 @@ public class AuthenticationService : IAuthenticationService
         var user = _userRepository.Create(new User(account.Username, account.Password, UserRole.Tourist, true));
         var person = _personRepository.Create(new Person(user.Id, account.Name, account.Surname, account.Email));
         _userProfileRepository.Create(new UserProfile(user.Id, account.Name, account.Surname, "", "", ""));
+
+        // ✨ Automatically create leaderboard entry for new tourist
+        try
+        {
+            _leaderboardService.CreateLeaderboardEntryForNewUser(user.Id, account.Username);
+        }
+        catch
+        {
+            // Leaderboard creation is not critical - proceed with registration
+        }
 
         return _tokenGenerator.GenerateAccessToken(user, person.Id);
     }

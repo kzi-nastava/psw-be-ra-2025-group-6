@@ -2,6 +2,7 @@ using AutoMapper;
 using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.Core.Domain;
 using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
+using Explorer.Encounters.API.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace Explorer.Encounters.Core.UseCases
         private readonly ITouristXpProfileRepository _profileRepository;
         private readonly IEncounterCompletionRepository _completionRepository;
         private readonly IChallengeRepository _challengeRepository;
+        private readonly IInternalLeaderboardService _leaderboardService;
         private readonly IMapper _mapper;
 
         // Proximity radius in meters for activating challenges
@@ -22,11 +24,13 @@ namespace Explorer.Encounters.Core.UseCases
             ITouristXpProfileRepository profileRepository,
             IEncounterCompletionRepository completionRepository,
             IChallengeRepository challengeRepository,
+            IInternalLeaderboardService leaderboardService,
             IMapper mapper)
         {
             _profileRepository = profileRepository;
             _completionRepository = completionRepository;
             _challengeRepository = challengeRepository;
+            _leaderboardService = leaderboardService;
             _mapper = mapper;
         }
 
@@ -125,6 +129,15 @@ namespace Explorer.Encounters.Core.UseCases
             // Record completion
             var completion = new EncounterCompletion(userId, request.ChallengeId, challenge.XP);
             _completionRepository.Create(completion);
+
+            // ? UPDATE LEADERBOARD STATS ?
+            var coinsEarned = challenge.XP / 2;
+            _ = _leaderboardService.UpdateUserStatsAsync(
+                userId,
+                xpGained: challenge.XP,
+                challengesCompleted: 1,
+                toursCompleted: 0,
+                coinsEarned);
 
             return new CompleteEncounterResponseDto
             {
