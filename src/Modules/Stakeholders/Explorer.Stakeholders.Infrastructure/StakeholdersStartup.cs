@@ -44,7 +44,12 @@ public static class StakeholdersStartup
 
         services.AddScoped<ITourProblemService, TourProblemService>();
         services.AddScoped<ITourProblemMessageService, TourProblemMessageService>();
-        services.AddScoped<INotificationService, NotificationService>();
+        
+        // Register NotificationService as singleton instance for both interfaces
+        services.AddScoped<NotificationService>();
+        services.AddScoped<INotificationService>(sp => sp.GetRequiredService<NotificationService>());
+        services.AddScoped<IInternalNotificationService>(sp => sp.GetRequiredService<NotificationService>());
+        
         services.AddScoped<IProfilePostService, ProfilePostService>();
         services.AddScoped<IClubPostService, ClubPostService>();
         services.AddScoped<IClubMembershipService, TemporaryClubMembershipService>();

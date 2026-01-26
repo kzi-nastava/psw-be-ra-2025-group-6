@@ -1,15 +1,14 @@
 using Explorer.Encounters.Core.Domain;
-using Explorer.Stakeholders.API.Dtos;
-using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.API.Internal;
 
 namespace Explorer.Encounters.Core.UseCases;
 
 public class LeaderboardNotificationService : ILeaderboardNotificationService
 {
-    private readonly INotificationService _notificationService;
+    private readonly IInternalNotificationService _notificationService;
     private const long SystemSenderId = -1; // System sender ID for automated notifications
 
-    public LeaderboardNotificationService(INotificationService notificationService)
+    public LeaderboardNotificationService(IInternalNotificationService notificationService)
     {
         _notificationService = notificationService;
     }
@@ -38,50 +37,40 @@ public class LeaderboardNotificationService : ILeaderboardNotificationService
             notificationType = "RankDecreased";
         }
 
-        _notificationService.Create(new NotificationDto
-        {
-            RecipientId = userId,
-            SenderId = SystemSenderId,
-            Content = content,
-            ReferenceId = userId,
-            Type = notificationType
-        });
+        _notificationService.CreateNotification(userId, SystemSenderId, content, userId, notificationType);
     }
 
     public void NotifyTop10Entry(long userId)
     {
-        _notificationService.Create(new NotificationDto
-        {
-            RecipientId = userId,
-            SenderId = SystemSenderId,
-            Content = "Amazing! You've reached the TOP 10 on the leaderboard!",
-            ReferenceId = userId,
-            Type = "EnteredTop10"
-        });
+        _notificationService.CreateNotification(
+            userId,
+            SystemSenderId,
+            "Amazing! You've reached the TOP 10 on the leaderboard!",
+            userId,
+            "EnteredTop10"
+        );
     }
 
     public void NotifyTop3Entry(long userId)
     {
-        _notificationService.Create(new NotificationDto
-        {
-            RecipientId = userId,
-            SenderId = SystemSenderId,
-            Content = "Incredible! You've entered the TOP 3 on the leaderboard!",
-            ReferenceId = userId,
-            Type = "EnteredTop3"
-        });
+        _notificationService.CreateNotification(
+            userId,
+            SystemSenderId,
+            "Incredible! You've entered the TOP 3 on the leaderboard!",
+            userId,
+            "EnteredTop3"
+        );
     }
 
     public void NotifyBecameFirst(long userId)
     {
-        _notificationService.Create(new NotificationDto
-        {
-            RecipientId = userId,
-            SenderId = SystemSenderId,
-            Content = "Congratulations! You're now #1 on the leaderboard!",
-            ReferenceId = userId,
-            Type = "BecameFirst"
-        });
+        _notificationService.CreateNotification(
+            userId,
+            SystemSenderId,
+            "Congratulations! You're now #1 on the leaderboard!",
+            userId,
+            "BecameFirst"
+        );
     }
 
     public void NotifyMilestoneXP(long userId, int xpAmount)
@@ -94,14 +83,7 @@ public class LeaderboardNotificationService : ILeaderboardNotificationService
             _ => $"Milestone reached: {xpAmount:N0} XP earned!"
         };
 
-        _notificationService.Create(new NotificationDto
-        {
-            RecipientId = userId,
-            SenderId = SystemSenderId,
-            Content = content,
-            ReferenceId = userId,
-            Type = "MilestoneXP"
-        });
+        _notificationService.CreateNotification(userId, SystemSenderId, content, userId, "MilestoneXP");
     }
 
     public void NotifyMilestoneChallenges(long userId, int challengeCount)
@@ -114,14 +96,7 @@ public class LeaderboardNotificationService : ILeaderboardNotificationService
             _ => $"Milestone: {challengeCount} challenges completed!"
         };
 
-        _notificationService.Create(new NotificationDto
-        {
-            RecipientId = userId,
-            SenderId = SystemSenderId,
-            Content = content,
-            ReferenceId = userId,
-            Type = "MilestoneChallenges"
-        });
+        _notificationService.CreateNotification(userId, SystemSenderId, content, userId, "MilestoneChallenges");
     }
 
     public void NotifyMilestoneTours(long userId, int tourCount)
@@ -134,14 +109,7 @@ public class LeaderboardNotificationService : ILeaderboardNotificationService
             _ => $"Milestone: {tourCount} tours completed!"
         };
 
-        _notificationService.Create(new NotificationDto
-        {
-            RecipientId = userId,
-            SenderId = SystemSenderId,
-            Content = content,
-            ReferenceId = userId,
-            Type = "MilestoneTours"
-        });
+        _notificationService.CreateNotification(userId, SystemSenderId, content, userId, "MilestoneTours");
     }
 
     public void NotifyClubRankChange(long clubId, string clubName, int oldRank, int newRank, List<long> memberIds)
@@ -152,28 +120,23 @@ public class LeaderboardNotificationService : ILeaderboardNotificationService
             ? $"Your club '{clubName}' moved up to rank #{newRank}!"
             : $"Your club '{clubName}' dropped to rank #{newRank}.";
 
-        foreach (var memberId in memberIds)
-        {
-            _notificationService.Create(new NotificationDto
-            {
-                RecipientId = memberId,
-                SenderId = SystemSenderId,
-                Content = content,
-                ReferenceId = clubId,
-                Type = "ClubRankChanged"
-            });
-        }
+        _notificationService.CreateNotificationsForMultipleRecipients(
+            memberIds,
+            SystemSenderId,
+            content,
+            clubId,
+            "ClubRankChanged"
+        );
     }
 
     public void NotifyNearRanking(long userId, int xpDifference, int targetRank)
     {
-        _notificationService.Create(new NotificationDto
-        {
-            RecipientId = userId,
-            SenderId = SystemSenderId,
-            Content = $"You're only {xpDifference} XP away from rank #{targetRank}! Complete another challenge!",
-            ReferenceId = userId,
-            Type = "NearRankingAlert"
-        });
+        _notificationService.CreateNotification(
+            userId,
+            SystemSenderId,
+            $"You're only {xpDifference} XP away from rank #{targetRank}! Complete another challenge!",
+            userId,
+            "NearRankingAlert"
+        );
     }
 }
