@@ -8,9 +8,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Explorer.Encounters.API\Explorer.Encounters.API.csproj" />
-	  <ProjectReference Include="..\Explorer.Encounters.API\Explorer.Encounters.API.csproj" />
-
+    <ProjectReference Include="..\..\Stakeholders\Explorer.Stakeholders.API\Explorer.Stakeholders.API.csproj" />
+    <ProjectReference Include="..\..\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj" />
   </ItemGroup>
-
 
 </Project>
