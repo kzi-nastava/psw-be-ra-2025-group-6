@@ -23,5 +23,23 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
                 .Where(n => n.RecipientId == recipientId && n.Status == NotificationStatus.Unread)
                 .ToList();
         }
+
+        // ? NEW: Get notifications by recipient and type
+        public List<Notification> GetByRecipientAndType(long recipientId, NotificationType type)
+        {
+            return _dbContext.Notifications
+                .Where(n => n.RecipientId == recipientId && n.Type == type)
+                .OrderByDescending(n => n.Timestamp)
+                .ToList();
+        }
+
+        // ? NEW: Get unread notifications by recipient and type
+        public List<Notification> GetUnreadByRecipientAndType(long recipientId, NotificationType type)
+        {
+            return _dbContext.Notifications
+                .Where(n => n.RecipientId == recipientId && n.Status == NotificationStatus.Unread && n.Type == type)
+                .OrderByDescending(n => n.Timestamp)
+                .ToList();
+        }
     }
 }

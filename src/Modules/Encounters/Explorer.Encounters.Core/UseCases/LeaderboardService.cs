@@ -16,7 +16,11 @@ public class LeaderboardService : ILeaderboardService
     private readonly IEncounterCompletionRepository _encounterCompletionRepository;
     private readonly IInternalStakeholderService _stakeholderService;
     private readonly IInternalTourService _tourService;
+    private readonly ILeaderboardNotificationService _notificationService;
     private readonly IMapper _mapper;
+    
+    // Lock object to prevent concurrent rank recalculations
+    private static readonly object _rankCalculationLock = new object();
 
     public LeaderboardService(
         ILeaderboardEntryRepository leaderboardEntryRepository,
@@ -25,6 +29,7 @@ public class LeaderboardService : ILeaderboardService
         IEncounterCompletionRepository encounterCompletionRepository,
         IInternalStakeholderService stakeholderService,
         IInternalTourService tourService,
+        ILeaderboardNotificationService notificationService,
         IMapper mapper)
     {
         _leaderboardEntryRepository = leaderboardEntryRepository;
@@ -33,6 +38,7 @@ public class LeaderboardService : ILeaderboardService
         _encounterCompletionRepository = encounterCompletionRepository;
         _stakeholderService = stakeholderService;
         _tourService = tourService;
+        _notificationService = notificationService;
         _mapper = mapper;
     }
 
@@ -93,57 +99,180 @@ public class LeaderboardService : ILeaderboardService
 
     public async Task UpdateUserStatsAsync(long userId, int xpGained, int challengesCompleted, int toursCompleted, int coinsEarned)
     {
-        var entry = await _leaderboardEntryRepository.GetByUserIdAsync(userId);
-        if (entry == null)
+        // Use lock to ensure sequential processing of stats updates
+        lock (_rankCalculationLock)
         {
-            entry = new LeaderboardEntry(userId, $"User_{userId}");
-            entry.UpdateStats(xpGained, challengesCompleted, toursCompleted, coinsEarned);
-            _leaderboardEntryRepository.Create(entry);
-        }
-        else
-        {
-            entry.UpdateStats(xpGained, challengesCompleted, toursCompleted, coinsEarned);
-            _leaderboardEntryRepository.Update(entry);
-        }
+            var entry = _leaderboardEntryRepository.GetByUserIdAsync(userId).GetAwaiter().GetResult();
+            var oldTotalXP = entry?.TotalXP ?? 0;
+            var oldChallenges = entry?.CompletedChallenges ?? 0;
+            var oldTours = entry?.CompletedTours ?? 0;
+            
+            if (entry == null)
+            {
+                entry = new LeaderboardEntry(userId, $"User_{userId}");
+                entry.UpdateStats(xpGained, challengesCompleted, toursCompleted, coinsEarned);
+                _leaderboardEntryRepository.Create(entry);
+            }
+            else
+            {
+                // Update stats
+                entry.UpdateStats(xpGained, challengesCompleted, toursCompleted, coinsEarned);
+                
+                // Explicitly update in database
+                _leaderboardEntryRepository.Update(entry);
+            }
 
-        // Update club stats if user is in a club
-        if (entry.ClubId.HasValue)
-        {
-            await UpdateClubStatsAsync(entry.ClubId.Value, xpGained, challengesCompleted, toursCompleted, coinsEarned);
-        }
+            // Check for XP milestones
+            CheckXPMilestone(userId, oldTotalXP, entry.TotalXP);
+            
+            // Check for challenge milestones
+            CheckChallengeMilestone(userId, oldChallenges, entry.CompletedChallenges);
+            
+            // Check for tour milestones
+            CheckTourMilestone(userId, oldTours, entry.CompletedTours);
 
-        // Recalculate ranks
-        await RecalculateRanksAsync();
+            // Update club stats if user is in a club
+            if (entry.ClubId.HasValue)
+            {
+                UpdateClubStatsAsync(entry.ClubId.Value, xpGained, challengesCompleted, toursCompleted, coinsEarned).GetAwaiter().GetResult();
+            }
+            else
+            {
+                // Only recalculate ranks if user is NOT in a club
+                // (UpdateClubStatsAsync will handle recalculation for club members)
+                RecalculateRanksAsync().GetAwaiter().GetResult();
+            }
+        }
+    }
+
+    private void CheckXPMilestone(long userId, int oldXP, int newXP)
+    {
+        int[] milestones = { 1000, 5000, 10000, 25000, 50000, 100000 };
+        
+        foreach (var milestone in milestones)
+        {
+            if (oldXP < milestone && newXP >= milestone)
+            {
+                _notificationService.NotifyMilestoneXP(userId, milestone);
+            }
+        }
+    }
+
+    private void CheckChallengeMilestone(long userId, int oldCount, int newCount)
+    {
+        int[] milestones = { 10, 25, 50, 100, 250, 500 };
+        
+        foreach (var milestone in milestones)
+        {
+            if (oldCount < milestone && newCount >= milestone)
+            {
+                _notificationService.NotifyMilestoneChallenges(userId, milestone);
+            }
+        }
+    }
+
+    private void CheckTourMilestone(long userId, int oldCount, int newCount)
+    {
+        int[] milestones = { 10, 25, 50, 100, 250, 500 };
+        
+        foreach (var milestone in milestones)
+        {
+            if (oldCount < milestone && newCount >= milestone)
+            {
+                _notificationService.NotifyMilestoneTours(userId, milestone);
+            }
+        }
     }
 
     public async Task UpdateClubStatsAsync(long clubId, int xpGained, int challengesCompleted, int toursCompleted, int coinsEarned)
     {
-        var clubLeaderboard = await _clubLeaderboardRepository.GetByClubIdAsync(clubId);
-        if (clubLeaderboard == null)
+        lock (_rankCalculationLock)
         {
-            throw new KeyNotFoundException($"Club leaderboard not found for club {clubId}");
+            var clubLeaderboard = _clubLeaderboardRepository.GetByClubIdAsync(clubId).GetAwaiter().GetResult();
+            if (clubLeaderboard == null)
+            {
+                throw new KeyNotFoundException($"Club leaderboard not found for club {clubId}");
+            }
+
+            clubLeaderboard.UpdateStats(xpGained, challengesCompleted, toursCompleted, coinsEarned);
+            _clubLeaderboardRepository.Update(clubLeaderboard);
+
+            // Recalculate club ranks
+            RecalculateClubRanksAsync().GetAwaiter().GetResult();
         }
-
-        clubLeaderboard.UpdateStats(xpGained, challengesCompleted, toursCompleted, coinsEarned);
-        _clubLeaderboardRepository.Update(clubLeaderboard);
-
-        // Recalculate club ranks
-        await RecalculateClubRanksAsync();
     }
 
     public async Task RecalculateRanksAsync()
     {
+        // Get all entries
         var allEntries = await _leaderboardEntryRepository.GetTopEntriesAsync(int.MaxValue);
+        
+        // Sort entries by XP, then challenges, then tours
         var sortedEntries = allEntries
             .OrderByDescending(e => e.TotalXP)
             .ThenByDescending(e => e.CompletedChallenges)
             .ThenByDescending(e => e.CompletedTours)
             .ToList();
 
+        // Process each entry: update rank and send notifications
+        int currentRank = 1;
         for (int i = 0; i < sortedEntries.Count; i++)
         {
-            sortedEntries[i].UpdateRank(i + 1);
-            _leaderboardEntryRepository.Update(sortedEntries[i]);
+            var entry = sortedEntries[i];
+            var oldRank = entry.CurrentRank;
+            
+            // Determine new rank - handle ties
+            int newRank;
+            if (i > 0)
+            {
+                var prevEntry = sortedEntries[i - 1];
+                // Check if this entry has the same stats as previous entry (tie)
+                if (entry.TotalXP == prevEntry.TotalXP && 
+                    entry.CompletedChallenges == prevEntry.CompletedChallenges && 
+                    entry.CompletedTours == prevEntry.CompletedTours)
+                {
+                    // Same rank as previous entry
+                    newRank = prevEntry.CurrentRank;
+                }
+                else
+                {
+                    // Different stats, use position-based rank
+                    newRank = i + 1;
+                    currentRank = newRank;
+                }
+            }
+            else
+            {
+                // First entry always gets rank 1
+                newRank = 1;
+            }
+            
+            // Update rank if changed
+            if (oldRank != newRank)
+            {
+                entry.UpdateRank(newRank);
+                _leaderboardEntryRepository.Update(entry);
+                
+                // Send notifications for rank changes (skip if this is initial ranking)
+                if (oldRank != 0)
+                {
+                    _notificationService.NotifyRankChange(entry.UserId, oldRank, newRank);
+                    
+                    // Check for special milestones
+                    if (newRank == 1 && oldRank > 1)
+                    {
+                        _notificationService.NotifyBecameFirst(entry.UserId);
+                    }
+                    else if (newRank <= 3 && oldRank > 3)
+                    {
+                        _notificationService.NotifyTop3Entry(entry.UserId);
+                    }
+                    else if (newRank <= 10 && oldRank > 10)
+                    {
+                        _notificationService.NotifyTop10Entry(entry.UserId);
+                    }
+                }
+            }
         }
 
         await RecalculateClubRanksAsync();
@@ -160,8 +289,45 @@ public class LeaderboardService : ILeaderboardService
 
         for (int i = 0; i < sortedClubs.Count; i++)
         {
-            sortedClubs[i].UpdateRank(i + 1);
-            _clubLeaderboardRepository.Update(sortedClubs[i]);
+            var club = sortedClubs[i];
+            var oldRank = club.CurrentRank;
+            
+            // Determine new rank - handle ties
+            int newRank;
+            if (i > 0)
+            {
+                var prevClub = sortedClubs[i - 1];
+                // Check if this club has the same stats as previous club (tie)
+                if (club.TotalXP == prevClub.TotalXP && 
+                    club.TotalCompletedChallenges == prevClub.TotalCompletedChallenges && 
+                    club.TotalCompletedTours == prevClub.TotalCompletedTours)
+                {
+                    // Same rank as previous club
+                    newRank = prevClub.CurrentRank;
+                }
+                else
+                {
+                    // Different stats, use position-based rank
+                    newRank = i + 1;
+                }
+            }
+            else
+            {
+                // First club always gets rank 1
+                newRank = 1;
+            }
+            
+            club.UpdateRank(newRank);
+            _clubLeaderboardRepository.Update(club);
+            
+            // Send notifications to all club members about rank change
+            if (oldRank != 0 && oldRank != newRank)
+            {
+                var members = await _leaderboardEntryRepository.GetEntriesByClubIdAsync(club.ClubId);
+                var memberIds = members.Select(m => m.UserId).ToList();
+                
+                _notificationService.NotifyClubRankChange(club.ClubId, club.ClubName, oldRank, newRank, memberIds);
+            }
         }
     }
 

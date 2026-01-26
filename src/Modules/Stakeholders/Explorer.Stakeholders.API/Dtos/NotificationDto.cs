@@ -9,6 +9,7 @@ namespace Explorer.Stakeholders.API.Dtos
         public long SenderId { get; set; }
         public string Content { get; set; }
         public string Status { get; set; } // Map enum to string
+        public string Type { get; set; }
         public DateTime Timestamp { get; set; }
         public long ReferenceId { get; set; }
     }

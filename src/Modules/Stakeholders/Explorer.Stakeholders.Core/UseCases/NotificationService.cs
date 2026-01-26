@@ -22,11 +22,19 @@ namespace Explorer.Stakeholders.Core.UseCases
 
         public NotificationDto Create(NotificationDto notificationDto)
         {
+            // Parse Type from string, default to General if not provided
+            var type = NotificationType.General;
+            if (!string.IsNullOrEmpty(notificationDto.Type) && System.Enum.TryParse<NotificationType>(notificationDto.Type, out var parsedType))
+            {
+                type = parsedType;
+            }
+
             var notification = new Notification(
                 notificationDto.RecipientId,
                 notificationDto.SenderId,
                 notificationDto.Content,
-                notificationDto.ReferenceId
+                notificationDto.ReferenceId,
+                type
             );
             var result = _notificationRepository.Create(notification);
             return _mapper.Map<NotificationDto>(result);
@@ -35,6 +43,28 @@ namespace Explorer.Stakeholders.Core.UseCases
         public List<NotificationDto> GetUnreadByRecipient(long recipientId)
         {
             var notifications = _notificationRepository.GetUnreadByRecipient(recipientId);
+            return _mapper.Map<List<NotificationDto>>(notifications);
+        }
+
+        public List<NotificationDto> GetUnreadByRecipientAndType(long recipientId, string type)
+        {
+            if (string.IsNullOrEmpty(type) || !System.Enum.TryParse<NotificationType>(type, out var notificationType))
+            {
+                return new List<NotificationDto>();
+            }
+
+            var notifications = _notificationRepository.GetUnreadByRecipientAndType(recipientId, notificationType);
+            return _mapper.Map<List<NotificationDto>>(notifications);
+        }
+
+        public List<NotificationDto> GetByRecipientAndType(long recipientId, string type)
+        {
+            if (string.IsNullOrEmpty(type) || !System.Enum.TryParse<NotificationType>(type, out var notificationType))
+            {
+                return new List<NotificationDto>();
+            }
+
+            var notifications = _notificationRepository.GetByRecipientAndType(recipientId, notificationType);
             return _mapper.Map<List<NotificationDto>>(notifications);
         }
 
