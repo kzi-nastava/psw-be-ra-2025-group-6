@@ -40,7 +40,7 @@ public class BlogSearchService : IBlogSearchService
             {
                 Id = b.Id,
                 Title = b.Title,
-                Description = b.Description,
+                Description = b.CreatedAt.ToShortDateString(),
                 Type = SearchEntityType.Blog,
                 Url = $"/blog/{b.Id}",
                 Photo = string.IsNullOrWhiteSpace(b.Images.FirstOrDefault())? null: "https://localhost:44333" + b.Images.FirstOrDefault()
