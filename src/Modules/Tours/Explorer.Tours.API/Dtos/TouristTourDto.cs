@@ -11,4 +11,5 @@ public class TouristTourDto
     public double DistanceInKm { get; set; }
     public List<TourDurationDto> Duration { get; set; }
     public string Description { get; set; }
+    public string? CoverImage { get; set; }
 }
