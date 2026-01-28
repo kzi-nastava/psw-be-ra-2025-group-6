@@ -9,5 +9,7 @@ public class AchievementDto
     public string IconUrl { get; set; }
     public string Category { get; set; }
     public int? Threshold { get; set; }
+
+    public List<UserRoleDto> userRole { get; set; } = new List<UserRoleDto>();
 }
 

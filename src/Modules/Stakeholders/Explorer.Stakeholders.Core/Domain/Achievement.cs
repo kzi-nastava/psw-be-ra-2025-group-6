@@ -11,6 +11,8 @@ public class Achievement : Entity
     public string Category { get; private set; }
     public int? Threshold { get; private set; }
 
+    public List<UserRole> Role { get; set; } = new List<UserRole>();
+
     public ICollection<UserProfile> UserProfiles { get; private set; }
         = new List<UserProfile>();
 
