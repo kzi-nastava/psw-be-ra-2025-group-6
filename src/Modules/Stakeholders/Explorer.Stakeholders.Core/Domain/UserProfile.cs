@@ -10,6 +10,8 @@ public class UserProfile : Entity
     public string ProfilePicture { get; private set; }
     public string Biography { get; private set; }
     public string Quote { get; private set; }
+    public ICollection<Achievement> Achievements { get; private set; }
+        = new List<Achievement>();
 
     public UserProfile(long userId, string name, string surname, string profilePicture, string biography, string quote)
     {

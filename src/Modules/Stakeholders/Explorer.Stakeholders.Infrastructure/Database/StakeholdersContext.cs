@@ -19,6 +19,8 @@ public class StakeholdersContext : DbContext
     public DbSet<ClubPost> ClubPosts { get; set; }
     public DbSet<SocialMessage> SocialMessages { get; set; }
 
+    public DbSet<Achievement> Achievement { get; set; }
+
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,6 +28,8 @@ public class StakeholdersContext : DbContext
         modelBuilder.HasDefaultSchema("stakeholders");
 
         modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
+
+        modelBuilder.Entity<Achievement>().HasIndex(u => u.Code).IsUnique();
 
         modelBuilder.Entity<TouristPosition>().HasIndex(tp => tp.TouristId).IsUnique();
 
@@ -47,6 +51,15 @@ public class StakeholdersContext : DbContext
         ConfigureClubPosts(modelBuilder);
         ConfigureFollowing(modelBuilder);
         ConfigureSocialMessages(modelBuilder);
+
+        modelBuilder.Entity<UserProfile>()
+    .HasMany(up => up.Achievements)
+    .WithMany(a => a.UserProfiles)
+    .UsingEntity(j =>
+    {
+        j.ToTable("UserAchievements");
+    });
+
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)
