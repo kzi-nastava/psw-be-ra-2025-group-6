@@ -66,7 +66,7 @@ public class TourExecutionDbRepository : ITourExecutionRepository
 
     public List<TourExecution> GetAll(long touristId)
     {
-        var entities = _dbContext.Set<TourExecutionEntity>()
+        var entities = _dbContext.Set<TourExecutionEntity>().AsNoTracking()
             .Where(e => e.TouristId == touristId)
             .ToList();
 

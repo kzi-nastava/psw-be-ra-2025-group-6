@@ -58,6 +58,7 @@ public class UserProfileService : IUserProfileService
     public void AddAchievement(long userId, long achievementId)
     {
         _userProfileRepository.AddAchievement(userId, achievementId);
+       
     }
 
 

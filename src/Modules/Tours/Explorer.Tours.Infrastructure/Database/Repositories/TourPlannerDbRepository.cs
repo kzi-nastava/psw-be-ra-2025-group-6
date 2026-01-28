@@ -19,7 +19,7 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
 
         public List<TourPlanner> GetAllByUserId(long userId)
         {
-            return _planners
+            return _planners.AsNoTracking()
                 .Where(p => p.UserId == userId)
                 .OrderBy(p => p.StartDate)
                 .ToList();

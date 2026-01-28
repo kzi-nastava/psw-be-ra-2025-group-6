@@ -20,7 +20,7 @@ public class BlogDbRepository : IBlogRepository
 
     public List<BlogPost> GetByUser(long userId)
     {
-        return _dbSet.Where(b => b.UserId == userId).ToList();
+        return _dbSet.AsNoTracking().Where(b => b.UserId == userId).ToList();
     }
 
     public BlogPost Create(BlogPost blog)
@@ -77,7 +77,7 @@ public class BlogDbRepository : IBlogRepository
         return _dbSet
             .Include(b => b.Votes)
             .Include(b => b.Comments)
-            .Include(b => b.Location)
+            .Include(b => b.Location).AsNoTracking()
             .ToList();
     }
 
