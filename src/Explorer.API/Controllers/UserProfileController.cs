@@ -50,5 +50,23 @@ namespace Explorer.API.Controllers
             var result = _userProfileService.Update(profile);
             return Ok(result);
         }
+
+        [HttpGet("{id:long}/achievements")]
+        public ActionResult<IEnumerable<AchievementDto>> GetUserAchievements(long id)
+        {
+            var achievements = _userProfileService.GetAchievements(id);
+            return Ok(achievements);
+        }
+
+        [HttpPost("{id:long}/achievements")]
+        public IActionResult AddAchievement(
+        long id,
+    [FromBody] long AchievementId)
+        {
+            _userProfileService.AddAchievement(id,AchievementId);
+            return NoContent();
+        }
+
+
     }
 }

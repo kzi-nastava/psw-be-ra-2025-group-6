@@ -6,6 +6,8 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Shared;
+using Shared.Achievements;
 
 namespace Explorer.Tours.Core.UseCases.Authoring;
 
@@ -15,13 +17,15 @@ public class TourService : ITourService
     private readonly IEquipmentRepository _equipmentRepository;
     private readonly IMapper _mapper;
     private readonly IInternalTourPurchaseTokenService _tokenService;
+    private readonly IDomainEventDispatcher _eventDispatcher;
 
-    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper, IInternalTourPurchaseTokenService tokenService)
+    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper, IInternalTourPurchaseTokenService tokenService, IDomainEventDispatcher eventDispatcher)
     {
         _tourRepository = repository;
         _equipmentRepository = equipmentRepository;
         _mapper = mapper;
         _tokenService = tokenService;
+        _eventDispatcher = eventDispatcher;
     }
 
     public List<TourDto> GetAll()
@@ -190,14 +194,24 @@ public class TourService : ITourService
 
     public TourDto Publish(long tourId, long authorId)
     {
+        var publishedCountBefore =
+            _tourRepository
+                .GetByAuthorId(authorId)
+                .Count(t => t.Status == TourStatus.CONFIRMED);
+
         var tour = _tourRepository.Get(tourId);
-
         tour.Publish(authorId);
-
         _tourRepository.Update(tour);
+
+        if (publishedCountBefore == 0)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(authorId, 7)).GetAwaiter().GetResult();
+
+        if (publishedCountBefore == 9)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(authorId, 9)).GetAwaiter().GetResult();
 
         return _mapper.Map<TourDto>(tour);
     }
+
     public List<TourDto> GetAvailableForTourist(long touristId)
     {
         var confirmedTours = _tourRepository.GetAll()

@@ -62,7 +62,7 @@ public class FollowDbRepository : IFollowRepository
     public IEnumerable<User> GetFollowers(long userId)
     {
         return _dbSet
-            .Where(f => f.FollowedId == userId)
+            .Where(f => f.FollowedId == userId).AsNoTracking()
             .Join(_dbContext.Users,
                   f => f.FollowerId,
                   u => u.Id,
@@ -74,7 +74,7 @@ public class FollowDbRepository : IFollowRepository
     public IEnumerable<User> GetFollowing(long userId)
     {
         return _dbSet
-            .Where(f => f.FollowerId == userId)
+            .Where(f => f.FollowerId == userId).AsNoTracking()
             .Join(_dbContext.Users,
                   f => f.FollowedId,
                   u => u.Id,

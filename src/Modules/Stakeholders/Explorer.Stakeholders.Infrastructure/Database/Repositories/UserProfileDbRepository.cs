@@ -1,4 +1,5 @@
 using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
@@ -41,4 +42,40 @@ public class UserProfileDbRepository : IUserProfileRepository
         _dbContext.SaveChanges();
         return userProfile;
     }
+
+    public List<Achievement> GetAchievements(long userId)
+    {
+        var profile = _dbContext.UserProfiles
+            .Include(p => p.Achievements)
+            .FirstOrDefault(p => p.UserId == userId);
+
+        if (profile == null)
+            throw new KeyNotFoundException("User profile not found.");
+
+        return profile.Achievements.ToList();
+    }
+
+    public void AddAchievement(long userId, long achievementId)
+    {
+        var profile = _dbContext.UserProfiles
+            .Include(p => p.Achievements)
+            .FirstOrDefault(p => p.UserId == userId);
+
+        if (profile == null)
+            throw new NotFoundException("User profile not found.");
+
+        // Prevent duplicates
+        if (profile.Achievements.Any(a => a.Id == achievementId))
+            return;
+
+        var achievement = _dbContext.Set<Achievement>()
+            .FirstOrDefault(a => a.Id == achievementId);
+
+        if (achievement == null)
+            throw new NotFoundException("Achievement not found.");
+
+        profile.Achievements.Add(achievement);
+        _dbContext.SaveChanges();
+    }
+
 }

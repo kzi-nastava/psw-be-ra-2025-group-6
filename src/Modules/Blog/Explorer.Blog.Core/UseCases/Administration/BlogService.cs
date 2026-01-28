@@ -6,6 +6,9 @@ using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Internal;
+using Shared;
+using Shared.Achievements;
+using System.Diagnostics;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -17,8 +20,9 @@ public class BlogService : IBlogService
     private readonly ICommentLikeRepository _likeRepository;
     private readonly ICommentReportRepository _reportRepository;
     private readonly IBlogLocationService _locationService;
-    
-    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, ICommentLikeRepository likeRepository, ICommentReportRepository reportRepository, IBlogLocationService locationService)
+    private readonly IDomainEventDispatcher _eventDispatcher;
+
+    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, ICommentLikeRepository likeRepository, ICommentReportRepository reportRepository, IBlogLocationService locationService, IDomainEventDispatcher eventDispatcher)
     {
         _blogRepository = blogRepository;
         _stakeholderService = stakeholderService;
@@ -26,6 +30,7 @@ public class BlogService : IBlogService
         _likeRepository = likeRepository;
         _reportRepository = reportRepository;
         _locationService = locationService;
+        _eventDispatcher = eventDispatcher;
     }
 
 public PagedResult<BlogDto> GetPaged(int page, int pageSize)
@@ -43,6 +48,15 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
 
     public BlogDto Create(BlogCreateDto dto, long userId)
     {
+
+        var count = _blogRepository.GetByUser(userId).Count();
+
+        Debug.WriteLine($"User {userId} has {count} blogs.");
+
+        if (count == 0)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(userId, 8))
+                            .GetAwaiter().GetResult();
+
         var status = _mapper.Map<BlogStatus>(dto.Status);
 
         var blog = new BlogPost(
@@ -55,7 +69,6 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
 
         if (!string.IsNullOrWhiteSpace(dto.City))
         {
-            // 1. Kreiramo DTO za lokaciju od podataka iz bloga
             var locationDto = new BlogLocationDto
             {
                 City = dto.City,
@@ -65,26 +78,16 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
                 Longitude = dto.Longitude ?? 0
             };
 
-            // 2. SERVIS kreira lokaciju u svojoj tabeli i vraća nam je sa dodeljenim ID-jem iz baze
             var savedLocationDto = _locationService.CreateOrGet(locationDto);
-
-            // 3. POSTAVLJAMO ID lokacije u blog. 
-            // Ovo je ključno: BlogPost entitet sada zna tačan ID iz tabele lokacija.
             blog.SetLocationId(savedLocationDto.Id);
         }
 
 
-        if (dto.ContentItems != null)
-        {
-            foreach (var item in dto.ContentItems.OrderBy(i => i.Order))
-            {
-                blog.AddContentItem((ContentType)item.Type, item.Content);
-            }
-        }
-
         var created = _blogRepository.Create(blog);
+
         return _mapper.Map<BlogDto>(created);
     }
+
 
     public BlogDto Update(BlogDto blogDto)
     {
@@ -150,9 +153,25 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
         var blog = _blogRepository.GetById(blogId);
         if (blog == null) throw new Exception("Blog not found.");
 
+        // Achievements
+
+        var totalComments = GetTotalCommentsByUser(userId); 
+
+        if (totalComments == 0)
+        {
+            _eventDispatcher.DispatchAsync(
+                new AchievementUnlockedEvent(userId, 13)
+            ).GetAwaiter().GetResult();
+        }
+        else if (totalComments == 9)
+        {
+            _eventDispatcher.DispatchAsync(
+                new AchievementUnlockedEvent(userId, 14)
+            ).GetAwaiter().GetResult();
+        }
+
         var authorName = _stakeholderService.GetUsername(userId);
         var authorProfilePicture = _stakeholderService.GetProfilePicture(userId);
-        
 
         blog.AddComment(blogId, userId, authorName, authorProfilePicture, text);
         _blogRepository.Update(blog);
@@ -215,6 +234,20 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
 
         return comments;
     }
+
+    public int GetTotalCommentsByUser(long userId)
+    {
+
+        var allBlogs = _blogRepository.GetAll(); 
+
+        int totalComments = allBlogs
+            .SelectMany(b => b.Comments)      
+            .Count(c => c.UserId == userId);  
+
+        return totalComments;
+    }
+
+
     public void Archive(long blogId)
     {
         var blog = _blogRepository.GetById(blogId);
@@ -250,10 +283,49 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
             throw new Exception("Blog not found");
 
         var type = _mapper.Map<VoteType>(voteType);
+
         blog.AddOrUpdateVote(userId, type);
+
+
         blog.RecalculateQualityStatus();
+
+        if (type == VoteType.Upvote)
+        {
+            HandleUpvoteAchievements(blog.UserId);
+        }
+
         _blogRepository.Update(blog);
     }
+
+    private void HandleUpvoteAchievements(long userId)
+    {
+        var totalUpvotes = GetTotalUpvotesByUser(userId);
+
+        if (totalUpvotes == 0)
+        {
+            // First upvote
+            _eventDispatcher.DispatchAsync(
+                new AchievementUnlockedEvent(userId, 15)
+            ).GetAwaiter().GetResult();
+        }
+        else if (totalUpvotes == 49)
+        {
+            // 50 upvotes 
+            _eventDispatcher.DispatchAsync(
+                new AchievementUnlockedEvent(userId, 16)
+            ).GetAwaiter().GetResult();
+        }
+    }
+
+    private long GetTotalUpvotesByUser(long userId)
+    {
+        var blogs = _blogRepository.GetByUser(userId); 
+
+        return blogs
+            .SelectMany(b => b.Votes) 
+            .Count(v => v.UserId != userId && v.Type == VoteType.Upvote);
+    }
+
 
     public void RemoveVote(long userId, long blogId)
     {
