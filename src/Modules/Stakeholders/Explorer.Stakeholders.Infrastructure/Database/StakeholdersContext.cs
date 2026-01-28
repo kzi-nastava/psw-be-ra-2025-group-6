@@ -1,5 +1,7 @@
 ﻿using Explorer.Stakeholders.Core.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Explorer.Stakeholders.Infrastructure.Database;
 
@@ -30,6 +32,24 @@ public class StakeholdersContext : DbContext
         modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
 
         modelBuilder.Entity<Achievement>().HasIndex(u => u.Code).IsUnique();
+
+        var roleConverter = new ValueConverter<List<UserRole>, int[]>(
+        v => v.Select(r => (int)r).ToArray(),
+        v => v.Select(i => (UserRole)i).ToList()
+    );
+
+        var roleComparer = new ValueComparer<List<UserRole>>(
+            (c1, c2) => c1.SequenceEqual(c2),
+            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+            c => c.ToList()
+        );
+
+        modelBuilder.Entity<Achievement>()
+            .Property(a => a.Role)
+            .HasColumnName("Role")
+            .HasColumnType("integer[]")
+            .HasConversion(roleConverter)
+            .Metadata.SetValueComparer(roleComparer);
 
         modelBuilder.Entity<TouristPosition>().HasIndex(tp => tp.TouristId).IsUnique();
 

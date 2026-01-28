@@ -27,7 +27,18 @@ public class StakeholderProfile : Profile
             .ForMember(dest => dest.ResourceType, opt => opt.MapFrom(src => src.ResourceType.HasValue ? (API.Dtos.ResourceTypeDto?)src.ResourceType.Value : null));
         CreateMap<ClubPostDto, ClubPost>()
             .ForMember(dest => dest.ResourceType, opt => opt.MapFrom(src => src.ResourceType.HasValue ? (Domain.ResourceType?)src.ResourceType.Value : null));
-        CreateMap<Achievement, AchievementDto>().ReverseMap();
+        CreateMap<Achievement, AchievementDto>()
+    .ForMember(
+        dest => dest.userRole,
+        opt => opt.MapFrom(src => src.Role)
+    );
+
+        CreateMap<AchievementDto, Achievement>()
+            .ForMember(
+                dest => dest.Role,
+                opt => opt.MapFrom(src => src.userRole)
+            );
+
         CreateMap<UserRole, UserRoleDto>().ReverseMap();
 
     }
