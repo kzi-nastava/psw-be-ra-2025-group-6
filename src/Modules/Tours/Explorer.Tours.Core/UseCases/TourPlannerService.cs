@@ -5,6 +5,8 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Shared;
+using Shared.Achievements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,20 +17,32 @@ namespace Explorer.Tours.Core.UseCases
     {
         private readonly IMapper _mapper;
         private readonly ITourPlannerRepository _repository;
+        private readonly IDomainEventDispatcher _eventDispatcher;
 
-        public TourPlannerService(IMapper mapper, ITourPlannerRepository repository)
+        public TourPlannerService(IMapper mapper, ITourPlannerRepository repository, IDomainEventDispatcher eventDispatcher)
         {
             _mapper = mapper;
             _repository = repository;
+            _eventDispatcher = eventDispatcher;
         }
 
         public TourPlannerDto Create(long userId, TourPlannerCreateDto dto)
         {
+            HandleTourPlannerAchievements(userId);
+
             EnsureNoOverlappingPlan(userId, dto.TourId, dto.StartDate, dto.EndDate, null);
-            var planner = new TourPlanner(userId, dto.TourId, dto.StartDate, dto.EndDate);
+
+            var planner = new TourPlanner(
+                userId,
+                dto.TourId,
+                dto.StartDate,
+                dto.EndDate
+            );
+
             var created = _repository.Create(planner);
             return _mapper.Map<TourPlannerDto>(created);
         }
+
 
         public TourPlannerDto Update(long id, long userId, TourPlannerUpdateDto dto)
         {
@@ -75,5 +89,24 @@ namespace Explorer.Tours.Core.UseCases
                 throw new EntityValidationException("You can not schedule the same tour in an overlapping period.");
             }
         }
+
+        private void HandleTourPlannerAchievements(long userId)
+        {
+            var count = GetAllByUserId(userId).Count;
+
+            if (count == 0)
+            {
+                _eventDispatcher
+                    .DispatchAsync(new AchievementUnlockedEvent(userId, 4))
+                    .GetAwaiter().GetResult();
+            }
+            else if (count == 9)
+            {
+                _eventDispatcher
+                    .DispatchAsync(new AchievementUnlockedEvent(userId, 5))
+                    .GetAwaiter().GetResult();
+            }
+        }
+
     }
 }

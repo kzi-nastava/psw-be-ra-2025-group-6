@@ -47,4 +47,19 @@ public class UserProfileService : IUserProfileService
             return _mapper.Map<UserProfileDto>(createdProfile);
         }
     }
+
+    public List<AchievementDto> GetAchievements(long userId)
+    {
+        var achievements = _userProfileRepository.GetAchievements(userId);
+
+        return _mapper.Map<List<AchievementDto>>(achievements);
+    }
+
+    public void AddAchievement(long userId, long achievementId)
+    {
+        _userProfileRepository.AddAchievement(userId, achievementId);
+       
+    }
+
+
 }
