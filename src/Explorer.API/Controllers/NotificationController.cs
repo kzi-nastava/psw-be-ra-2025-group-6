@@ -26,6 +26,13 @@ namespace Explorer.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        public ActionResult<List<NotificationDto>> GetAll()
+        {
+            var result = _notificationService.GetByRecipient(User.PersonId());
+            return Ok(result);
+        }
+
         [HttpPut("{notificationId:long}/mark-as-read")]
         public ActionResult<NotificationDto> MarkAsRead(long notificationId)
         {
