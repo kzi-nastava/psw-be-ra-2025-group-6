@@ -1,39 +1,38 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\BuildingBlocks\Explorer.BuildingBlocks.Core\Explorer.BuildingBlocks.Core.csproj" />
-    <ProjectReference Include="..\BuildingBlocks\Explorer.BuildingBlocks.Infrastructure\Explorer.BuildingBlocks.Infrastructure.csproj" />
-    <ProjectReference Include="..\Modules\Blog\Explorer.Blog.Core\Explorer.Blog.Core.csproj" />
-    <ProjectReference Include="..\Modules\Blog\Explorer.Blog.Infrastructure\Explorer.Blog.Infrastructure.csproj" />
-    <ProjectReference Include="..\Modules\Encounters\Explorer.Encounters.API\Explorer.Encounters.API.csproj" />
-    <ProjectReference Include="..\Modules\Encounters\Explorer.Encounters.Core\Explorer.Encounters.Core.csproj" />
-    <ProjectReference Include="..\Modules\Encounters\Explorer.Encounters.Infrastructure\Explorer.Encounters.Infrastructure.csproj" />
-    <ProjectReference Include="..\Modules\Payments\Explorer.Payments.API\Explorer.Payments.API.csproj" />
-    <ProjectReference Include="..\Modules\Payments\Explorer.Payments.Infrastructure\Explorer.Payments.Infrastructure.csproj" />
-    <ProjectReference Include="..\Modules\Stakeholders\Explorer.Stakeholders.API\Explorer.Stakeholders.API.csproj" />
-    <ProjectReference Include="..\Modules\Stakeholders\Explorer.Stakeholders.Infrastructure\Explorer.Stakeholders.Infrastructure.csproj" />
-    <ProjectReference Include="..\Modules\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj" />
-    <ProjectReference Include="..\Modules\Tours\Explorer.Tours.Infrastructure\Explorer.Tours.Infrastructure.csproj" />
-    <ProjectReference Include="..\Search\Search.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\BuildingBlocks\Explorer.BuildingBlocks.Core\Explorer.BuildingBlocks.Core.csproj" />
+		<ProjectReference Include="..\BuildingBlocks\Explorer.BuildingBlocks.Infrastructure\Explorer.BuildingBlocks.Infrastructure.csproj" />
+		<ProjectReference Include="..\Modules\Encounters\Explorer.Encounters.API\Explorer.Encounters.API.csproj" />
+		<ProjectReference Include="..\Modules\Encounters\Explorer.Encounters.Infrastructure\Explorer.Encounters.Infrastructure.csproj" />
+		<ProjectReference Include="..\Modules\Blog\Explorer.Blog.Core\Explorer.Blog.Core.csproj" />
+		<ProjectReference Include="..\Modules\Blog\Explorer.Blog.Infrastructure\Explorer.Blog.Infrastructure.csproj" />
+		<ProjectReference Include="..\Modules\Payments\Explorer.Payments.API\Explorer.Payments.API.csproj" />
+		<ProjectReference Include="..\Modules\Payments\Explorer.Payments.Infrastructure\Explorer.Payments.Infrastructure.csproj" />
+		<ProjectReference Include="..\Modules\Stakeholders\Explorer.Stakeholders.API\Explorer.Stakeholders.API.csproj" />
+		<ProjectReference Include="..\Modules\Stakeholders\Explorer.Stakeholders.Infrastructure\Explorer.Stakeholders.Infrastructure.csproj" />
+		<ProjectReference Include="..\Modules\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj" />
+		<ProjectReference Include="..\Modules\Tours\Explorer.Tours.Infrastructure\Explorer.Tours.Infrastructure.csproj" />
+		<ProjectReference Include="..\Search\Search.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\images\blogs\" />
+	<ItemGroup>
+		<Folder Include="wwwroot\images\blogs\" />
 
-  </ItemGroup>
+	</ItemGroup>
 
 </Project>

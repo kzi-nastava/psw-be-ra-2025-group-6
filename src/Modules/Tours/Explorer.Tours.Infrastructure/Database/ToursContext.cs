@@ -33,6 +33,8 @@ public class ToursContext : DbContext
 
     public DbSet<PublicEntityRequest> PublicEntityRequests { get; set; }
 
+    public DbSet<TourReviewHelpfulVote> TourReviewHelpfulVotes { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -71,6 +73,18 @@ public class ToursContext : DbContext
                 v => JsonSerializer.Deserialize<List<TourDuration>>(v, new JsonSerializerOptions())!
             )
             .HasColumnType("jsonb");
+
+        modelBuilder.Entity<TourReviewHelpfulVote>(b =>
+        {
+            b.ToTable("TourReviewHelpfulVotes", "tours");
+            b.HasKey(v => v.Id);
+            b.HasIndex(v => new { v.ReviewId, v.UserId }).IsUnique();
+            b.Property(v => v.CreatedAt).IsRequired();
+            b.HasOne<TourReview>()
+                .WithMany()
+                .HasForeignKey(v => v.ReviewId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 
 
