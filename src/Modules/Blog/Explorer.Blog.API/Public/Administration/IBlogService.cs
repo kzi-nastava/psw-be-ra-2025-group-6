@@ -35,5 +35,8 @@ public interface IBlogService
     PagedResult<BlogDto> GetFollowingBlogs(int page, int pageSize, long userId);
 
     List<BlogDto> GetFilteredBlogs(FilterBlogDto filter);
+    void Save(long userId, long blogPostId);
+    void Unsave(long userId, long blogPostId);
+    PagedResult<BlogDto> GetSavedByUser(int page, int pageSize, long userId);
 }
 
