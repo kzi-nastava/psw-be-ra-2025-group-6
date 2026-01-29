@@ -57,12 +57,19 @@ namespace Explorer.Stakeholders.Core.UseCases
             var result = _clubPostRepository.GetAllForClub(clubId);
             var dtos = _mapper.Map<List<ClubPostDto>>(result);
 
-            foreach (var dto in dtos) {
-                var person = _userProfileRepository.Get(dto.AuthorId);
-                if (person != null) 
+            foreach (var dto in dtos)
+            {
+                var person = _userProfileRepository.GetAll().FirstOrDefault(p => p.UserId == dto.AuthorId);
+
+                if (person != null)
                 {
                     dto.AuthorUsername = person.Name + " " + person.Surname;
                     dto.AuthorProfilePicture = person.ProfilePicture;
+                }
+                else
+                {
+                    dto.AuthorUsername = "Unknown User";
+                    dto.AuthorProfilePicture = "";
                 }
             }
 

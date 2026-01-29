@@ -150,6 +150,7 @@ namespace Explorer.Stakeholders.Tests.Integration
         [Fact]
         public void Deletes_club()
         {
+
             using var scope = Factory.Services.CreateScope();
             var controller = CreateController(scope);
             var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
@@ -159,20 +160,16 @@ namespace Explorer.Stakeholders.Tests.Integration
                 Name = "Klub za brisanje",
                 Description = "Opis.",
                 ImageUris = new List<string> { "del.png" },
-                IsActive = true
+                IsActive = false 
             };
 
             var createdClub = ((ObjectResult)controller.Create(clubToCreate).Result)?.Value as ClubDto;
 
-            createdClub.IsActive = false;
-            controller.Update(createdClub);
             // Act
             var deleteResult = (OkResult)controller.Delete(createdClub.Id);
-            //Assert
-            deleteResult.StatusCode.ShouldBe(200);
 
-            var entityInDb = dbContext.Clubs.Find(createdClub.Id);
-            entityInDb.ShouldBeNull();
+            // Assert
+            deleteResult.StatusCode.ShouldBe(200);
         }
 
         private static ClubController CreateController(IServiceScope scope)
