@@ -12,13 +12,15 @@ namespace Explorer.Stakeholders.Core.UseCases
         private readonly IClubRepository _clubRepository;
         private readonly IClubMembershipService _clubMembershipService;
         private readonly IMapper _mapper;
+        private readonly IUserProfileRepository _userProfileRepository;
 
-        public ClubPostService(IClubPostRepository clubPostRepository, IClubRepository clubRepository, IClubMembershipService clubMembershipService, IMapper mapper)
+        public ClubPostService(IClubPostRepository clubPostRepository, IClubRepository clubRepository, IClubMembershipService clubMembershipService, IMapper mapper, IUserProfileRepository userProfileRepository)
         {
             _clubPostRepository = clubPostRepository;
             _clubRepository = clubRepository;
             _clubMembershipService = clubMembershipService;
             _mapper = mapper;
+            _userProfileRepository = userProfileRepository;
         }
 
         public ClubPostDto Create(ClubPostDto postDto, long userId)
@@ -53,7 +55,18 @@ namespace Explorer.Stakeholders.Core.UseCases
         public List<ClubPostDto> GetForClub(long clubId)
         {
             var result = _clubPostRepository.GetAllForClub(clubId);
-            return _mapper.Map<List<ClubPostDto>>(result);
+            var dtos = _mapper.Map<List<ClubPostDto>>(result);
+
+            foreach (var dto in dtos) {
+                var person = _userProfileRepository.Get(dto.AuthorId);
+                if (person != null) 
+                {
+                    dto.AuthorUsername = person.Name + " " + person.Surname;
+                    dto.AuthorProfilePicture = person.ProfilePicture;
+                }
+            }
+
+            return dtos;
         }
 
         public ClubPostDto Update(ClubPostDto postDto, long userId)

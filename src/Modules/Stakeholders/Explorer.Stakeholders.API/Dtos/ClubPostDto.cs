@@ -12,5 +12,7 @@ namespace Explorer.Stakeholders.API.Dtos
         public ResourceTypeDto? ResourceType { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public string? AuthorUsername { get; set; }
+        public string? AuthorProfilePicture { get; set; }
     }
 }
