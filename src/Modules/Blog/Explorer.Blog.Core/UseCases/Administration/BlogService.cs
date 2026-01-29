@@ -6,6 +6,7 @@ using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.Core.Domain;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -19,7 +20,7 @@ public class BlogService : IBlogService
     private readonly IBlogLocationService _locationService;
     private readonly IBlogBookmarkRepository _bookmarkRepository;
 
-    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, ICommentLikeRepository likeRepository, ICommentReportRepository reportRepository, IBlogLocationService locationService)
+    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, ICommentLikeRepository likeRepository, ICommentReportRepository reportRepository, IBlogLocationService locationService, IBlogBookmarkRepository bookmarkRepository)
     {
         _blogRepository = blogRepository;
         _stakeholderService = stakeholderService;
@@ -27,19 +28,20 @@ public class BlogService : IBlogService
         _likeRepository = likeRepository;
         _reportRepository = reportRepository;
         _locationService = locationService;
+        _bookmarkRepository = bookmarkRepository;
     }
 
-public PagedResult<BlogDto> GetPaged(int page, int pageSize)
+public PagedResult<BlogDto> GetPaged(int page, int pageSize, long? userId = null)
     {
         var result = _blogRepository.GetPaged(page, pageSize);
-        var items = result.Results.Select(MapBlogWithUsername).ToList();
+        var items = result.Results.Select(b => MapBlogWithUsername(b, userId)).ToList();
         return new PagedResult<BlogDto>(items, result.TotalCount);
     }
 
     public List<BlogDto> GetByUser(long userId)
     {
         var blogs = _blogRepository.GetByUser(userId);
-        return blogs.Select(MapBlogWithUsername).ToList();
+        return blogs.Select(b => MapBlogWithUsername(b, userId)).ToList();
     }
 
     public BlogDto Create(BlogCreateDto dto, long userId)
@@ -56,7 +58,6 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
 
         if (!string.IsNullOrWhiteSpace(dto.City))
         {
-            // 1. Kreiramo DTO za lokaciju od podataka iz bloga
             var locationDto = new BlogLocationDto
             {
                 City = dto.City,
@@ -65,12 +66,8 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
                 Latitude = dto.Latitude ?? 0,
                 Longitude = dto.Longitude ?? 0
             };
-
-            // 2. SERVIS kreira lokaciju u svojoj tabeli i vraća nam je sa dodeljenim ID-jem iz baze
             var savedLocationDto = _locationService.CreateOrGet(locationDto);
 
-            // 3. POSTAVLJAMO ID lokacije u blog. 
-            // Ovo je ključno: BlogPost entitet sada zna tačan ID iz tabele lokacija.
             blog.SetLocationId(savedLocationDto.Id);
         }
 
@@ -121,11 +118,11 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
         return _mapper.Map<BlogDto>(updated);
     }
 
-    public BlogDto GetById(long id)
+    public BlogDto GetById(long id, long? userId = null)
     {
         var blog = _blogRepository.GetById(id);
         if (blog == null) return null;
-        return MapBlogWithUsername(blog);
+        return MapBlogWithUsername(blog, userId);
     }
 
     public BlogDto Delete(long id)
@@ -313,12 +310,18 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
         return blogs.Select(MapBlogWithUsername).ToList();
     }*/
 
-    private BlogDto MapBlogWithUsername(BlogPost blog)
+    private BlogDto MapBlogWithUsername(BlogPost blog, long? userId = null)
     {
         var dto = _mapper.Map<BlogDto>(blog);
         dto.Username = _stakeholderService.GetUsername(blog.UserId);
         dto.AuthorProfilePicture = _stakeholderService.GetProfilePicture(blog.UserId);
         dto.VisibleCommentCount = _blogRepository.CountVisibleComments(blog.Id);
+
+        if (userId.HasValue)
+        {
+            dto.IsBookmarked = _bookmarkRepository.IsBookmarked(userId.Value, blog.Id);
+        }
+
         return dto;
     }
     public bool ToggleCommentLike(long blogId, long commentId, long userId)
@@ -460,7 +463,7 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
         var filteredBlogs = allBlogs
             .Where(b => followedIds.Contains(b.UserId) && b.Status == BlogStatus.POSTED)
             .OrderByDescending(b => b.CreatedAt)
-            .Select(MapBlogWithUsername)
+            .Select(b => MapBlogWithUsername(b, userId))
             .ToList();
 
         var pagedItems = filteredBlogs
@@ -533,7 +536,7 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
             _ => query.OrderByDescending(b => b.CreatedAt)
         };
 
-        return query.ToList().Select(MapBlogWithUsername).ToList();
+        return query.ToList().Select(b => MapBlogWithUsername(b)).ToList();
     }
 
     public void Save(long userId, long blogPostId)
@@ -556,7 +559,7 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
 
         var allSavedBlogs = _blogRepository.GetAll()
             .Where(b => savedIds.Contains(b.Id))
-            .Select(MapBlogWithUsername)
+            .Select(b => MapBlogWithUsername(b, userId))
             .ToList();
 
         var pagedItems = allSavedBlogs
