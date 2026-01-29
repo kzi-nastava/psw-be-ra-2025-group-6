@@ -8,6 +8,8 @@ public interface ITourService
     List<TourDto> GetAll();
     PagedResult<TourDto> GetPaged(int page, int pageSize);
     TourDto Get(long id);
+    List<TourDto> GetByAuthorId(long authorId);
+    List<TourDto> GetPublishedByAuthorId(long authorId);
     TourDto Create(TourDto tour);
     TourDto Update(TourDto tour);
     void Delete(long id);

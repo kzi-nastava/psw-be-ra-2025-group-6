@@ -7,6 +7,7 @@ DELETE FROM tours."PublicEntityRequests";
 DELETE FROM payments."TourPurchaseTokens";
 DELETE FROM payments."OrderItem";
 DELETE FROM tours."TouristEquipment";
+DELETE FROM tours."TourPlanners";
 DELETE FROM tours."Journals";
 DELETE FROM tours."Meetups";
 DELETE FROM tours."AnnualAwards";

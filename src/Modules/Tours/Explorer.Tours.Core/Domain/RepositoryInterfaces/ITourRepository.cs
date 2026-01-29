@@ -8,6 +8,8 @@ public interface ITourRepository
     PagedResult<Tour> GetPaged(int page, int pageSize);
 
     List<Tour> GetAll();
+
+    List<Tour> GetByAuthorId(long authorId);
     Tour Get(long id);
     Tour GetWithKeyPoints(long id);
     Tour Create(Tour tour);
@@ -15,5 +17,6 @@ public interface ITourRepository
     void Delete(long id);
     Tour? GetByReviewId(long reviewId);
     List<Tour> GetByReviewUserId(long userId);
+    List<Tour> GetPublishedWithKeyPoints();
     List<Tour> GetPublishedTours();
 }

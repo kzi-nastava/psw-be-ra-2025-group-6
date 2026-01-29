@@ -10,6 +10,8 @@ public interface ITourExecutionService
     TourExecutionResultDto AbandonExecution(long executionId, long touristId);
     List<TourExecutionResultDto> GetExecutedTours(long touristId);
 
+    List<RecentTourExecutionResultDto> GetRecentExecutedTours(long touristId);
+
     ProgressResponseDto CheckProgress(long executionId, TrackPointDto dto, long touristId);
     UnlockedSecretsDto GetUnlockedSecrets(long executionId, long touristId);
 

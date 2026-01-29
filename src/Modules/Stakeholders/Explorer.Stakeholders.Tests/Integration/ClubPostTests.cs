@@ -149,6 +149,8 @@ namespace Explorer.Stakeholders.Tests.Integration
             using var scope = Factory.Services.CreateScope();
             var controller = CreateController(scope, "-21");
             var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+            dbContext.ClubPosts.RemoveRange(dbContext.ClubPosts.Where(p => p.ClubId == -2));
+            dbContext.SaveChanges();
             dbContext.ClubPosts.Add(new Core.Domain.ClubPost(-21, -2, "Post 1", null, null, DateTime.UtcNow, null));
             dbContext.ClubPosts.Add(new Core.Domain.ClubPost(-22, -2, "Post 2", null, null, DateTime.UtcNow, null));
             dbContext.SaveChanges();

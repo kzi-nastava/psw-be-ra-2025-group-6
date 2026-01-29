@@ -1,7 +1,5 @@
 ﻿using Explorer.Blog.Core.Domain.RepositoryInterfaces;
-﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.Core.Domain;
-using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
@@ -38,9 +36,6 @@ public class BlogDbRepository : IBlogRepository
         if (existingBlog == null)
             throw new NotFoundException($"Blog with Id {blog.Id} not found.");
 
-        //DbContext.Entry(existingBlog).State = EntityState.Detached;
-
-        //DbContext.Entry(blog).State = EntityState.Modified;
         _dbSet.Update(blog);
         DbContext.Entry(existingBlog).CurrentValues.SetValues(blog);
 
@@ -57,7 +52,7 @@ public class BlogDbRepository : IBlogRepository
 
     public PagedResult<BlogPost> GetPaged(int page, int pageSize)
     {
-        var task = _dbSet.GetPagedById(page, pageSize);
+        var task = _dbSet.Include(b => b.Location).GetPagedById(page, pageSize);
         task.Wait();
         return task.Result;
     }
@@ -67,6 +62,7 @@ public class BlogDbRepository : IBlogRepository
         return _dbSet
             .Include(b => b.Votes)
             .Include(b => b.Comments)
+            .Include(b => b.Location)
             .FirstOrDefault(b => b.Id == id);
     }
 
@@ -81,6 +77,12 @@ public class BlogDbRepository : IBlogRepository
         return _dbSet
             .Include(b => b.Votes)
             .Include(b => b.Comments)
+            .Include(b => b.Location)
             .ToList();
+    }
+
+    public int CountVisibleComments(long blogId)
+    {
+        return DbContext.Comments.Count(c => c.BlogId == blogId && !c.IsHidden);
     }
 }

@@ -10,7 +10,7 @@ public class StakeholdersContext : DbContext
     public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<ReviewApp> ReviewApps { get; set; }
     public DbSet<Club> Clubs { get; set; }
-
+    public DbSet<Follow> Following { get; set; }
     public DbSet<TouristPosition> TouristPositions { get; set; }
     public DbSet<TourProblem> TourProblems { get; set; }
     public DbSet<TourProblemMessage> TourProblemMessages { get; set; }
@@ -44,6 +44,7 @@ public class StakeholdersContext : DbContext
         ConfigureTourProblems(modelBuilder);
         ConfigureProfilePosts(modelBuilder);
         ConfigureClubPosts(modelBuilder);
+        ConfigureFollowing(modelBuilder);
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)
@@ -137,6 +138,28 @@ public class StakeholdersContext : DbContext
                 .HasConversion<string?>()
                 .HasMaxLength(20);
             builder.HasIndex(p => p.ClubId);
+        });
+    }
+    private static void ConfigureFollowing(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Follow>(builder =>
+        {
+            builder.ToTable("Following");
+
+            builder.HasKey(f => f.Id);
+
+            builder.HasIndex(f => new { f.FollowerId, f.FollowedId })
+                   .IsUnique();
+
+            builder.HasOne<User>()
+                   .WithMany()
+                   .HasForeignKey(f => f.FollowerId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne<User>()
+                   .WithMany()
+                   .HasForeignKey(f => f.FollowedId)
+                   .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

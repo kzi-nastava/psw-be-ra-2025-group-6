@@ -22,6 +22,7 @@ public class ToursContext : DbContext
     public DbSet<Tour> Tours { get; set; }
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Meetup> Meetups { get; set; }
+    public DbSet<TourPlanner> TourPlanners { get; set; }
 
     public DbSet<TourReview> TourReviews { get; set; }
     public DbSet<Facility> Facility { get; set; }
@@ -32,6 +33,8 @@ public class ToursContext : DbContext
 
     public DbSet<PublicEntityRequest> PublicEntityRequests { get; set; }
 
+    public DbSet<TourReviewHelpfulVote> TourReviewHelpfulVotes { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -39,6 +42,7 @@ public class ToursContext : DbContext
         modelBuilder.HasDefaultSchema("tours");
 
         ConfigureTouristEquipment(modelBuilder);
+        ConfigureTourPlanner(modelBuilder);
 
         modelBuilder.Entity<Tour>()
     .HasMany(t => t.Equipment)
@@ -69,6 +73,18 @@ public class ToursContext : DbContext
                 v => JsonSerializer.Deserialize<List<TourDuration>>(v, new JsonSerializerOptions())!
             )
             .HasColumnType("jsonb");
+
+        modelBuilder.Entity<TourReviewHelpfulVote>(b =>
+        {
+            b.ToTable("TourReviewHelpfulVotes", "tours");
+            b.HasKey(v => v.Id);
+            b.HasIndex(v => new { v.ReviewId, v.UserId }).IsUnique();
+            b.Property(v => v.CreatedAt).IsRequired();
+            b.HasOne<TourReview>()
+                .WithMany()
+                .HasForeignKey(v => v.ReviewId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 
 
@@ -105,5 +121,15 @@ public class ToursContext : DbContext
         modelBuilder.Entity<Quiz>()
             .Property(q => q.Title)
             .IsRequired();
+    }
+
+    private static void ConfigureTourPlanner(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TourPlanner>(b =>
+        {
+            b.HasKey(tp => tp.Id);
+            b.HasIndex(tp => tp.UserId);
+            b.HasIndex(tp => tp.TourId);
+        });
     }
 }
