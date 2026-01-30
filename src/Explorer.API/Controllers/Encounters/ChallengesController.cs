@@ -33,6 +33,12 @@ public class ChallengesController : ControllerBase
         return Ok(_publicService.Get(id));
     }
 
+    [HttpGet("keypoint/{keyPointId:long}")]
+    public ActionResult<List<ChallengeDto>> GetByKeyPointId(long keyPointId)
+    {
+        return Ok(_publicService.GetByKeyPointId(keyPointId));
+    }
+
     // Admin: get all challenges (including Draft/Archived)
     [HttpGet("all")]
     [Authorize(Policy = "administratorPolicy")]

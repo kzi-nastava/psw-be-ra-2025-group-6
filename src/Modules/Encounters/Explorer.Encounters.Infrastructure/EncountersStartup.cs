@@ -30,7 +30,6 @@ namespace Explorer.Encounters.Infrastructure
             services.AddScoped<ISocialEncounterService, SocialEncounterService>();
 
             services.AddScoped<IHiddenLocationService, HiddenLocationService>();
-
         }
 
         private static void SetupInfrastructure(IServiceCollection services)

@@ -18,6 +18,8 @@ namespace Explorer.Encounters.Core.Domain
         public bool IsCreatedByTourist { get; private set; }
         public string? ImagePath { get; private set; }
         public int ActivationRadiusMeters { get; private set; }
+        public long? KeyPointId { get; private set; }
+        public bool IsRequiredForSecret { get; private set; }
 
         private Challenge() { }
 
@@ -63,6 +65,63 @@ namespace Explorer.Encounters.Core.Domain
             IsCreatedByTourist = true;
             ImagePath = imagePath;
             ActivationRadiusMeters = activationRadiusMeters;
+        }
+
+        public Challenge(string title, string description, int xp, ChallengeType type, long keyPointId, bool isRequiredForSecret, string? imagePath = null, int activationRadiusMeters = 50)
+        {
+            if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("Invalid Title.");
+            if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
+            if (xp < 0) throw new ArgumentException("XP must be non-negative.");
+            if (keyPointId <= 0) throw new ArgumentException("Invalid KeyPointId.");
+            if (activationRadiusMeters <= 0) throw new ArgumentException("Activation radius must be positive.");
+
+            Title = title;
+            Description = description;
+            XP = xp;
+            Type = type;
+            Status = ChallengeStatus.Active;
+            KeyPointId = keyPointId;
+            IsRequiredForSecret = isRequiredForSecret;
+            ImagePath = imagePath;
+            ActivationRadiusMeters = activationRadiusMeters;
+            IsCreatedByTourist = false;
+
+            Longitude = 0;
+            Latitude = 0;
+        }
+
+        public Challenge(string title, string description, int xp, ChallengeType type, long keyPointId, long authorId, bool isRequiredForSecret, string? imagePath = null, int activationRadiusMeters = 50)
+        {
+            if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("Invalid Title.");
+            if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
+            if (xp < 0) throw new ArgumentException("XP must be non-negative.");
+            if (keyPointId <= 0) throw new ArgumentException("Invalid KeyPointId.");
+            if (authorId <= 0) throw new ArgumentException("Invalid AuthorId.");
+            if (activationRadiusMeters <= 0) throw new ArgumentException("Activation radius must be positive.");
+
+            Title = title;
+            Description = description;
+            XP = xp;
+            Type = type;
+            Status = ChallengeStatus.Active;
+            KeyPointId = keyPointId;
+            CreatorId = authorId;
+            IsRequiredForSecret = isRequiredForSecret;
+            ImagePath = imagePath;
+            ActivationRadiusMeters = activationRadiusMeters;
+            IsCreatedByTourist = false;
+
+            Longitude = 0;
+            Latitude = 0;
+        }
+
+        public void SetLocationFromKeyPoint(double longitude, double latitude)
+        {
+            if (longitude < -180 || longitude > 180) throw new ArgumentException("Invalid Longitude.");
+            if (latitude < -90 || latitude > 90) throw new ArgumentException("Invalid Latitude.");
+
+            Longitude = longitude;
+            Latitude = latitude;
         }
 
         public void Publish()
