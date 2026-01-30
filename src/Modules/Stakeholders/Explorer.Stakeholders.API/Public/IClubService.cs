@@ -9,5 +9,11 @@ namespace Explorer.Stakeholders.API.Public
         void Delete(long id);
         ClubDto Get(long id);
         List<ClubDto> GetAll();
+        
+        // Owner controls
+        ClubDto ChangeStatus(long clubId, string status, long ownerId);
+        List<ClubMemberDto> GetMembers(long clubId, long ownerId);
+        ClubMemberDto InviteMember(long clubId, long userId, long ownerId);
+        void RemoveMember(long clubId, long memberId, long ownerId);
     }
 }

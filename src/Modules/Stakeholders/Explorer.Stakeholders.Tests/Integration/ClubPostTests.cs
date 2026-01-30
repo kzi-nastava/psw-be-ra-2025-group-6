@@ -118,7 +118,7 @@ namespace Explorer.Stakeholders.Tests.Integration
                 "Test description",
                 new List<string> { "img.jpg" },
                 -21,
-                true
+                Core.Domain.ClubStatus.Active
             );
             dbContext.Clubs.Add(club);
             dbContext.SaveChanges();

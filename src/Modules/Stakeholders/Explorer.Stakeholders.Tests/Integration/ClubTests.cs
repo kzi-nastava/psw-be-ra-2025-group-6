@@ -119,7 +119,7 @@ namespace Explorer.Stakeholders.Tests.Integration
                 Name = "Klub za azuriranje",
                 Description = "Originalni opis.",
                 ImageUris = new List<string> { "orig.png" },
-                IsActive = true
+                Status = "Active"
             };
 
             var createdClub = ((ObjectResult)controller.Create(clubToCreate).Result)?.Value as ClubDto;
@@ -131,7 +131,7 @@ namespace Explorer.Stakeholders.Tests.Integration
                 Description = createdClub.Description,
                 ImageUris = createdClub.ImageUris,
                 OwnerId = createdClub.OwnerId,
-                IsActive = false
+                Status = "Closed"
             };
 
             var result = ((ObjectResult)controller.Update(clubToUpdate).Result)?.Value as ClubDto;
@@ -139,12 +139,12 @@ namespace Explorer.Stakeholders.Tests.Integration
             result.ShouldNotBeNull();
             result.Id.ShouldBe(createdClub.Id);
             result.Name.ShouldBe("AZURIRANO IME");
-            result.IsActive.ShouldBe(false);
+            result.Status.ShouldBe("Closed");
 
             var entityInDb = dbContext.Clubs.Find(createdClub.Id);
             entityInDb.ShouldNotBeNull();
             entityInDb.Name.ShouldBe("AZURIRANO IME");
-            entityInDb.IsActive.ShouldBe(false);
+            entityInDb.Status.ToString().ShouldBe("Closed");
         }
 
         [Fact]
@@ -160,7 +160,7 @@ namespace Explorer.Stakeholders.Tests.Integration
                 Name = "Klub za brisanje",
                 Description = "Opis.",
                 ImageUris = new List<string> { "del.png" },
-                IsActive = false 
+                Status = "Closed"
             };
 
             var createdClub = ((ObjectResult)controller.Create(clubToCreate).Result)?.Value as ClubDto;
