@@ -276,11 +276,11 @@ public class TourService : ITourService
         
         return new PagedResult<TourDto>(items, totalCount);
     }
-    
+
     private void ApplySaleInfo(TourDto tour)
     {
         var saleInfo = _tourDataProvider.GetActiveSaleForTour(tour.Id);
-        
+
         if (saleInfo != null)
         {
             tour.IsOnSale = true;
@@ -296,7 +296,7 @@ public class TourService : ITourService
             tour.SaleStartDate = null;
             tour.SaleEndDate = null;
         }
-
+    }
     public List<TourDto> GetPublished() 
     {
         var publishedTours = _tourRepository.GetAll().Where(t => t.Status == TourStatus.CONFIRMED).ToList();
