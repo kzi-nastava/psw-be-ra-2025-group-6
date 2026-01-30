@@ -25,4 +25,5 @@ public interface ITourService
     TourDto UpdateTourDistance(long tourId, double distance);
     TourDto UpdateDuration(long tourId, List<TourDurationDto> durations);
     TourDto Publish(long tourId, long authorId);
+    List<TourDto> GetPublished();
 }

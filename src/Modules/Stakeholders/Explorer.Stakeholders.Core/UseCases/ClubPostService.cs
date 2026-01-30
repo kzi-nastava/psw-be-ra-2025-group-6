@@ -3,9 +3,6 @@ using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using System.Collections.Generic;
-using Explorer.BuildingBlocks.Core.UseCases;
-using System;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {
@@ -15,13 +12,15 @@ namespace Explorer.Stakeholders.Core.UseCases
         private readonly IClubRepository _clubRepository;
         private readonly IClubMembershipService _clubMembershipService;
         private readonly IMapper _mapper;
+        private readonly IUserProfileRepository _userProfileRepository;
 
-        public ClubPostService(IClubPostRepository clubPostRepository, IClubRepository clubRepository, IClubMembershipService clubMembershipService, IMapper mapper)
+        public ClubPostService(IClubPostRepository clubPostRepository, IClubRepository clubRepository, IClubMembershipService clubMembershipService, IMapper mapper, IUserProfileRepository userProfileRepository)
         {
             _clubPostRepository = clubPostRepository;
             _clubRepository = clubRepository;
             _clubMembershipService = clubMembershipService;
             _mapper = mapper;
+            _userProfileRepository = userProfileRepository;
         }
 
         public ClubPostDto Create(ClubPostDto postDto, long userId)
@@ -56,7 +55,25 @@ namespace Explorer.Stakeholders.Core.UseCases
         public List<ClubPostDto> GetForClub(long clubId)
         {
             var result = _clubPostRepository.GetAllForClub(clubId);
-            return _mapper.Map<List<ClubPostDto>>(result);
+            var dtos = _mapper.Map<List<ClubPostDto>>(result);
+
+            foreach (var dto in dtos)
+            {
+                var person = _userProfileRepository.GetAll().FirstOrDefault(p => p.UserId == dto.AuthorId);
+
+                if (person != null)
+                {
+                    dto.AuthorUsername = person.Name + " " + person.Surname;
+                    dto.AuthorProfilePicture = person.ProfilePicture;
+                }
+                else
+                {
+                    dto.AuthorUsername = "Unknown User";
+                    dto.AuthorProfilePicture = "";
+                }
+            }
+
+            return dtos;
         }
 
         public ClubPostDto Update(ClubPostDto postDto, long userId)
