@@ -30,6 +30,10 @@ namespace Explorer.Encounters.Core.Mappers
 
             // HiddenLocationAttempt mappings
             CreateMap<HiddenLocationAttempt, HiddenLocationAttemptDto>().ReverseMap();
+            
+            // Leaderboard mappings
+            CreateMap<LeaderboardEntry, LeaderboardEntryDto>().ReverseMap();
+            CreateMap<ClubLeaderboard, ClubLeaderboardDto>().ReverseMap();
         }
 
         private class ChallengeDtoToChallengeConverter : ITypeConverter<ChallengeDto, Challenge>

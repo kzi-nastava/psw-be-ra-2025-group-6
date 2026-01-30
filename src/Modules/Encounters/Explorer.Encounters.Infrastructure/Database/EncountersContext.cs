@@ -20,6 +20,9 @@ namespace Explorer.Encounters.Infrastructure.Database
         public DbSet<ActiveSocialParticipant> ActiveSocialParticipants { get; set; }
 
         public DbSet<HiddenLocationAttempt> HiddenLocationAttempts { get; set; }
+        
+        public DbSet<LeaderboardEntry> LeaderboardEntries { get; set; }
+        public DbSet<ClubLeaderboard> ClubLeaderboards { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -84,6 +87,37 @@ namespace Explorer.Encounters.Infrastructure.Database
                 b.Property(a => a.LastPositionUpdate).IsRequired();
             });
 
+            modelBuilder.Entity<LeaderboardEntry>(b =>
+            {
+                b.HasKey(l => l.Id);
+                b.Property(l => l.UserId).IsRequired();
+                b.Property(l => l.Username).IsRequired();
+                b.Property(l => l.TotalXP).IsRequired();
+                b.Property(l => l.CompletedChallenges).IsRequired();
+                b.Property(l => l.CompletedTours).IsRequired();
+                b.Property(l => l.AdventureCoins).IsRequired();
+                b.Property(l => l.CurrentRank).IsRequired();
+                b.Property(l => l.LastUpdated).IsRequired();
+                b.Property(l => l.ClubId);
+                b.HasIndex(l => l.UserId).IsUnique();
+                b.HasIndex(l => l.CurrentRank);
+            });
+
+            modelBuilder.Entity<ClubLeaderboard>(b =>
+            {
+                b.HasKey(c => c.Id);
+                b.Property(c => c.ClubId).IsRequired();
+                b.Property(c => c.ClubName).IsRequired();
+                b.Property(c => c.TotalXP).IsRequired();
+                b.Property(c => c.TotalCompletedChallenges).IsRequired();
+                b.Property(c => c.TotalCompletedTours).IsRequired();
+                b.Property(c => c.TotalAdventureCoins).IsRequired();
+                b.Property(c => c.MemberCount).IsRequired();
+                b.Property(c => c.CurrentRank).IsRequired();
+                b.Property(c => c.LastUpdated).IsRequired();
+                b.HasIndex(c => c.ClubId).IsUnique();
+                b.HasIndex(c => c.CurrentRank);
+            });
         }
     }
 }
