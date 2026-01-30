@@ -5,6 +5,8 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Execution;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Shared;
+using Shared.Achievements;
 using Explorer.Encounters.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Execution;
@@ -16,6 +18,7 @@ public class TourExecutionService : ITourExecutionService
     private readonly IInternalTourPurchaseTokenService _tokenService;
     private readonly IInternalLeaderboardService _leaderboardService;
     private readonly IMapper _mapper;
+    private readonly IDomainEventDispatcher _eventDispatcher;
     private const double ProximityThresholdMeters = 50.0;
 
     public TourExecutionService(
@@ -23,13 +26,14 @@ public class TourExecutionService : ITourExecutionService
         ITourExecutionRepository executionRepository,
         IInternalTourPurchaseTokenService tokenService,
         IInternalLeaderboardService leaderboardService,
-        IMapper mapper)
+        IMapper mapper, IDomainEventDispatcher eventDispatcher)
     {
         _tourRepository = tourRepository;
         _executionRepository = executionRepository;
         _tokenService = tokenService;
         _leaderboardService = leaderboardService;
         _mapper = mapper;
+        _eventDispatcher = eventDispatcher;
     }
 
     public TourExecutionStartResultDto StartExecution(TourExecutionStartDto dto, long touristId)
@@ -44,10 +48,35 @@ public class TourExecutionService : ITourExecutionService
             throw new InvalidOperationException("Tour must be purchased before starting. Please add it to your cart and checkout.");
 
 
+        // ACHIEVEMENTS:
+        var previousExecutions = _executionRepository.GetAll(touristId).Count;
+
+
+        if (previousExecutions == 0)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(touristId, 1)).GetAwaiter().GetResult();
+
+
+        if (previousExecutions == 4)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(touristId, 2)).GetAwaiter().GetResult();
+
+
+        if (previousExecutions == 19)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(touristId, 3)).GetAwaiter().GetResult();
+
+        var now = DateTime.Now;
+        var hour = now.Hour;
+
+        //00:00 - 03:00 
+        if (hour >= 0 && hour < 3)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(touristId, 19)).GetAwaiter().GetResult();
+
+        //  03:00 - 06:00 
+        if (hour >= 3 && hour < 6)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(touristId, 20)).GetAwaiter().GetResult();
+
+
         var initial = new TrackPoint(dto.Latitude, dto.Longitude);
-
         var execution = new TourExecution(dto.TourId, touristId, initial);
-
         var created = _executionRepository.Create(execution);
 
         KeyPointDto? firstKeyPoint = null;
@@ -83,6 +112,7 @@ public class TourExecutionService : ITourExecutionService
             RouteToFirstKeyPoint = route
         };
     }
+
 
     public TourExecutionStartResultDto? GetActiveExecution(long touristId, long? tourId = null)
     {

@@ -17,5 +17,6 @@ public interface ITourRepository
     void Delete(long id);
     Tour? GetByReviewId(long reviewId);
     List<Tour> GetByReviewUserId(long userId);
+    List<Tour> GetPublishedWithKeyPoints();
     List<Tour> GetPublishedTours();
 }
