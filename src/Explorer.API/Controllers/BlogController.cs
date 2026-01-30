@@ -145,7 +145,8 @@ public class BlogController : ControllerBase
     [HttpGet("{id:long}")]
     public ActionResult<BlogDto> GetBlog(long id)
     {
-        var blog = _blogService.GetById(id);
+        var userId = User.PersonId();
+        var blog = _blogService.GetById(id, userId);
 
         if (blog == null)
         {
@@ -255,7 +256,8 @@ public class BlogController : ControllerBase
     [HttpGet("paged")]
     public ActionResult<PagedResult<BlogDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
     {
-        return Ok(_blogService.GetPaged(page, pageSize));
+        var userId = User.PersonId();
+        return Ok(_blogService.GetPaged(page, pageSize, userId));
     }
 
     [HttpPatch("{id:long}/description")]
@@ -345,6 +347,30 @@ public class BlogController : ControllerBase
     {
         var userId = User.PersonId();
         var result = _blogService.GetFollowingBlogs(page, pageSize, userId);
+        return Ok(result);
+    }
+
+    [HttpPost("{id:long}/bookmark")]
+    public ActionResult BookmarkBlog(long id)
+    {
+        var userId = User.PersonId();
+        _blogService.Save(userId, id);
+        return Ok();
+    }
+
+    [HttpDelete("{id:long}/bookmark")]
+    public ActionResult RemoveBookmark(long id)
+    {
+        var userId = User.PersonId();
+        _blogService.Unsave(userId, id);
+        return NoContent();
+    }
+
+    [HttpGet("saved")]
+    public ActionResult<PagedResult<BlogDto>> GetSavedBlogs([FromQuery] int page, [FromQuery] int pageSize)
+    {
+        var userId = User.PersonId();
+        var result = _blogService.GetSavedByUser(page, pageSize, userId);
         return Ok(result);
     }
 }

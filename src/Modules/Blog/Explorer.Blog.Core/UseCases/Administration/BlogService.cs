@@ -21,8 +21,9 @@ public class BlogService : IBlogService
     private readonly ICommentReportRepository _reportRepository;
     private readonly IBlogLocationService _locationService;
     private readonly IDomainEventDispatcher _eventDispatcher;
+    private readonly IBlogBookmarkRepository _bookmarkRepository;
 
-    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, ICommentLikeRepository likeRepository, ICommentReportRepository reportRepository, IBlogLocationService locationService, IDomainEventDispatcher eventDispatcher)
+    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, ICommentLikeRepository likeRepository, ICommentReportRepository reportRepository, IBlogLocationService locationService, IDomainEventDispatcher eventDispatcher, IBlogBookmarkRepository bookmarkRepository)
     {
         _blogRepository = blogRepository;
         _stakeholderService = stakeholderService;
@@ -31,19 +32,20 @@ public class BlogService : IBlogService
         _reportRepository = reportRepository;
         _locationService = locationService;
         _eventDispatcher = eventDispatcher;
+        _bookmarkRepository = bookmarkRepository;
     }
 
-public PagedResult<BlogDto> GetPaged(int page, int pageSize)
+    public PagedResult<BlogDto> GetPaged(int page, int pageSize, long? userId = null)
     {
         var result = _blogRepository.GetPaged(page, pageSize);
-        var items = result.Results.Select(MapBlogWithUsername).ToList();
+        var items = result.Results.Select(b => MapBlogWithUsername(b, userId)).ToList();
         return new PagedResult<BlogDto>(items, result.TotalCount);
     }
 
     public List<BlogDto> GetByUser(long userId)
     {
         var blogs = _blogRepository.GetByUser(userId);
-        return blogs.Select(MapBlogWithUsername).ToList();
+        return blogs.Select(b => MapBlogWithUsername(b, userId)).ToList();
     }
 
     public BlogDto Create(BlogCreateDto dto, long userId)
@@ -123,11 +125,11 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
         return _mapper.Map<BlogDto>(updated);
     }
 
-    public BlogDto GetById(long id)
+    public BlogDto GetById(long id, long? userId = null)
     {
         var blog = _blogRepository.GetById(id);
         if (blog == null) return null;
-        return MapBlogWithUsername(blog);
+        return MapBlogWithUsername(blog, userId);
     }
 
     public BlogDto Delete(long id)
@@ -384,12 +386,18 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
         return blogs.Select(MapBlogWithUsername).ToList();
     }*/
 
-    private BlogDto MapBlogWithUsername(BlogPost blog)
+    private BlogDto MapBlogWithUsername(BlogPost blog, long? userId = null)
     {
         var dto = _mapper.Map<BlogDto>(blog);
         dto.Username = _stakeholderService.GetUsername(blog.UserId);
         dto.AuthorProfilePicture = _stakeholderService.GetProfilePicture(blog.UserId);
         dto.VisibleCommentCount = _blogRepository.CountVisibleComments(blog.Id);
+
+        if (userId.HasValue)
+        {
+            dto.IsBookmarked = _bookmarkRepository.IsBookmarked(userId.Value, blog.Id);
+        }
+
         return dto;
     }
     public bool ToggleCommentLike(long blogId, long commentId, long userId)
@@ -531,7 +539,7 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
         var filteredBlogs = allBlogs
             .Where(b => followedIds.Contains(b.UserId) && b.Status == BlogStatus.POSTED)
             .OrderByDescending(b => b.CreatedAt)
-            .Select(MapBlogWithUsername)
+            .Select(b => MapBlogWithUsername(b, userId))
             .ToList();
 
         var pagedItems = filteredBlogs
@@ -604,6 +612,37 @@ public PagedResult<BlogDto> GetPaged(int page, int pageSize)
             _ => query.OrderByDescending(b => b.CreatedAt)
         };
 
-        return query.ToList().Select(MapBlogWithUsername).ToList();
+        return query.ToList().Select(b => MapBlogWithUsername(b)).ToList();
+    }
+
+    public void Save(long userId, long blogPostId)
+    {
+        if (!_bookmarkRepository.IsBookmarked(userId, blogPostId))
+        {
+            var bookmark = new BlogBookmark(userId, blogPostId);
+            _bookmarkRepository.Create(bookmark);
+        }
+    }
+
+    public void Unsave(long userId, long blogPostId)
+    {
+        _bookmarkRepository.Delete(userId, blogPostId);
+    }
+
+    public PagedResult<BlogDto> GetSavedByUser(int page, int pageSize, long userId)
+    {
+        var savedIds = _bookmarkRepository.GetSavedPostIdsByUser(userId);
+
+        var allSavedBlogs = _blogRepository.GetAll()
+            .Where(b => savedIds.Contains(b.Id))
+            .Select(b => MapBlogWithUsername(b, userId))
+            .ToList();
+
+        var pagedItems = allSavedBlogs
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return new PagedResult<BlogDto>(pagedItems, allSavedBlogs.Count);
     }
 }
