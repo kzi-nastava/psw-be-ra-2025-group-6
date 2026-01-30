@@ -1,4 +1,3 @@
-using Explorer.Payments.API.Internal;
 using Explorer.Payments.API.Public;
 using Explorer.Tours.API.Internal;
 
