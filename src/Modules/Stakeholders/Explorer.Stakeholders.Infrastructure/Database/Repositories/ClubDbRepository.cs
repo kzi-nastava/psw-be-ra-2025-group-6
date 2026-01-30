@@ -46,7 +46,7 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
             {
                 throw new DbUpdateConcurrencyException("Club not found with id: " + club.Id);
             }
-            entityToUpdate.Update(club.Name, club.Description, club.ImageUris);
+            entityToUpdate.Update(club.Name, club.Description, club.ImageUris, club.IsActive);
 
             _dbContext.SaveChanges();
 

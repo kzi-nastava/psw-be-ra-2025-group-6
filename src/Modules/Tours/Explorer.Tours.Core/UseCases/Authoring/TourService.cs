@@ -296,5 +296,10 @@ public class TourService : ITourService
             tour.SaleStartDate = null;
             tour.SaleEndDate = null;
         }
+
+    public List<TourDto> GetPublished() 
+    {
+        var publishedTours = _tourRepository.GetAll().Where(t => t.Status == TourStatus.CONFIRMED).ToList();
+        return _mapper.Map<List<TourDto>>(publishedTours);
     }
 }
