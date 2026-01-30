@@ -33,6 +33,11 @@ namespace Explorer.Stakeholders.Core.UseCases
 
         public void Delete(long id)
         {
+            var club = _clubRepository.Get(id);
+            if (club.IsActive)
+            {
+                throw new InvalidOperationException("Club must be closed before deletion.");
+            }
             _clubRepository.Delete(id);
         }
 

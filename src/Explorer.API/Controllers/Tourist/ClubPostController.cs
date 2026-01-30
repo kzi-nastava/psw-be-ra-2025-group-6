@@ -1,8 +1,11 @@
+using System.Collections.Generic;
+using Explorer.Blog.API.Dtos;
+using Explorer.Blog.API.Public.Administration;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
+using Explorer.Tours.API.Public.Authoring;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 
 namespace Explorer.API.Controllers.Tourist
 {
@@ -11,10 +14,14 @@ namespace Explorer.API.Controllers.Tourist
     public class ClubPostController : ControllerBase
     {
         private readonly IClubPostService _clubPostService;
+        private readonly ITourService _tourService;
+        private readonly IBlogService _blogService;
 
-        public ClubPostController(IClubPostService clubPostService)
+        public ClubPostController(IClubPostService clubPostService, ITourService tourService, IBlogService blogService)
         {
             _clubPostService = clubPostService;
+            _tourService = tourService;
+            _blogService = blogService;
         }
 
         [HttpGet]
@@ -60,6 +67,44 @@ namespace Explorer.API.Controllers.Tourist
             var userId = long.Parse(User.FindFirst("id").Value);
             _clubPostService.Delete(postId, userId);
             return Ok();
+        }
+
+        [HttpGet("search-resources")]
+        public ActionResult<List<ResourceSearchDto>> SearchResources([FromQuery] string query, [FromQuery] int type)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return Ok(new List<ResourceSearchDto>());
+
+            if (type == 0) // TURE
+            {
+                var tours = _tourService.GetPublished()
+                    .Where(t => t.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    .Take(10)
+                    .Select(t => new ResourceSearchDto
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                        AuthorName = $"Author ID: {t.AuthorId}",
+                        Image = t.KeyPoints?.FirstOrDefault()?.ImagePath
+                    }).ToList();
+
+                return Ok(tours);
+            }
+            else // BLOGOVI
+            {
+                var blogs = _blogService.GetPaged(1, 100).Results
+                    .Where(b => b.Status == BlogStatusDto.POSTED && 
+                                b.Title.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    .Take(10)
+                    .Select(b => new ResourceSearchDto
+                    {
+                        Id = (long)b.Id,
+                        Name = b.Title,
+                        AuthorName = $"by {b.Username}",
+                        Image = b.Images?.FirstOrDefault()
+                    }).ToList();
+
+                return Ok(blogs);
+            }
         }
     }
 }

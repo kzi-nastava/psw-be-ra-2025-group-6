@@ -7,5 +7,6 @@
         public string Description { get; set; } = string.Empty;
         public List<string> ImageUris { get; set; } = new List<string>();
         public long OwnerId { get; set; }
+        public bool IsActive { get; set; }
     }
 }
