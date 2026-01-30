@@ -18,7 +18,7 @@ public class TouristPurchaseController : ControllerBase
         _tourPurchaseTokenService = tourPurchaseTokenService;
     }
 
-    [HttpGet("tours")]
+    [HttpGet("tokens")]
     public ActionResult<List<TourPurchaseTokenDto>> GetPurchasedTours()
     {
         var touristId = User.PersonId();
