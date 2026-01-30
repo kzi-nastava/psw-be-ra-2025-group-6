@@ -7,6 +7,8 @@ using Explorer.Tours.Core.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Explorer.Encounters.API.Public;
+using Explorer.Encounters.API.Dtos;
 
 namespace Explorer.API.Controllers.Author.Authoring;
 
@@ -16,10 +18,12 @@ namespace Explorer.API.Controllers.Author.Authoring;
 public class TourController : ControllerBase
 {
     private readonly ITourService _tourService;
+    private readonly IChallengePublicService? _challengeService;
 
-    public TourController(ITourService tourService)
+    public TourController(ITourService tourService, IChallengePublicService? challengeService = null)
     {
         _tourService = tourService;
+        _challengeService = challengeService;
     }
 
     [HttpGet("paged")]
@@ -174,6 +178,87 @@ public class TourController : ControllerBase
         }
     }
 
+    [HttpPost("key-points/{keyPointId:long}/challenges")]
+    public async Task<ActionResult<ChallengeDto>> CreateChallengeForKeyPoint(
+        long keyPointId,
+        [FromForm] string title,
+        [FromForm] string description,
+        [FromForm] int xp,
+        [FromForm] string type,
+        [FromForm] bool isRequiredForSecret,
+        [FromForm] int activationRadiusMeters,
+        [FromForm] string longitude,
+        [FromForm] string latitude,
+        [FromForm] int? requiredPeople,
+        [FromForm] double? socialRadiusMeters,
+        IFormFile? image = null)
+    {
+        if (_challengeService == null)
+        {
+            return BadRequest(new { message = "Challenge service is not available." });
+        }
 
+        try
+        {
+            var authorId = User.PersonId();
+            
+            Console.WriteLine($"=== CREATE CHALLENGE FOR KEYPOINT {keyPointId} ===");
+            Console.WriteLine($"AuthorId: {authorId}");
+            Console.WriteLine($"Type: {type}");
+            Console.WriteLine($"Longitude RAW: '{longitude}'");
+            Console.WriteLine($"Latitude RAW: '{latitude}'");
+            Console.WriteLine($"RequiredPeople: {requiredPeople}");
+            Console.WriteLine($"SocialRadiusMeters: {socialRadiusMeters}");
 
+            // Parse coordinates with InvariantCulture
+            if (!double.TryParse(longitude, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var lng))
+            {
+                return BadRequest(new { message = $"Invalid Longitude format: '{longitude}'" });
+            }
+
+            if (!double.TryParse(latitude, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var lat))
+            {
+                return BadRequest(new { message = $"Invalid Latitude format: '{latitude}'" });
+            }
+
+            Console.WriteLine($"Parsed: Longitude={lng}, Latitude={lat}");
+
+            var dto = new ChallengeDto
+            {
+                Title = title,
+                Description = description,
+                XP = xp,
+                Type = type,
+                IsRequiredForSecret = isRequiredForSecret,
+                ActivationRadiusMeters = activationRadiusMeters > 0 ? activationRadiusMeters : 50,
+                RequiredPeople = requiredPeople,
+                SocialRadiusMeters = socialRadiusMeters
+            };
+
+            if (image != null && image.Length > 0)
+            {
+                var root = Directory.GetCurrentDirectory();
+                var folder = Path.Combine(root, "wwwroot/uploads/challenges");
+                Directory.CreateDirectory(folder);
+
+                var fileName = $"{Guid.NewGuid()}_{image.FileName}";
+                var path = Path.Combine(folder, fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await image.CopyToAsync(stream);
+                }
+
+                dto.ImagePath = $"/uploads/challenges/{fileName}";
+            }
+
+            var result = _challengeService.CreateForKeyPoint(dto, keyPointId, lng, lat, authorId);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] {ex.Message}");
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

@@ -12,12 +12,18 @@ namespace Explorer.Encounters.Core.UseCases
     {
         private readonly IChallengeRepository _repository;
         private readonly ITouristXpProfileRepository _profileRepository;
+        private readonly ISocialEncounterRepository _socialEncounterRepository;
         private readonly IMapper _mapper;
 
-        public ChallengeService(IChallengeRepository repository, ITouristXpProfileRepository profileRepository, IMapper mapper)
+        public ChallengeService(
+            IChallengeRepository repository, 
+            ITouristXpProfileRepository profileRepository, 
+            ISocialEncounterRepository socialEncounterRepository,
+            IMapper mapper)
         {
             _repository = repository;
             _profileRepository = profileRepository;
+            _socialEncounterRepository = socialEncounterRepository;
             _mapper = mapper;
         }
 
@@ -155,6 +161,48 @@ namespace Explorer.Encounters.Core.UseCases
         {
             var c = _repository.Get(id);
             return _mapper.Map<ChallengeDto>(c);
+        }
+
+        public ChallengeDto CreateForKeyPoint(ChallengeDto dto, long keyPointId, double longitude, double latitude, long authorId)
+        {
+            if (!Enum.TryParse<ChallengeType>(dto.Type, true, out var parsedType))
+            {
+                throw new ArgumentException("Invalid challenge type.");
+            }
+
+            var challenge = new Challenge(
+                dto.Title,
+                dto.Description,
+                dto.XP,
+                parsedType,
+                keyPointId,
+                authorId,
+                dto.IsRequiredForSecret,
+                dto.ImagePath,
+                dto.ActivationRadiusMeters > 0 ? dto.ActivationRadiusMeters : 50
+            );
+
+            challenge.SetLocationFromKeyPoint(longitude, latitude);
+
+            var created = _repository.Create(challenge);
+
+            // If Social type, automatically create SocialEncounter
+            if (parsedType == ChallengeType.Social)
+            {
+                var requiredPeople = dto.RequiredPeople ?? 3; // Default 3
+                var socialRadius = dto.SocialRadiusMeters ?? 100.0; // Default 100m
+
+                var socialEncounter = new SocialEncounter(created.Id, requiredPeople, socialRadius);
+                _socialEncounterRepository.Create(socialEncounter);
+            }
+
+            return _mapper.Map<ChallengeDto>(created);
+        }
+
+        public List<ChallengeDto> GetByKeyPointId(long keyPointId)
+        {
+            var challenges = _repository.GetByKeyPointId(keyPointId);
+            return _mapper.Map<List<ChallengeDto>>(challenges);
         }
     }
 }

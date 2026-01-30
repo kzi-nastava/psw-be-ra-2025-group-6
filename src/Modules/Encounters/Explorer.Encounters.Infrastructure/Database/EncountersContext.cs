@@ -37,6 +37,8 @@ namespace Explorer.Encounters.Infrastructure.Database
                 b.Property(c => c.IsCreatedByTourist);
                 b.Property(c => c.ImagePath);
                 b.Property(c => c.ActivationRadiusMeters).HasDefaultValue(50);
+                b.Property(c => c.KeyPointId);
+                b.Property(c => c.IsRequiredForSecret).HasDefaultValue(false);
             });
 
             modelBuilder.Entity<TouristXpProfile>(b =>

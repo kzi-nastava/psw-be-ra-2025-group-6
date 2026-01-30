@@ -14,5 +14,4 @@ public interface ITourExecutionService
 
     ProgressResponseDto CheckProgress(long executionId, TrackPointDto dto, long touristId);
     UnlockedSecretsDto GetUnlockedSecrets(long executionId, long touristId);
-
 }

@@ -16,5 +16,7 @@ namespace Explorer.Encounters.Core.UseCases
         List<ChallengeDto> GetAllDraft();
         ChallengeDto ApproveChallenge(long id);
         ChallengeDto RejectChallenge(long id);
+        ChallengeDto CreateForKeyPoint(ChallengeDto dto, long keyPointId, double longitude, double latitude, long authorId);
+        List<ChallengeDto> GetByKeyPointId(long keyPointId);
     }
 }
