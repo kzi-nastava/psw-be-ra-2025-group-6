@@ -35,6 +35,8 @@ public class ToursContext : DbContext
 
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
+    public DbSet<TourBookmark> TourBookmarks { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("tours");
