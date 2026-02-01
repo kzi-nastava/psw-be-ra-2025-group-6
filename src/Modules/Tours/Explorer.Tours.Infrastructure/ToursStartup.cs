@@ -75,6 +75,7 @@ public static class ToursStartup
         services.AddScoped<IPublicEntityRequestRepository, PublicEntityRequestDbRepository>();
         services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
         services.AddScoped<ITourPlannerRepository, TourPlannerDbRepository>();
+        services.AddScoped<ITourBookmarkRepository, TourBookmarkDbRepository>();
 
 
         // Repo for executions
