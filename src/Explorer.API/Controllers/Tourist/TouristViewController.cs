@@ -31,5 +31,29 @@ namespace Explorer.Tours.API.Controllers.Tourist
             var tours = _tourService.GetAvailableForTourist(touristId);
             return Ok(tours);
         }
+
+        [HttpPost("{tourId:long}/bookmark")]
+        public ActionResult BookmarkTour(long tourId)
+        {
+            var touristId = User.PersonId();
+            _touristService.BookmarkTour(touristId, tourId);
+            return Ok();
+        }
+
+        [HttpDelete("{tourId:long}/bookmark")]
+        public ActionResult RemoveBookmark(long tourId)
+        {
+            var touristId = User.PersonId();
+            _touristService.RemoveBookmark(touristId, tourId);
+            return Ok();
+        }
+
+        [HttpGet("saved")]
+        public ActionResult<List<TouristTourDto>> GetSavedTours()
+        {
+            var touristId = User.PersonId();
+            var result = _touristService.GetSavedTours(touristId);
+            return Ok(result);
+        }
     }
 }
