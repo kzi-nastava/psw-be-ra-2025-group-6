@@ -20,6 +20,8 @@ namespace Explorer.Tours.Core.UseCases.Tourist
             var tours = _tourRepository.GetPublishedTours();
             var touristViews = tours.Select(tour => new TouristTourDto
             {
+                Id = tour.Id,
+                AuthorId = tour.AuthorId,
                 Name = tour.Name,
                 FirstKeyPoint = tour.KeyPoints?.FirstOrDefault() != null
                     ? new KeyPointDto
@@ -77,6 +79,7 @@ namespace Explorer.Tours.Core.UseCases.Tourist
             return tours.Select(tour => new TouristTourDto
             {
                 Id = tour.Id,
+                AuthorId = tour.AuthorId,
                 Name = tour.Name,
                 FirstKeyPoint = tour.KeyPoints?.FirstOrDefault() != null
                     ? new KeyPointDto

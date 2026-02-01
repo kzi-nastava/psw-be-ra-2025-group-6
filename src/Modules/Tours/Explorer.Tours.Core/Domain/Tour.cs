@@ -14,7 +14,7 @@ public class Tour : AggregateRoot
     
     public TourStatus Status { get; private set; }
 
-    public long AuthorId { get; init; }
+    public long AuthorId { get; set; }
 
     public List<Equipment>? Equipment { get; private set; }
 

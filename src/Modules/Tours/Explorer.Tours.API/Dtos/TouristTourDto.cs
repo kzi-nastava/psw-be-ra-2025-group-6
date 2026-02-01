@@ -12,4 +12,5 @@ public class TouristTourDto
     public List<TourDurationDto> Duration { get; set; }
     public string Description { get; set; }
     public long Id { get; set; }
+    public long AuthorId { get; set; }
 }
