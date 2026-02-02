@@ -7,8 +7,6 @@ using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Shared;
 using Shared.Achievements;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Explorer.Stakeholders.Core.UseCases;
 

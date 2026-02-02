@@ -103,6 +103,20 @@ public class BlogService : IBlogService
 
         var created = _blogRepository.Create(blog);
 
+        var followeIds = _stakeholderService.GetFollowedIds(userId);
+        var authorName = _stakeholderService.GetUsername(userId);
+
+        foreach (var followerId in followeIds)
+        {
+            _notificationService.Create(new Explorer.Stakeholders.API.Dtos.NotificationDto
+            {
+                RecipientId = followerId,
+                SenderId = userId,
+                Content = $"{authorName} posted a new blog: \"{created.Title}\"",
+                ReferenceId = created.Id
+            });
+        }
+
         return _mapper.Map<BlogDto>(created);
     }
 
