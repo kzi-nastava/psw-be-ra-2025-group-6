@@ -9,6 +9,7 @@ using Explorer.Stakeholders.API.Internal;
 using Shared;
 using Shared.Achievements;
 using System.Diagnostics;
+using Explorer.Stakeholders.API.Public;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -22,8 +23,18 @@ public class BlogService : IBlogService
     private readonly IBlogLocationService _locationService;
     private readonly IDomainEventDispatcher _eventDispatcher;
     private readonly IBlogBookmarkRepository _bookmarkRepository;
+    private readonly INotificationService _notificationService;
 
-    public BlogService(IBlogRepository blogRepository, IInternalStakeholderService stakeholderService, IMapper mapper, ICommentLikeRepository likeRepository, ICommentReportRepository reportRepository, IBlogLocationService locationService, IDomainEventDispatcher eventDispatcher, IBlogBookmarkRepository bookmarkRepository)
+    public BlogService(
+        IBlogRepository blogRepository, 
+        IInternalStakeholderService stakeholderService, 
+        IMapper mapper, 
+        ICommentLikeRepository likeRepository, 
+        ICommentReportRepository reportRepository, 
+        IBlogLocationService locationService, 
+        IDomainEventDispatcher eventDispatcher, 
+        IBlogBookmarkRepository bookmarkRepository,
+        INotificationService notificationService)
     {
         _blogRepository = blogRepository;
         _stakeholderService = stakeholderService;
@@ -33,6 +44,7 @@ public class BlogService : IBlogService
         _locationService = locationService;
         _eventDispatcher = eventDispatcher;
         _bookmarkRepository = bookmarkRepository;
+        _notificationService = notificationService;
     }
 
     public PagedResult<BlogDto> GetPaged(int page, int pageSize, long? userId = null)
