@@ -9,6 +9,7 @@ using Explorer.Stakeholders.API.Internal;
 using Shared;
 using Shared.Achievements;
 using System.Diagnostics;
+using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
@@ -192,6 +193,19 @@ public class BlogService : IBlogService
 
         var comment = blog.Comments.Last();
 
+        var preview = text.Length > 50 ? text.Substring(0, 50) + "..." : text;
+
+        if (blog.UserId != userId)
+        {
+            _notificationService.Create(new NotificationDto
+            {
+                RecipientId = blog.UserId,
+                SenderId = userId,
+                Content = $"{authorName} left a comment on your blog post: \"{preview}\"",
+                ReferenceId = blog.Id
+            });
+        }
+
         return _mapper.Map<CommentDto>(comment);
     }
 
@@ -309,6 +323,20 @@ public class BlogService : IBlogService
         }
 
         _blogRepository.Update(blog);
+
+        if (blog.UserId != userId)
+        {
+            var voterName = _stakeholderService.GetUsername(userId);
+            var typeText = type == VoteType.Upvote ? "upvoted" : "downvoted";
+
+            _notificationService.Create(new NotificationDto
+            {
+                RecipientId = blog.UserId,
+                SenderId = userId,
+                Content = $"{voterName} {typeText} your blog post: \"{blog.Title}\"",
+                ReferenceId = blog.Id
+            });
+        }
     }
 
     private void HandleUpvoteAchievements(long userId)
@@ -420,7 +448,27 @@ public class BlogService : IBlogService
         if (!blog.Comments.Any(c => c.Id == commentId))
             throw new Exception("Comment not found.");
 
-        return _likeRepository.Toggle(blogId, commentId, userId);
+        var isNowLiked = _likeRepository.Toggle(blogId, commentId, userId);
+
+        if (isNowLiked)
+        {
+            var comment = blog.Comments.First(c => c.Id == commentId);
+
+            if (comment.UserId != userId)
+            {
+                var likerName = _stakeholderService.GetUsername(userId);
+
+                _notificationService.Create(new NotificationDto
+                {
+                    RecipientId = comment.UserId,
+                    SenderId = userId,
+                    Content = $"{likerName} liked your comment on blog post: \"{blog.Title}\"",
+                    ReferenceId = blog.Id
+                });
+            }
+        }
+
+        return isNowLiked;
     }
 
     public int CountCommentLikes(long blogId, long commentId)
