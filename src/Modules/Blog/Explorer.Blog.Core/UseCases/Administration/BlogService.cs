@@ -5,12 +5,15 @@ using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.Core.Domain;
 using Shared;
 using Shared.Achievements;
+using System.ComponentModel.Design;
 using System.Diagnostics;
-using Explorer.Stakeholders.API.Dtos;
-using Explorer.Stakeholders.API.Public;
+using System.Xml.Linq;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -507,6 +510,20 @@ public class BlogService : IBlogService
 
         var report = new CommentReport(blogId, commentId, userId, domainReason, additionalInfo);
         _reportRepository.Create(report);
+
+        var reporterName = _stakeholderService.GetUsername(userId);
+        var admins = _stakeholderService.GetAdminIds();
+
+        foreach (var adminId in admins)
+        {
+            _notificationService.Create(new NotificationDto
+            {
+                RecipientId = adminId,
+                SenderId = userId,
+                Content = $"{reporterName} reported a comment on blog post: \"{blog.Title}\"",
+                ReferenceId = commentId
+            });
+        }
     }
 
     public bool IsCommentReportedByUser(long blogId, long commentId, long userId)
@@ -568,6 +585,8 @@ public class BlogService : IBlogService
         var blog = _blogRepository.GetById(report.BlogId);
         if (blog == null) throw new NotFoundException("Blog not found");
 
+        var comment = blog.Comments.FirstOrDefault(c => c.Id == report.CommentId);
+
         report.Approve(adminId, note);
         _reportRepository.Update(report);
 
@@ -575,7 +594,19 @@ public class BlogService : IBlogService
         _blogRepository.Update(blog);
 
         _reportRepository.DeleteOpenByComment(report.BlogId, report.CommentId);
-        
+
+        if (comment != null && comment.UserId != 0 && comment.UserId != adminId)
+        {
+            var reasonText = report.Reason.ToString();
+
+            _notificationService.Create(new NotificationDto
+            {
+                RecipientId = comment.UserId,
+                SenderId = adminId,
+                Content = $"Your comment on \"{blog.Title}\" was removed due to report: {reasonText}.",
+                ReferenceId = blog.Id
+            });
+        }
     }
 
     public void DismissCommentReport(long reportId, long adminId, string? note)
