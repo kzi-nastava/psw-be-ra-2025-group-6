@@ -108,7 +108,7 @@ public class BlogService : IBlogService
 
         foreach (var followerId in followeIds)
         {
-            _notificationService.Create(new Explorer.Stakeholders.API.Dtos.NotificationDto
+            _notificationService.Create(new NotificationDto
             {
                 RecipientId = followerId,
                 SenderId = userId,
