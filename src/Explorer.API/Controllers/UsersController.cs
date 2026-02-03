@@ -24,5 +24,18 @@ namespace Explorer.Stakeholders.API.Controllers
             return Ok(user);
         }
 
+        /// <summary>
+        /// Search users by username for autocomplete
+        /// </summary>
+        [Authorize(Policy = "touristPolicy")]
+        [HttpGet("search")]
+        public ActionResult<List<UserSearchResultDto>> SearchUsers([FromQuery] string query, [FromQuery] int limit = 10)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return Ok(new List<UserSearchResultDto>());
+
+            var results = _userService.SearchUsers(query, limit);
+            return Ok(results);
+        }
     }
 }

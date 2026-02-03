@@ -7,6 +7,11 @@
         public string Description { get; set; } = string.Empty;
         public List<string> ImageUris { get; set; } = new List<string>();
         public long OwnerId { get; set; }
-        public bool IsActive { get; set; }
+        public string Status { get; set; } = "Active";
+    }
+
+    public class ChangeClubStatusDto
+    {
+        public string Status { get; set; } // "Active" or "Closed"
     }
 }
