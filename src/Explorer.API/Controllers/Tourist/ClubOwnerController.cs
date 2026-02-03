@@ -67,7 +67,7 @@ namespace Explorer.API.Controllers.Tourist
         }
 
         /// <summary>
-        /// Invite a user to the club - Owner only (Club must be Active)
+        /// Invite a user to the club by username - Owner only (Club must be Active)
         /// </summary>
         [HttpPost("{clubId}/members")]
         public ActionResult<ClubMemberDto> InviteMember(long clubId, [FromBody] InviteToClubDto request)
@@ -75,7 +75,7 @@ namespace Explorer.API.Controllers.Tourist
             try
             {
                 var ownerId = User.PersonId();
-                var result = _clubService.InviteMember(clubId, request.UserId, ownerId);
+                var result = _clubService.InviteMember(clubId, request.Username, ownerId);
                 return CreatedAtAction(nameof(GetMembers), new { clubId }, result);
             }
             catch (UnauthorizedAccessException)

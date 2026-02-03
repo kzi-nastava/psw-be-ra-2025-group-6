@@ -11,17 +11,23 @@ namespace Explorer.Stakeholders.Core.UseCases
         private readonly IClubRepository _clubRepository;
         private readonly IClubMemberRepository _clubMemberRepository;
         private readonly IPersonRepository _personRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
 
         public ClubService(
             IClubRepository clubRepository,
             IClubMemberRepository clubMemberRepository,
             IPersonRepository personRepository,
+            IUserRepository userRepository,
+            INotificationService notificationService,
             IMapper mapper)
         {
             _clubRepository = clubRepository;
             _clubMemberRepository = clubMemberRepository;
             _personRepository = personRepository;
+            _userRepository = userRepository;
+            _notificationService = notificationService;
             _mapper = mapper;
         }
 
@@ -102,7 +108,7 @@ namespace Explorer.Stakeholders.Core.UseCases
             return memberDtos;
         }
 
-        public ClubMemberDto InviteMember(long clubId, long userId, long ownerId)
+        public ClubMemberDto InviteMember(long clubId, string username, long ownerId)
         {
             var club = _clubRepository.Get(clubId);
             
@@ -112,6 +118,14 @@ namespace Explorer.Stakeholders.Core.UseCases
             if (!club.CanAcceptMembers())
                 throw new InvalidOperationException("Club is closed and cannot accept new members");
 
+            // Find user by username
+            var user = _userRepository.GetActiveByName(username);
+            if (user == null)
+                throw new KeyNotFoundException($"User not found with username: {username}");
+
+            // Get person ID for the user
+            var userId = _userRepository.GetPersonId(user.Id);
+
             if (_clubMemberRepository.IsMember(clubId, userId))
                 throw new InvalidOperationException("User is already a member");
 
@@ -119,6 +133,19 @@ namespace Explorer.Stakeholders.Core.UseCases
             var created = _clubMemberRepository.Create(member);
 
             var person = _personRepository.GetById(userId);
+            
+            // Send notification to the invited member
+            var notificationContent = $"You have been invited to join the club '{club.Name}'.";
+            _notificationService.Create(new NotificationDto
+            {
+                RecipientId = userId,
+                SenderId = ownerId,
+                Content = notificationContent,
+                Status = "Unread",
+                Timestamp = DateTime.UtcNow,
+                ReferenceId = clubId
+            });
+
             return new ClubMemberDto
             {
                 Id = created.Id,
@@ -141,7 +168,28 @@ namespace Explorer.Stakeholders.Core.UseCases
             if (!club.CanAcceptMembers())
                 throw new InvalidOperationException("Club is closed");
 
+            // Get member details before deletion for notification
+            var member = _clubMemberRepository.Get(memberId);
+            if (member == null)
+                throw new KeyNotFoundException("Member not found");
+
+            if (member.ClubId != clubId)
+                throw new InvalidOperationException("Member does not belong to this club");
+
+            // Delete the member
             _clubMemberRepository.Delete(memberId);
+
+            // Send notification to the removed member
+            var notificationContent = $"You have been removed from the club '{club.Name}'.";
+            _notificationService.Create(new NotificationDto
+            {
+                RecipientId = member.UserId,
+                SenderId = ownerId,
+                Content = notificationContent,
+                Status = "Unread",
+                Timestamp = DateTime.UtcNow,
+                ReferenceId = clubId
+            });
         }
     }
 }

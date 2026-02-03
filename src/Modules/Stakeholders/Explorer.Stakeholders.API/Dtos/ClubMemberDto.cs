@@ -13,6 +13,6 @@ namespace Explorer.Stakeholders.API.Dtos
 
     public class InviteToClubDto
     {
-        public long UserId { get; set; }
+        public string Username { get; set; }
     }
 }

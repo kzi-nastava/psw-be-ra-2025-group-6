@@ -22,6 +22,13 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
             return member;
         }
 
+        public ClubMember Get(long id)
+        {
+            var entity = _dbSet.Find(id);
+            if (entity == null) throw new KeyNotFoundException("Member not found: " + id);
+            return entity;
+        }
+
         public void Delete(long id)
         {
             var entity = _dbSet.Find(id);

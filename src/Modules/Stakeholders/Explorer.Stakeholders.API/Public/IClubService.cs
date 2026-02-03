@@ -13,7 +13,7 @@ namespace Explorer.Stakeholders.API.Public
         // Owner controls
         ClubDto ChangeStatus(long clubId, string status, long ownerId);
         List<ClubMemberDto> GetMembers(long clubId, long ownerId);
-        ClubMemberDto InviteMember(long clubId, long userId, long ownerId);
+        ClubMemberDto InviteMember(long clubId, string username, long ownerId);
         void RemoveMember(long clubId, long memberId, long ownerId);
     }
 }
