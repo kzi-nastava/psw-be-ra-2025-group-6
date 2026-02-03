@@ -14,5 +14,7 @@ namespace Explorer.Stakeholders.API.Services
         // Blokira korisnika po ID-u
         void BlockUser(long userId);
 
+        // Pretražuje korisnike po korisničkom imenu
+        List<UserSearchResultDto> SearchUsers(string searchTerm, int limit = 10);
     }
 }
