@@ -30,7 +30,8 @@ namespace Explorer.API.Controllers
 
             var dbPath = $"/images/tours/{uniqueFileName}";
 
-            return Ok(dbPath);
+            return Ok(new { url = dbPath });
+            //return Ok(dbpath);
         }
     }
 }
