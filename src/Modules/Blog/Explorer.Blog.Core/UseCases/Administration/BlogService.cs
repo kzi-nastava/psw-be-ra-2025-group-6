@@ -5,15 +5,14 @@ using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Internal;
-using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Shared;
 using Shared.Achievements;
+using Shared.Notifications;
 using System.ComponentModel.Design;
 using System.Diagnostics;
-using System.Xml.Linq;
+using System.Security.Cryptography.Xml;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -27,7 +26,6 @@ public class BlogService : IBlogService
     private readonly IBlogLocationService _locationService;
     private readonly IDomainEventDispatcher _eventDispatcher;
     private readonly IBlogBookmarkRepository _bookmarkRepository;
-    private readonly INotificationService _notificationService;
 
     public BlogService(
         IBlogRepository blogRepository, 
@@ -37,8 +35,7 @@ public class BlogService : IBlogService
         ICommentReportRepository reportRepository, 
         IBlogLocationService locationService, 
         IDomainEventDispatcher eventDispatcher, 
-        IBlogBookmarkRepository bookmarkRepository,
-        INotificationService notificationService)
+        IBlogBookmarkRepository bookmarkRepository)
     {
         _blogRepository = blogRepository;
         _stakeholderService = stakeholderService;
@@ -48,7 +45,6 @@ public class BlogService : IBlogService
         _locationService = locationService;
         _eventDispatcher = eventDispatcher;
         _bookmarkRepository = bookmarkRepository;
-        _notificationService = notificationService;
     }
 
     public PagedResult<BlogDto> GetPaged(int page, int pageSize, long? userId = null)
@@ -108,13 +104,12 @@ public class BlogService : IBlogService
 
         foreach (var followerId in followeIds)
         {
-            _notificationService.Create(new NotificationDto
-            {
-                RecipientId = followerId,
-                SenderId = userId,
-                Content = $"{authorName} posted a new blog: \"{created.Title}\"",
-                ReferenceId = created.Id
-            });
+            _eventDispatcher.DispatchAsync(new NotificationRequestedEvent(
+                followerId,
+                userId, 
+                $"{authorName} posted a new blog: \"{created.Title}\"",
+                created.Id
+                )).GetAwaiter().GetResult();
         }
 
         return _mapper.Map<BlogDto>(created);
@@ -214,13 +209,12 @@ public class BlogService : IBlogService
 
         if (blog.UserId != userId)
         {
-            _notificationService.Create(new NotificationDto
-            {
-                RecipientId = blog.UserId,
-                SenderId = userId,
-                Content = $"{authorName} left a comment on your blog post: \"{preview}\"",
-                ReferenceId = blog.Id
-            });
+            _eventDispatcher.DispatchAsync(new NotificationRequestedEvent(
+                blog.UserId,
+                userId,
+                $"{authorName} left a comment on your blog post: \"{preview}\"",
+                blog.Id
+            )).GetAwaiter().GetResult();
         }
 
         return _mapper.Map<CommentDto>(comment);
@@ -346,13 +340,12 @@ public class BlogService : IBlogService
             var voterName = _stakeholderService.GetUsername(userId);
             var typeText = type == VoteType.Upvote ? "upvoted" : "downvoted";
 
-            _notificationService.Create(new NotificationDto
-            {
-                RecipientId = blog.UserId,
-                SenderId = userId,
-                Content = $"{voterName} {typeText} your blog post: \"{blog.Title}\"",
-                ReferenceId = blog.Id
-            });
+            _eventDispatcher.DispatchAsync(new NotificationRequestedEvent(
+                blog.UserId,
+                userId,
+                $"{voterName} {typeText} your blog post: \"{blog.Title}\"",
+                blog.Id
+            )).GetAwaiter().GetResult();
         }
     }
 
@@ -475,13 +468,12 @@ public class BlogService : IBlogService
             {
                 var likerName = _stakeholderService.GetUsername(userId);
 
-                _notificationService.Create(new NotificationDto
-                {
-                    RecipientId = comment.UserId,
-                    SenderId = userId,
-                    Content = $"{likerName} liked your comment on blog post: \"{blog.Title}\"",
-                    ReferenceId = blog.Id
-                });
+                _eventDispatcher.DispatchAsync(new NotificationRequestedEvent(
+                    blog.UserId,
+                    userId,
+                    $"{likerName} liked your comment on blog post: \"{blog.Title}\"",
+                    blog.Id
+                )).GetAwaiter().GetResult();
             }
         }
 
@@ -530,13 +522,12 @@ public class BlogService : IBlogService
 
         foreach (var adminId in admins)
         {
-            _notificationService.Create(new NotificationDto
-            {
-                RecipientId = adminId,
-                SenderId = userId,
-                Content = $"{reporterName} reported a comment on blog post: \"{blog.Title}\"",
-                ReferenceId = commentId
-            });
+            _eventDispatcher.DispatchAsync(new NotificationRequestedEvent(
+                adminId,
+                userId,
+                $"{reporterName} reported a comment on blog post: \"{blog.Title}\"",
+                commentId
+            )).GetAwaiter().GetResult();
         }
     }
 
@@ -613,13 +604,12 @@ public class BlogService : IBlogService
         {
             var reasonText = report.Reason.ToString();
 
-            _notificationService.Create(new NotificationDto
-            {
-                RecipientId = comment.UserId,
-                SenderId = adminId,
-                Content = $"Your comment on \"{blog.Title}\" was removed due to report: {reasonText}.",
-                ReferenceId = blog.Id
-            });
+            _eventDispatcher.DispatchAsync(new NotificationRequestedEvent(
+                comment.UserId,
+                adminId,
+                $"Your comment on \"{blog.Title}\" was removed due to report: {reasonText}.",
+                blog.Id
+            )).GetAwaiter().GetResult();
         }
     }
 
