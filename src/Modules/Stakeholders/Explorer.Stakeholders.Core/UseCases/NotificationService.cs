@@ -38,6 +38,11 @@ namespace Explorer.Stakeholders.Core.UseCases
             return _mapper.Map<List<NotificationDto>>(notifications);
         }
 
+        public List<NotificationDto> GetByRecipient(long recipientId)
+        {
+            var notifications = _notificationRepository.GetByRecipient(recipientId);
+            return _mapper.Map<List<NotificationDto>>(notifications);
+        }
         public NotificationDto MarkAsRead(long notificationId)
         {
             var notification = _notificationRepository.Get(notificationId);

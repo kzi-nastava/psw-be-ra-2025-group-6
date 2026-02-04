@@ -56,7 +56,7 @@ public class ProfilePostService : IProfilePostService
 
         if (dto.ResourceType == ProfileResourceTypeDto.Blog && dto.ResourceId.HasValue)
         {
-            var blog = await _blogInfoGateway.GetById(dto.ResourceId.Value);
+            var blog = _blogInfoGateway.GetById(dto.ResourceId.Value).GetAwaiter().GetResult();
             if (blog != null)
             {
                 {
