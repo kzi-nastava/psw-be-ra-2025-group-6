@@ -31,5 +31,12 @@ namespace Explorer.Tours.API.Controllers.Tourist
             var tours = _tourService.GetAvailableForTourist(touristId);
             return Ok(tours);
         }
+
+        [HttpGet("{id:long}/key-points")]
+        public ActionResult<List<KeyPointDto>> GetKeyPoints(long id)
+        {
+            var tour = _tourService.Get(id);
+            return Ok(tour.KeyPoints ?? new List<KeyPointDto>());
+        }
     }
 }
