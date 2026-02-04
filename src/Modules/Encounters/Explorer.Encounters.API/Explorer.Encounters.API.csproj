@@ -17,6 +17,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\..\BuildingBlocks\Explorer.BuildingBlocks.Core\Explorer.BuildingBlocks.Core.csproj" />
+	  <ProjectReference Include="..\..\..\Shared\Shared.csproj" />
 	</ItemGroup>
 
 
