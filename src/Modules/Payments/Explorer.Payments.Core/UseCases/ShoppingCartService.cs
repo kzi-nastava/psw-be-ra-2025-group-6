@@ -228,6 +228,10 @@ public class ShoppingCartService : IShoppingCartService
         if (cart.Items.Count == 0)
             throw new InvalidOperationException("Cannot checkout an empty cart");
 
+        // Coupons cannot be applied to bundles
+        if (cart.BundleItems.Count > 0)
+            throw new InvalidOperationException("Coupons cannot be applied when cart contains bundles. Please purchase tours and bundles separately.");
+
         var coupon = _couponRepository.GetByCode(couponCode);
         if (coupon == null || !coupon.IsValid())
             throw new InvalidOperationException("Invalid or expired coupon");
@@ -235,136 +239,85 @@ public class ShoppingCartService : IShoppingCartService
         var items = cart.Items.ToList();
         var tokens = new List<TourPurchaseToken>();
         double totalPrice = 0;
+        long? tourIdForCoupon = null;
 
-        // Apply coupon logic
+        // Determine which tour gets the coupon discount
         if (coupon.TourId.HasValue)
         {
-            // Coupon applies to specific tour
-            foreach (var item in items)
-            {
-                double originalPrice = item.Price;
-                double priceAfterSale = item.Price;
-                double finalPrice = item.Price;
-                int? saleDiscountPercent = null;
-                int? couponDiscountPercent = null;
-                string? appliedCouponCode = null;
-
-                // STEP 1: Apply sale discount first (if exists)
-                var saleInfo = _tourDataProvider.GetActiveSaleForTour(item.TourId);
-                if (saleInfo != null)
-                {
-                    priceAfterSale = item.Price * (1 - saleInfo.DiscountPercent / 100.0);
-                    saleDiscountPercent = saleInfo.DiscountPercent;
-                    finalPrice = priceAfterSale;
-                }
-
-                // STEP 2: Apply coupon on top of sale price (if tour matches)
-                if (item.TourId == coupon.TourId.Value)
-                {
-                    finalPrice = priceAfterSale * (1 - coupon.DiscountPercent / 100.0);
-                    couponDiscountPercent = coupon.DiscountPercent;
-                    appliedCouponCode = couponCode;
-                }
-
-                totalPrice += finalPrice;
-
-                var token = new TourPurchaseToken(touristId, item.TourId, item.TourName, finalPrice);
-                tokens.Add(token);
-
-                // Calculate total discount percent
-                int? totalDiscountPercent = null;
-                if (saleDiscountPercent.HasValue && couponDiscountPercent.HasValue)
-                {
-                    // Combined discount
-                    totalDiscountPercent = (int)Math.Round(
-                        (1 - finalPrice / originalPrice) * 100
-                    );
-                }
-                else if (saleDiscountPercent.HasValue)
-                {
-                    totalDiscountPercent = saleDiscountPercent;
-                }
-                else if (couponDiscountPercent.HasValue)
-                {
-                    totalDiscountPercent = couponDiscountPercent;
-                }
-
-                var paymentRecord = new PaymentRecord(
-                    touristId,
-                    item.TourId,
-                    null,
-                    originalPrice,
-                    finalPrice,
-                    totalDiscountPercent,
-                    appliedCouponCode
-                );
-                _paymentRecordRepository.Create(paymentRecord);
-            }
+            // Coupon is for a specific tour - check if that tour is in cart
+            if (!items.Any(i => i.TourId == coupon.TourId.Value))
+                throw new InvalidOperationException($"Coupon is only valid for a specific tour that is not in your cart");
+            
+            tourIdForCoupon = coupon.TourId.Value;
         }
         else
         {
-            // Coupon applies to most expensive tour from the author
-            var mostExpensiveItem = items.OrderByDescending(i => i.Price).First();
-            
-            foreach (var item in items)
+            // Coupon is for any tour - apply to most expensive tour
+            var mostExpensiveItem = items.OrderByDescending(i => i.Price).FirstOrDefault();
+            if (mostExpensiveItem != null)
+                tourIdForCoupon = mostExpensiveItem.TourId;
+        }
+
+        // Process each item
+        foreach (var item in items)
+        {
+            double originalPrice = item.Price;
+            double priceAfterSale = item.Price;
+            double finalPrice = item.Price;
+            int? saleDiscountPercent = null;
+            int? couponDiscountPercent = null;
+            string? appliedCouponCode = null;
+
+            // STEP 1: Apply sale discount first (if exists)
+            var saleInfo = _tourDataProvider.GetActiveSaleForTour(item.TourId);
+            if (saleInfo != null)
             {
-                double originalPrice = item.Price;
-                double priceAfterSale = item.Price;
-                double finalPrice = item.Price;
-                int? saleDiscountPercent = null;
-                int? couponDiscountPercent = null;
-                string? appliedCouponCode = null;
-
-                // STEP 1: Apply sale discount first (if exists)
-                var saleInfo = _tourDataProvider.GetActiveSaleForTour(item.TourId);
-                if (saleInfo != null)
-                {
-                    priceAfterSale = item.Price * (1 - saleInfo.DiscountPercent / 100.0);
-                    saleDiscountPercent = saleInfo.DiscountPercent;
-                    finalPrice = priceAfterSale;
-                }
-
-                // STEP 2: Apply coupon on top of sale price (if most expensive)
-                if (item.TourId == mostExpensiveItem.TourId)
-                {
-                    finalPrice = priceAfterSale * (1 - coupon.DiscountPercent / 100.0);
-                    couponDiscountPercent = coupon.DiscountPercent;
-                    appliedCouponCode = couponCode;
-                }
-
-                totalPrice += finalPrice;
-
-                var token = new TourPurchaseToken(touristId, item.TourId, item.TourName, finalPrice);
-                tokens.Add(token);
-
-                // Calculate total discount percent
-                int? totalDiscountPercent = null;
-                if (saleDiscountPercent.HasValue && couponDiscountPercent.HasValue)
-                {
-                    totalDiscountPercent = (int)Math.Round(
-                        (1 - finalPrice / originalPrice) * 100
-                    );
-                }
-                else if (saleDiscountPercent.HasValue)
-                {
-                    totalDiscountPercent = saleDiscountPercent;
-                }
-                else if (couponDiscountPercent.HasValue)
-                {
-                    totalDiscountPercent = couponDiscountPercent;
-                }
-
-                var paymentRecord = new PaymentRecord(
-                    touristId,
-                    item.TourId,
-                    null,
-                    originalPrice,
-                    finalPrice,
-                    totalDiscountPercent,
-                    appliedCouponCode
-                );
-                _paymentRecordRepository.Create(paymentRecord);
+                priceAfterSale = item.Price * (1 - saleInfo.DiscountPercent / 100.0);
+                saleDiscountPercent = saleInfo.DiscountPercent;
+                finalPrice = priceAfterSale;
             }
+
+            // STEP 2: Apply coupon on top of sale price (ONLY to selected tour)
+            if (tourIdForCoupon.HasValue && item.TourId == tourIdForCoupon.Value)
+            {
+                finalPrice = priceAfterSale * (1 - coupon.DiscountPercent / 100.0);
+                couponDiscountPercent = coupon.DiscountPercent;
+                appliedCouponCode = couponCode;
+            }
+
+            totalPrice += finalPrice;
+
+            var token = new TourPurchaseToken(touristId, item.TourId, item.TourName, finalPrice);
+            tokens.Add(token);
+
+            // Calculate total discount percent
+            int? totalDiscountPercent = null;
+            if (saleDiscountPercent.HasValue && couponDiscountPercent.HasValue)
+            {
+                // Combined discount
+                totalDiscountPercent = (int)Math.Round(
+                    (1 - finalPrice / originalPrice) * 100
+                );
+            }
+            else if (saleDiscountPercent.HasValue)
+            {
+                totalDiscountPercent = saleDiscountPercent;
+            }
+            else if (couponDiscountPercent.HasValue)
+            {
+                totalDiscountPercent = couponDiscountPercent;
+            }
+
+            var paymentRecord = new PaymentRecord(
+                touristId,
+                item.TourId,
+                null,
+                originalPrice,
+                finalPrice,
+                totalDiscountPercent,
+                appliedCouponCode
+            );
+            _paymentRecordRepository.Create(paymentRecord);
         }
 
         // Charge wallet with total discounted price
@@ -421,30 +374,30 @@ public class ShoppingCartService : IShoppingCartService
 
     private void ApplySaleInfo(ShoppingCartDto cart)
     {
-        if (cart?.Items == null || cart.Items.Count == 0) return;
+    if (cart?.Items == null || cart.Items.Count == 0) return;
 
-        foreach (var item in cart.Items)
+    foreach (var item in cart.Items)
+    {
+        item.OriginalPrice = item.Price;
+        var saleInfo = _tourDataProvider.GetActiveSaleForTour(item.TourId);
+        if (saleInfo != null)
         {
-            item.OriginalPrice = item.Price;
-            var saleInfo = _tourDataProvider.GetActiveSaleForTour(item.TourId);
-            if (saleInfo != null)
-            {
-                item.IsOnSale = true;
-                item.DiscountPercent = saleInfo.DiscountPercent;
-                item.DiscountedPrice = item.Price * (1 - saleInfo.DiscountPercent / 100.0);
-                item.SaleStartDate = saleInfo.StartDate;
-                item.SaleEndDate = saleInfo.EndDate;
-            }
-            else
-            {
-                item.IsOnSale = false;
-                item.DiscountPercent = null;
-                item.DiscountedPrice = null;
-                item.SaleStartDate = null;
-                item.SaleEndDate = null;
-            }
+            item.IsOnSale = true;
+            item.DiscountPercent = saleInfo.DiscountPercent;
+            item.DiscountedPrice = item.Price * (1 - saleInfo.DiscountPercent / 100.0);
+            item.SaleStartDate = saleInfo.StartDate;
+            item.SaleEndDate = saleInfo.EndDate;
+        }
+        else
+        {
+            item.IsOnSale = false;
+            item.DiscountPercent = null;
+            item.DiscountedPrice = null;
+            item.SaleStartDate = null;
+            item.SaleEndDate = null;
         }
     }
+}
 
     public CheckoutPreviewDto GetCheckoutPreview(long touristId)
     {
@@ -503,6 +456,10 @@ public class ShoppingCartService : IShoppingCartService
         if (cart == null || cart.Items.Count == 0)
             throw new KeyNotFoundException($"Shopping cart is empty or not found for tourist {touristId}");
 
+        // Coupons cannot be applied to bundles
+        if (cart.BundleItems.Count > 0)
+            throw new InvalidOperationException("Coupons cannot be applied when cart contains bundles. Please purchase tours and bundles separately.");
+
         var coupon = _couponRepository.GetByCode(couponCode);
         if (coupon == null || !coupon.IsValid())
             throw new InvalidOperationException("Invalid or expired coupon");
@@ -511,106 +468,70 @@ public class ShoppingCartService : IShoppingCartService
         var previewItems = new List<CheckoutItemPreviewDto>();
         double originalTotal = 0;
         double finalTotal = 0;
+        long? tourIdForCoupon = null;
 
+        // Determine which tour gets the coupon discount
         if (coupon.TourId.HasValue)
         {
-            // Coupon applies to specific tour
-            foreach (var item in items)
-            {
-                double originalPrice = item.Price;
-                double priceAfterSale = item.Price;
-                double finalPrice = item.Price;
-                int? totalDiscountPercent = null;
-                bool hasDiscount = false;
-
-                // STEP 1: Apply sale discount first (if exists)
-                var saleInfo = _tourDataProvider.GetActiveSaleForTour(item.TourId);
-                if (saleInfo != null)
-                {
-                    priceAfterSale = item.Price * (1 - saleInfo.DiscountPercent / 100.0);
-                    finalPrice = priceAfterSale;
-                    hasDiscount = true;
-                }
-
-                // STEP 2: Apply coupon on top of sale price (if tour matches)
-                if (item.TourId == coupon.TourId.Value)
-                {
-                    finalPrice = priceAfterSale * (1 - coupon.DiscountPercent / 100.0);
-                    hasDiscount = true;
-                }
-
-                // Calculate total discount percent
-                if (finalPrice < originalPrice)
-                {
-                    totalDiscountPercent = (int)Math.Round(
-                        (1 - finalPrice / originalPrice) * 100
-                    );
-                }
-
-                originalTotal += originalPrice;
-                finalTotal += finalPrice;
-
-                previewItems.Add(new CheckoutItemPreviewDto
-                {
-                    TourId = item.TourId,
-                    TourName = item.TourName,
-                    OriginalPrice = originalPrice,
-                    FinalPrice = finalPrice,
-                    DiscountPercent = totalDiscountPercent,
-                    HasDiscount = hasDiscount
-                });
-            }
+            // Coupon is for a specific tour - check if that tour is in cart
+            if (!items.Any(i => i.TourId == coupon.TourId.Value))
+                throw new InvalidOperationException($"Coupon is only valid for a specific tour that is not in your cart");
+            
+            tourIdForCoupon = coupon.TourId.Value;
         }
         else
         {
-            // Coupon applies to most expensive tour from the author
-            var mostExpensiveItem = items.OrderByDescending(i => i.Price).First();
+            // Coupon is for any tour - apply to most expensive tour
+            var mostExpensiveItem = items.OrderByDescending(i => i.Price).FirstOrDefault();
+            if (mostExpensiveItem != null)
+                tourIdForCoupon = mostExpensiveItem.TourId;
+        }
 
-            foreach (var item in items)
+        // Process each item
+        foreach (var item in items)
+        {
+            double originalPrice = item.Price;
+            double priceAfterSale = item.Price;
+            double finalPrice = item.Price;
+            int? totalDiscountPercent = null;
+            bool hasDiscount = false;
+
+            // STEP 1: Apply sale discount first (if exists)
+            var saleInfo = _tourDataProvider.GetActiveSaleForTour(item.TourId);
+            if (saleInfo != null)
             {
-                double originalPrice = item.Price;
-                double priceAfterSale = item.Price;
-                double finalPrice = item.Price;
-                int? totalDiscountPercent = null;
-                bool hasDiscount = false;
-
-                // STEP 1: Apply sale discount first (if exists)
-                var saleInfo = _tourDataProvider.GetActiveSaleForTour(item.TourId);
-                if (saleInfo != null)
-                {
-                    priceAfterSale = item.Price * (1 - saleInfo.DiscountPercent / 100.0);
-                    finalPrice = priceAfterSale;
-                    hasDiscount = true;
-                }
-
-                // STEP 2: Apply coupon on top of sale price (if most expensive)
-                if (item.TourId == mostExpensiveItem.TourId)
-                {
-                    finalPrice = priceAfterSale * (1 - coupon.DiscountPercent / 100.0);
-                    hasDiscount = true;
-                }
-
-                // Calculate total discount percent
-                if (finalPrice < originalPrice)
-                {
-                    totalDiscountPercent = (int)Math.Round(
-                        (1 - finalPrice / originalPrice) * 100
-                    );
-                }
-
-                originalTotal += originalPrice;
-                finalTotal += finalPrice;
-
-                previewItems.Add(new CheckoutItemPreviewDto
-                {
-                    TourId = item.TourId,
-                    TourName = item.TourName,
-                    OriginalPrice = originalPrice,
-                    FinalPrice = finalPrice,
-                    DiscountPercent = totalDiscountPercent,
-                    HasDiscount = hasDiscount
-                });
+                priceAfterSale = item.Price * (1 - saleInfo.DiscountPercent / 100.0);
+                finalPrice = priceAfterSale;
+                hasDiscount = true;
             }
+
+            // STEP 2: Apply coupon on top of sale price (ONLY to selected tour)
+            if (tourIdForCoupon.HasValue && item.TourId == tourIdForCoupon.Value)
+            {
+                finalPrice = priceAfterSale * (1 - coupon.DiscountPercent / 100.0);
+                hasDiscount = true;
+            }
+
+            // Calculate total discount percent
+            if (finalPrice < originalPrice)
+            {
+                totalDiscountPercent = (int)Math.Round(
+                    (1 - finalPrice / originalPrice) * 100
+                );
+            }
+
+            originalTotal += originalPrice;
+            finalTotal += finalPrice;
+
+            previewItems.Add(new CheckoutItemPreviewDto
+            {
+                TourId = item.TourId,
+                TourName = item.TourName,
+                OriginalPrice = originalPrice,
+                FinalPrice = finalPrice,
+                DiscountPercent = totalDiscountPercent,
+                HasDiscount = hasDiscount
+            });
         }
 
         return new CheckoutPreviewDto

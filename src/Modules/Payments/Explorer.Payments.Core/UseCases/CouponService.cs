@@ -32,8 +32,8 @@ public class CouponService : ICouponService
         if (existingCoupon.AuthorId != authorId)
             throw new ForbiddenException("You can only update your own coupons");
 
-        var updatedCoupon = new Coupon(authorId, dto.DiscountPercent, dto.TourId, dto.ValidUntil);
-        var result = _couponRepository.Update(updatedCoupon);
+        existingCoupon.Update(dto.DiscountPercent, dto.TourId, dto.ValidUntil);
+        var result = _couponRepository.Update(existingCoupon);
         return _mapper.Map<CouponDto>(result);
     }
 

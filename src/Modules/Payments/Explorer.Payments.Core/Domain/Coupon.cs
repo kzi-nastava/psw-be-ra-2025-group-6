@@ -4,10 +4,10 @@ namespace Explorer.Payments.Core.Domain;
 
 public class Coupon : Entity
 {
-    public string Code { get; init; }
-    public int DiscountPercent { get; init; }
-    public DateTime? ValidUntil { get; init; }
-    public long? TourId { get; init; }
+    public string Code { get; private set; }
+    public int DiscountPercent { get; private set; }
+    public DateTime? ValidUntil { get; private set; }
+    public long? TourId { get; private set; }
     public long AuthorId { get; init; }
     public DateTime CreatedAt { get; init; }
 
@@ -25,6 +25,16 @@ public class Coupon : Entity
         TourId = tourId;
         ValidUntil = validUntil;
         CreatedAt = DateTime.UtcNow;
+    }
+
+    public void Update(int discountPercent, long? tourId, DateTime? validUntil)
+    {
+        if (discountPercent < 1 || discountPercent > 100)
+            throw new ArgumentException("Discount percent must be between 1 and 100");
+
+        DiscountPercent = discountPercent;
+        TourId = tourId;
+        ValidUntil = validUntil;
     }
 
     public bool IsValid()
