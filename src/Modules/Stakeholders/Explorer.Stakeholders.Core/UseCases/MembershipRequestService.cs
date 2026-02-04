@@ -60,14 +60,24 @@ namespace Explorer.Stakeholders.Core.UseCases
             _requestRepository.Delete(requestId);
         }
 
-        public List<ClubMembershipRequestDto> GetPendingRequestsByClub(long clubId, long ownerId)
+        public List<ClubMembershipRequestDto> GetPendingRequestsByClub(long clubId, long userId)
         {
             var club = _clubRepository.Get(clubId);
-            if (club.OwnerId != ownerId)
-                throw new UnauthorizedAccessException("Only the owner can view pending requests.");
+            if (club == null) throw new KeyNotFoundException("Club not found");
 
-            var requests = _requestRepository.GetByClub(clubId);
-            var dtos = _mapper.Map<List<ClubMembershipRequestDto>>(requests);
+            var allRequests = _requestRepository.GetByClub(clubId);
+            List<ClubMembershipRequest> filteredRequests;
+
+            if (club.OwnerId == userId)
+            {
+                filteredRequests = allRequests;
+            }
+            else
+            {
+                filteredRequests = allRequests.Where(r => r.TouristId == userId).ToList();
+            }
+
+            var dtos = _mapper.Map<List<ClubMembershipRequestDto>>(filteredRequests);
 
             foreach (var dto in dtos)
             {
