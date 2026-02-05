@@ -189,6 +189,7 @@ public class TourService : ITourService
             DistanceInKm = tour.DistanceInKm,
             Duration = _mapper.Map<List<TourDurationDto>>(tour.Duration),
             Description = tour.Description,
+            CoverImage = tour.CoverImage
         };
     }
 
@@ -253,5 +254,10 @@ public class TourService : ITourService
 
         var items = _mapper.Map<List<TourDto>>(pagedTours);
         return new PagedResult<TourDto>(items, totalCount);
+    }
+    public List<TourDto> GetPublished() 
+    {
+        var publishedTours = _tourRepository.GetAll().Where(t => t.Status == TourStatus.CONFIRMED).ToList();
+        return _mapper.Map<List<TourDto>>(publishedTours);
     }
 }

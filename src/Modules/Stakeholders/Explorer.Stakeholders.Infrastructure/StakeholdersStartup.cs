@@ -71,6 +71,7 @@ public static class StakeholdersStartup
         services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
         services.AddScoped<IReviewAppRepository, ReviewAppDbRepository>();
         services.AddScoped<IClubRepository, ClubDbRepository>();
+        services.AddScoped<IClubMemberRepository, ClubMemberDbRepository>();
         services.AddScoped<ITouristPositionRepository, TouristPositionRepository>();
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
         services.AddScoped<ITourProblemMessageRepository, TourProblemMessageDatabaseRepository>();

@@ -27,6 +27,7 @@ public class StakeholderProfile : Profile
             .ForMember(dest => dest.ResourceType, opt => opt.MapFrom(src => src.ResourceType.HasValue ? (API.Dtos.ResourceTypeDto?)src.ResourceType.Value : null));
         CreateMap<ClubPostDto, ClubPost>()
             .ForMember(dest => dest.ResourceType, opt => opt.MapFrom(src => src.ResourceType.HasValue ? (Domain.ResourceType?)src.ResourceType.Value : null));
+<<<<<<< HEAD
         CreateMap<Achievement, AchievementDto>()
     .ForMember(
         dest => dest.userRole,
@@ -41,5 +42,16 @@ public class StakeholderProfile : Profile
 
         CreateMap<UserRole, UserRoleDto>().ReverseMap();
 
+=======
+
+        CreateMap<Club, ClubDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ReverseMap()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<ClubStatus>(src.Status)));
+
+        CreateMap<ClubMember, ClubMemberDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ReverseMap();
+>>>>>>> origin/development-new
     }
 }

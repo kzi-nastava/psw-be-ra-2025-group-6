@@ -19,9 +19,13 @@ public class StakeholdersContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<ProfilePost> ProfilePosts { get; set; }
     public DbSet<ClubPost> ClubPosts { get; set; }
+<<<<<<< HEAD
     public DbSet<SocialMessage> SocialMessages { get; set; }
 
     public DbSet<Achievement> Achievement { get; set; }
+=======
+    public DbSet<ClubMember> ClubMembers { get; set; }
+>>>>>>> origin/development-new
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 

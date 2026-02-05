@@ -55,6 +55,7 @@ public static class ToursStartup
         services.AddScoped<IKeyPointService, KeyPointService>();
         services.AddScoped<ITourReviewService, TourReviewService>();
         services.AddScoped<ITourPlannerService, TourPlannerService>();
+        services.AddScoped<ITourCheckpointPlanService, TourCheckpointPlanService>();
 
         services.AddScoped<ITouristViewService, TouristViewService>();
         services.AddScoped<IQuizService, QuizService>();
@@ -76,12 +77,13 @@ public static class ToursStartup
         services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
         services.AddScoped<ITourPlannerRepository, TourPlannerDbRepository>();
         services.AddScoped<ITourBookmarkRepository, TourBookmarkDbRepository>();
-
+        services.AddScoped<ITourCheckpointPlanRepository, TourCheckpointPlanDbRepository>();
 
         // Repo for executions
         services.AddScoped<Core.Domain.RepositoryInterfaces.ITourExecutionRepository, Tours.Infrastructure.Database.Repositories.TourExecutionDbRepository>();
 
         services.AddScoped<IQuizRepository, QuizDbRepository>();
+        services.AddScoped<ITourReviewHelpfulRepository, TourReviewHelpfulDbRepository>();
 
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));

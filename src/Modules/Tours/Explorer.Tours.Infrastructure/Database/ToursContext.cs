@@ -23,6 +23,7 @@ public class ToursContext : DbContext
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Meetup> Meetups { get; set; }
     public DbSet<TourPlanner> TourPlanners { get; set; }
+    public DbSet<TourCheckpointPlan> TourCheckpointPlans { get; set; }
 
     public DbSet<TourReview> TourReviews { get; set; }
     public DbSet<Facility> Facility { get; set; }
@@ -32,6 +33,8 @@ public class ToursContext : DbContext
     public DbSet<KeyPoint> KeyPoints { get; set; }
 
     public DbSet<PublicEntityRequest> PublicEntityRequests { get; set; }
+
+    public DbSet<TourReviewHelpfulVote> TourReviewHelpfulVotes { get; set; }
 
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
@@ -58,6 +61,7 @@ public class ToursContext : DbContext
 
         ConfigureTouristEquipment(modelBuilder);
         ConfigureTourPlanner(modelBuilder);
+        ConfigureTourCheckpointPlans(modelBuilder);
 
         modelBuilder.Entity<Tour>()
             .HasMany(t => t.Equipment)
@@ -88,6 +92,18 @@ public class ToursContext : DbContext
                 v => JsonSerializer.Deserialize<List<TourDuration>>(v, new JsonSerializerOptions())!
             )
             .HasColumnType("jsonb");
+
+        modelBuilder.Entity<TourReviewHelpfulVote>(b =>
+        {
+            b.ToTable("TourReviewHelpfulVotes", "tours");
+            b.HasKey(v => v.Id);
+            b.HasIndex(v => new { v.ReviewId, v.UserId }).IsUnique();
+            b.Property(v => v.CreatedAt).IsRequired();
+            b.HasOne<TourReview>()
+                .WithMany()
+                .HasForeignKey(v => v.ReviewId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 
 
@@ -133,6 +149,27 @@ public class ToursContext : DbContext
             b.HasKey(tp => tp.Id);
             b.HasIndex(tp => tp.UserId);
             b.HasIndex(tp => tp.TourId);
+        });
+    }
+
+    private static void ConfigureTourCheckpointPlans(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TourCheckpointPlan>(b =>
+        {
+            b.HasKey(tp => tp.Id);
+            b.HasIndex(tp => tp.UserId);
+            b.HasIndex(tp => tp.PlannerItemId);
+            b.HasIndex(tp => tp.KeyPointId);
+
+            b.HasOne<TourPlanner>()
+                .WithMany()
+                .HasForeignKey(tp => tp.PlannerItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne<KeyPoint>()
+                .WithMany()
+                .HasForeignKey(tp => tp.KeyPointId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

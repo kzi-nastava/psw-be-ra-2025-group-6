@@ -11,6 +11,7 @@ public class Tour : AggregateRoot
     public TourDifficulty Difficulty { get; init; }
     public List<string>? Tags { get; init; }
     public float Price { get; init; }
+    public string? CoverImage { get; private set; }
     
     public TourStatus Status { get; private set; }
 
@@ -40,7 +41,8 @@ public class Tour : AggregateRoot
         TourStatus status,
         List<Equipment> equipment,
         List<KeyPoint> keypoints,
-        List<TourDuration> durations)
+        List<TourDuration> durations,
+        string? coverImage = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Invalid Name.");
@@ -61,6 +63,7 @@ public class Tour : AggregateRoot
         Price = price;
         Status = status;
         Equipment = equipment ?? new List<Equipment>();
+        CoverImage = coverImage;
 
         KeyPoints = keypoints ?? new List<KeyPoint>();
         DistanceInKm = 0;
@@ -73,7 +76,8 @@ public class Tour : AggregateRoot
         string description,
         TourDifficulty difficulty,
         List<string> tags,
-        long AuthorId)
+        long AuthorId,
+        string? coverImage = null)
     {
 
         if (string.IsNullOrWhiteSpace(name))
@@ -95,6 +99,7 @@ public class Tour : AggregateRoot
         Status = TourStatus.DRAFT;
         this.AuthorId = AuthorId;
         Equipment = new List<Equipment>();
+        CoverImage = coverImage;
 
         KeyPoints = new List<KeyPoint>();
         DistanceInKm = 0;
@@ -252,6 +257,14 @@ public class Tour : AggregateRoot
 
         Status = TourStatus.CONFIRMED; 
         PublishedTime = DateTime.UtcNow;
+    }
+
+    public void SetCoverImage(string? coverImage)
+    {
+        if (Status == TourStatus.ARCHIVED)
+            throw new InvalidOperationException("Cannot modify cover image of an archived tour.");
+        
+        CoverImage = coverImage;
     }
 
     private static double ToRadians(double angle) => Math.PI * angle / 180.0;
