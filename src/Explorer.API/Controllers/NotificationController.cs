@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Explorer.API.Controllers
 {
-    [Authorize(Policy = "registeredUserPolicy")]
+    [Authorize]
     [Route("api/notifications")]
     [ApiController]
     public class NotificationController : ControllerBase
@@ -23,6 +23,13 @@ namespace Explorer.API.Controllers
         public ActionResult<List<NotificationDto>> GetUnread()
         {
             var result = _notificationService.GetUnreadByRecipient(User.PersonId());
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public ActionResult<List<NotificationDto>> GetAll()
+        {
+            var result = _notificationService.GetByRecipient(User.PersonId());
             return Ok(result);
         }
 

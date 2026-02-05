@@ -1,11 +1,8 @@
 using AutoMapper;
-using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {
@@ -38,6 +35,11 @@ namespace Explorer.Stakeholders.Core.UseCases
             return _mapper.Map<List<NotificationDto>>(notifications);
         }
 
+        public List<NotificationDto> GetByRecipient(long recipientId)
+        {
+            var notifications = _notificationRepository.GetByRecipient(recipientId);
+            return _mapper.Map<List<NotificationDto>>(notifications);
+        }
         public NotificationDto MarkAsRead(long notificationId)
         {
             var notification = _notificationRepository.Get(notificationId);
