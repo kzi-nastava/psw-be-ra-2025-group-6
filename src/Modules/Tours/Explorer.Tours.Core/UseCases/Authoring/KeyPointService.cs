@@ -21,4 +21,10 @@ public class KeyPointService : IKeyPointService
         var keyPoints = _keyPointRepository.GetPublicKeyPoints();
         return keyPoints.Select(_mapper.Map<KeyPointDto>).ToList();
     }
+
+    public List<KeyPointDto> GetAll()
+    {
+        var keyPoints = _keyPointRepository.GetAll();
+        return keyPoints.Select(_mapper.Map<KeyPointDto>).ToList();
+    }
 }

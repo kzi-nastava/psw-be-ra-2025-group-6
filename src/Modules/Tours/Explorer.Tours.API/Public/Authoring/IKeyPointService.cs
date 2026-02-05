@@ -5,4 +5,5 @@ namespace Explorer.Tours.API.Public.Authoring;
 public interface IKeyPointService
 {
     List<KeyPointDto> GetPublicKeyPoints();
+    List<KeyPointDto> GetAll();
 }
