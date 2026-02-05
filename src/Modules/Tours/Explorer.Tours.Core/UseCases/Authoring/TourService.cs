@@ -209,6 +209,7 @@ public class TourService : ITourService
             DistanceInKm = tour.DistanceInKm,
             Duration = _mapper.Map<List<TourDurationDto>>(tour.Duration),
             Description = tour.Description,
+            CoverImage = tour.CoverImage
         };
     }
 

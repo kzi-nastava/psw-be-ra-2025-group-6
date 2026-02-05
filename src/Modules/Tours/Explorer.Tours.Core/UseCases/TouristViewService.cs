@@ -51,7 +51,8 @@ namespace Explorer.Tours.Core.UseCases.Tourist
                     TravelType = (TravelTypeDto)d.TravelType,
                     Minutes = d.Minutes
                 }).ToList() ?? new List<TourDurationDto>(),
-                Description = tour.Description
+                Description = tour.Description,
+                CoverImage = tour.CoverImage
             }).ToList();
 
             return touristViews;

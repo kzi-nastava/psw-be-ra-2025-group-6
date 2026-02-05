@@ -10,6 +10,7 @@ public class TourDto
     public float Price { get; set; }
     public TourStatusDto Status { get; set; }
     public long AuthorId { get; set; }
+    public string? CoverImage { get; set; }
 
     public List<EquipmentDto>? Equipment { get; set; }
     public List<KeyPointDto>? KeyPoints { get; set; } = new List<KeyPointDto>();

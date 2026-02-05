@@ -10,4 +10,5 @@ public interface IUserRepository
     User GetById(long userId);
     void Update(User user);
     User? Get(long userId);
+    IEnumerable<User> SearchByUsername(string searchTerm, int limit = 10);
 }

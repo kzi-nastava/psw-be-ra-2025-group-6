@@ -58,4 +58,12 @@ public class UserDbRepository : IUserRepository
     {
         return _dbContext.Users.FirstOrDefault(u => u.Id == id);
     }
+
+    public IEnumerable<User> SearchByUsername(string searchTerm, int limit = 10)
+    {
+        return _dbContext.Users
+            .Where(u => u.Username.Contains(searchTerm) && u.IsActive)
+            .Take(limit)
+            .ToList();
+    }
 }

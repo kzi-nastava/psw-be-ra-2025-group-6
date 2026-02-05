@@ -57,5 +57,30 @@ namespace Explorer.Stakeholders.Core.UseCases
             var user = _userRepository.Get(userId);
             return _mapper.Map<UserDto>(user);
         }
+
+        public List<UserSearchResultDto> SearchUsers(string searchTerm, int limit = 10)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return new List<UserSearchResultDto>();
+
+            var users = _userRepository.SearchByUsername(searchTerm, limit);
+            var results = new List<UserSearchResultDto>();
+
+            foreach (var user in users)
+            {
+                var personId = _userRepository.GetPersonId(user.Id);
+                var person = _personRepository.GetById(personId);
+                
+                results.Add(new UserSearchResultDto
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Name = $"{person.Name} {person.Surname}",
+                    Email = person.Email
+                });
+            }
+
+            return results;
+        }
     }
 }
