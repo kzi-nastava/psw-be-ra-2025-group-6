@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace Explorer.BuildingBlocks.Tests;
 
@@ -23,6 +24,7 @@ public abstract class BaseTestFactory<TDbContext> : WebApplicationFactory<Progra
             // Resolve TestData relative to the test project's output directory so it works regardless of content root
             var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "TestData"));
             InitializeDatabase(db, path, logger);
+            SeedAdditionalDatabases(scopedServices, path, logger);
         });
     }
 
@@ -30,6 +32,15 @@ public abstract class BaseTestFactory<TDbContext> : WebApplicationFactory<Progra
     {
         try
         {
+            // First, ensure the database exists
+            EnsureDatabaseExists(logger);
+            
+            var defaultSchema = context.Model.GetDefaultSchema();
+            if (!string.IsNullOrWhiteSpace(defaultSchema))
+            {
+                context.Database.ExecuteSqlRaw($"CREATE SCHEMA IF NOT EXISTS \"{defaultSchema}\";");
+            }
+
             context.Database.EnsureCreated();
             var databaseCreator = context.Database.GetService<IRelationalDatabaseCreator>();
             databaseCreator.CreateTables();
@@ -52,12 +63,50 @@ public abstract class BaseTestFactory<TDbContext> : WebApplicationFactory<Progra
         }
     }
 
+    private static void EnsureDatabaseExists(ILogger logger)
+    {
+        var server = Environment.GetEnvironmentVariable("DATABASE_HOST") ?? "localhost";
+        var port = Environment.GetEnvironmentVariable("DATABASE_PORT") ?? "5432";
+        var database = Environment.GetEnvironmentVariable("DATABASE_SCHEMA") ?? "explorer-v1-test";
+        var user = Environment.GetEnvironmentVariable("DATABASE_USERNAME") ?? "postgres";
+        var password = Environment.GetEnvironmentVariable("DATABASE_PASSWORD") ?? "root";
+
+        // Connect to postgres database to create the test database if it doesn't exist
+        var masterConnectionString = $"Server={server};Port={port};Database=postgres;User ID={user};Password={password};";
+        
+        try
+        {
+            using var connection = new NpgsqlConnection(masterConnectionString);
+            connection.Open();
+            
+            // Check if database exists
+            using var checkCmd = new NpgsqlCommand($"SELECT 1 FROM pg_database WHERE datname = '{database}'", connection);
+            var exists = checkCmd.ExecuteScalar() != null;
+            
+            if (!exists)
+            {
+                logger.LogInformation("Creating test database: {Database}", database);
+                using var createCmd = new NpgsqlCommand($"CREATE DATABASE \"{database}\"", connection);
+                createCmd.ExecuteNonQuery();
+                logger.LogInformation("Test database created successfully: {Database}", database);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Could not ensure database exists: {Message}", ex.Message);
+        }
+    }
+
     private ServiceProvider BuildServiceProvider(IServiceCollection services)
     {
         return ReplaceNeededDbContexts(services).BuildServiceProvider();
     }
 
     protected abstract IServiceCollection ReplaceNeededDbContexts(IServiceCollection services);
+
+    protected virtual void SeedAdditionalDatabases(IServiceProvider services, string scriptFolder, ILogger logger)
+    {
+    }
 
     protected static Action<DbContextOptionsBuilder> SetupTestContext()
     {

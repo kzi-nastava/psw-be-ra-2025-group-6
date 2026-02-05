@@ -34,6 +34,11 @@
   <ItemGroup>
     <Folder Include="wwwroot\images\blogs\" />
 
+    <Folder Include="wwwroot\images\tours\" />
+
+    <Folder Include="wwwroot\uploads\quiz-audio\" />
+
+
   </ItemGroup>
 
 </Project>

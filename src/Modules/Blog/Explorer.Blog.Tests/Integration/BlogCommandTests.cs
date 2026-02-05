@@ -464,6 +464,8 @@ public class BlogCommandTests : BaseBlogIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<IBlogSearchService>();
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+        dbContext.Blogs.RemoveRange(dbContext.Blogs);
+        dbContext.SaveChanges();
 
         var blog1 = new BlogPost(
             -11,

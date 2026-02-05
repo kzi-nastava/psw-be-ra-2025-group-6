@@ -1,5 +1,6 @@
 using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Public;
+using Explorer.API.Contracts;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Core.Domain;
@@ -24,7 +25,7 @@ namespace Explorer.API.Controllers.Tourist
         [HttpGet]
         public ActionResult<ShoppingCartDto> Get()
         {
-            var touristId = User.PersonId();
+            if (!TryGetTouristId(out var touristId, out var errorResult)) return errorResult;
             var result = _shoppingCartService.GetByTouristId(touristId);
             return Ok(result);
         }
@@ -34,7 +35,7 @@ namespace Explorer.API.Controllers.Tourist
         {
             try
             {
-                var touristId = User.PersonId();
+                if (!TryGetTouristId(out var touristId, out var errorResult)) return errorResult;
                 var tour = _tourService.Get(tourId); 
 
                 var result = _shoppingCartService.AddItem(touristId, tour.Id, tour.Name, tour.Price);
@@ -42,11 +43,11 @@ namespace Explorer.API.Controllers.Tourist
             }
             catch (ArgumentException ex) when (ex.Message.Contains("already in the cart"))
             {
-                return Conflict(new { message = ex.Message }); 
+                return Conflict(ApiErrorFactory.Create(HttpContext, ApiErrorCodes.Conflict, "Payment/Order creation failed.", ex.Message));
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message }); 
+                return BadRequest(ApiErrorFactory.Create(HttpContext, ApiErrorCodes.ValidationError, "Payment/Order creation failed.", ex.Message));
             }
         }
         
@@ -55,13 +56,13 @@ namespace Explorer.API.Controllers.Tourist
         {
             try
             {
-                var touristId = User.PersonId();
+                if (!TryGetTouristId(out var touristId, out var errorResult)) return errorResult;
                 var result = _shoppingCartService.RemoveItem(touristId, tourId);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message });
+                return NotFound(ApiErrorFactory.Create(HttpContext, ApiErrorCodes.NotFound, "Payment/Order update failed.", ex.Message));
             }
         }
 
@@ -70,18 +71,34 @@ namespace Explorer.API.Controllers.Tourist
         {
             try
             {
-                var touristId = User.PersonId();
+                if (!TryGetTouristId(out var touristId, out var errorResult)) return errorResult;
                 var result = _shoppingCartService.Checkout(touristId);
                 return Ok(result);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ApiErrorFactory.Create(HttpContext, ApiErrorCodes.ValidationError, "Payment/Order creation failed.", ex.Message));
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message });
+                return NotFound(ApiErrorFactory.Create(HttpContext, ApiErrorCodes.NotFound, "Payment/Order creation failed.", ex.Message));
             }
+        }
+
+        private bool TryGetTouristId(out long touristId, out ActionResult errorResult)
+        {
+            if (User.TryPersonId(out touristId))
+            {
+                errorResult = new EmptyResult();
+                return true;
+            }
+
+            errorResult = Unauthorized(ApiErrorFactory.Create(
+                HttpContext,
+                ApiErrorCodes.AuthRequired,
+                "Login required to perform payment.",
+                "User is not recognized (missing tourist profile)."));
+            return false;
         }
     }
 }

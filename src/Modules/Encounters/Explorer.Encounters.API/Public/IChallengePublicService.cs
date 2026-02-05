@@ -7,5 +7,7 @@ namespace Explorer.Encounters.API.Public
     {
         List<ChallengeDto> GetActive();
         ChallengeDto Get(long id);
+        ChallengeDto CreateForKeyPoint(ChallengeDto dto, long keyPointId, double longitude, double latitude, long authorId);
+        List<ChallengeDto> GetByKeyPointId(long keyPointId);
     }
 }
