@@ -11,10 +11,10 @@ public class TouristTourDto
     public double DistanceInKm { get; set; }
     public List<TourDurationDto> Duration { get; set; }
     public string Description { get; set; }
-<<<<<<< HEAD
+
     public long Id { get; set; }
     public long AuthorId { get; set; }
-=======
+
     public string? CoverImage { get; set; }
->>>>>>> origin/development-new
+
 }

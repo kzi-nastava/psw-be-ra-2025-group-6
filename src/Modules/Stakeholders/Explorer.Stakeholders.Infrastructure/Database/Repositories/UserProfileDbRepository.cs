@@ -42,7 +42,7 @@ public class UserProfileDbRepository : IUserProfileRepository
         _dbContext.SaveChanges();
         return userProfile;
     }
-<<<<<<< HEAD
+
 
     public List<Achievement> GetAchievements(long userId)
     {
@@ -79,10 +79,10 @@ public class UserProfileDbRepository : IUserProfileRepository
         _dbContext.SaveChanges();
     }
 
-=======
+
     public List<UserProfile> GetAll()
     {
         return _dbContext.UserProfiles.ToList();
     }
->>>>>>> origin/development-new
+
 }
