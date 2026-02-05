@@ -26,16 +26,23 @@ namespace Explorer.Stakeholders.Core.UseCases
                 notificationDto.RecipientId,
                 notificationDto.SenderId,
                 notificationDto.Content,
-                notificationDto.ReferenceId
+                notificationDto.ReferenceId,
+                notificationDto.Title
             );
             var result = _notificationRepository.Create(notification);
-            return _mapper.Map<NotificationDto>(result);
+            return MapDto(_mapper.Map<NotificationDto>(result));
         }
 
         public List<NotificationDto> GetUnreadByRecipient(long recipientId)
         {
             var notifications = _notificationRepository.GetUnreadByRecipient(recipientId);
-            return _mapper.Map<List<NotificationDto>>(notifications);
+            return _mapper.Map<List<NotificationDto>>(notifications).Select(MapDto).ToList();
+        }
+
+        public List<NotificationDto> GetByRecipient(long recipientId, int? limit = null)
+        {
+            var notifications = _notificationRepository.GetByRecipient(recipientId, limit);
+            return _mapper.Map<List<NotificationDto>>(notifications).Select(MapDto).ToList();
         }
 
         public NotificationDto MarkAsRead(long notificationId)
@@ -43,7 +50,15 @@ namespace Explorer.Stakeholders.Core.UseCases
             var notification = _notificationRepository.Get(notificationId);
             notification.MarkAsRead();
             var result = _notificationRepository.Update(notification);
-            return _mapper.Map<NotificationDto>(result);
+            return MapDto(_mapper.Map<NotificationDto>(result));
+        }
+
+        private static NotificationDto MapDto(NotificationDto dto)
+        {
+            dto.Message = dto.Content;
+            dto.IsRead = string.Equals(dto.Status, NotificationStatus.Read.ToString(), System.StringComparison.OrdinalIgnoreCase);
+            dto.CreatedAt = dto.Timestamp;
+            return dto;
         }
     }
 }

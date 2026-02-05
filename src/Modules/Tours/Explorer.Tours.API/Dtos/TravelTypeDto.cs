@@ -4,6 +4,7 @@
     {
         WALK,
         BIKE,
-        CAR
+        CAR,
+        BOAT
     }
 }

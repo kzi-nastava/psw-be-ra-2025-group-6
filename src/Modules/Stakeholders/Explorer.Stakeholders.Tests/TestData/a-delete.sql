@@ -1,4 +1,5 @@
-﻿DELETE FROM stakeholders."TourProblemMessages";
+DELETE FROM stakeholders."TourProblemMessages";
+DELETE FROM stakeholders."TouristPreferences";
 DELETE FROM stakeholders."Notifications";
 DELETE FROM stakeholders."ReviewApp";
 DELETE FROM stakeholders."UserProfiles";

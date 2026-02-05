@@ -11,6 +11,8 @@ using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Stakeholders.Infrastructure.Database.Repositories;
 using Explorer.Stakeholders.Infrastructure.Integration;
+using Explorer.Tours.Core.UseCases.Authoring;
+using Explorer.Tours.Core.UseCases.Tourist;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -45,6 +47,7 @@ public static class StakeholdersStartup
         services.AddScoped<ITourProblemService, TourProblemService>();
         services.AddScoped<ITourProblemMessageService, TourProblemMessageService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<ITouristPreferencesService, TouristPreferencesService>();
         services.AddScoped<IProfilePostService, ProfilePostService>();
         services.AddScoped<IClubPostService, ClubPostService>();
         services.AddScoped<IClubMembershipService, TemporaryClubMembershipService>();
@@ -67,6 +70,9 @@ public static class StakeholdersStartup
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
         services.AddScoped<ITourProblemMessageRepository, TourProblemMessageDatabaseRepository>();
         services.AddScoped<INotificationRepository, NotificationDatabaseRepository>();
+        services.AddScoped<ITouristPreferencesRepository, TouristPreferencesDatabaseRepository>();
+        services.AddScoped<ITouristPreferencesGateway, TouristPreferencesGateway>();
+        services.AddScoped<ITourPublishNotificationService, StakeholdersTourPublishNotificationService>();
         services.AddScoped<ITourInfoGateway, TourInfoGateway>();
         services.AddScoped<IProfilePostRepository, ProfilePostDbRepository>();
         services.AddScoped<IClubPostRepository, ClubPostDbRepository>();

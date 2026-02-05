@@ -6,7 +6,6 @@ using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using Explorer.Tours.API.Public.Authoring;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 

@@ -26,8 +26,22 @@ namespace Explorer.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("me")]
+        public ActionResult<List<NotificationDto>> GetMine([FromQuery] int? limit = null)
+        {
+            var result = _notificationService.GetByRecipient(User.PersonId(), limit);
+            return Ok(result);
+        }
+
         [HttpPut("{notificationId:long}/mark-as-read")]
         public ActionResult<NotificationDto> MarkAsRead(long notificationId)
+        {
+            var result = _notificationService.MarkAsRead(notificationId);
+            return Ok(result);
+        }
+
+        [HttpPut("{notificationId:long}/read")]
+        public ActionResult<NotificationDto> MarkAsReadNew(long notificationId)
         {
             var result = _notificationService.MarkAsRead(notificationId);
             return Ok(result);

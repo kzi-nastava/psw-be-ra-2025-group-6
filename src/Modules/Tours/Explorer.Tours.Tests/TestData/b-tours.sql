@@ -124,3 +124,19 @@ VALUES
     0,
     '[]'::jsonb
 );
+
+INSERT INTO tours."Tours"
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
+VALUES
+(
+    -13,
+    'Nature Walk Easy',
+    'Lagana tura kroz prirodu',
+    0,
+    ARRAY['nature'],
+    0,
+    1,
+    4,
+    0,
+    '[]'::jsonb
+);

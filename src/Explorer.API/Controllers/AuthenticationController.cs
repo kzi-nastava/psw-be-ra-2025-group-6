@@ -1,4 +1,5 @@
-﻿using Explorer.Stakeholders.API.Dtos;
+using Explorer.API.Contracts;
+using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +25,16 @@ public class AuthenticationController : ControllerBase
     [HttpPost("login")]
     public ActionResult<AuthenticationTokensDto> Login([FromBody] CredentialsDto credentials)
     {
-        return Ok(_authenticationService.Login(credentials));
+        var tokens = _authenticationService.Login(credentials);
+        if (tokens == null)
+        {
+            return Unauthorized(ApiErrorFactory.Create(
+                HttpContext,
+                ApiErrorCodes.AuthRequired,
+                "Invalid credentials.",
+                "Check your username/password or create/seed a user before logging in."));
+        }
+
+        return Ok(tokens);
     }
 }

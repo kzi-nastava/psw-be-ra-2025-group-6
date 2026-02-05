@@ -31,5 +31,13 @@ namespace Explorer.Tours.API.Controllers.Tourist
             var tours = _tourService.GetAvailableForTourist(touristId);
             return Ok(tours);
         }
+
+        [HttpGet("available")]
+        public ActionResult<List<TourDto>> GetAvailableTours()
+        {
+            var touristId = User.PersonId();
+            var tours = _tourService.GetAvailableForTourist(touristId);
+            return Ok(tours);
+        }
     }
 }

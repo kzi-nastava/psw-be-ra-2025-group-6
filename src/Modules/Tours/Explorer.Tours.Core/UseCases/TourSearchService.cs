@@ -18,7 +18,7 @@ namespace Explorer.Tours.Core.UseCases
             _mapper = mapper;
         }
 
-        public async Task<IReadOnlyCollection<SearchItemDto>> SearchAsync(
+        public Task<IReadOnlyCollection<SearchItemDto>> SearchAsync(
             string query,
             ClaimsPrincipal user,
             long personId, string userRole)
@@ -30,7 +30,7 @@ namespace Explorer.Tours.Core.UseCases
     isAdmin ? "/tours/" :
                "/published-tours/";
 
-            return _tourRepository.GetAll()
+            var results = _tourRepository.GetAll()
                 .Where(t =>
                     (string.IsNullOrWhiteSpace(query) || t.Name.Contains(query)) &&
                     (
@@ -53,6 +53,8 @@ namespace Explorer.Tours.Core.UseCases
                     };
                 })
                 .ToList();
+
+            return Task.FromResult<IReadOnlyCollection<SearchItemDto>>(results);
         }
     }
 }

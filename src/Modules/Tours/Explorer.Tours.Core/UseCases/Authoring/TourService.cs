@@ -3,9 +3,11 @@ using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Payments.API.Internal;
 using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using System.Diagnostics;
 
 namespace Explorer.Tours.Core.UseCases.Authoring;
 
@@ -15,13 +17,20 @@ public class TourService : ITourService
     private readonly IEquipmentRepository _equipmentRepository;
     private readonly IMapper _mapper;
     private readonly IInternalTourPurchaseTokenService _tokenService;
+    private readonly ITourPublishNotificationService _publishNotificationService;
 
-    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper, IInternalTourPurchaseTokenService tokenService)
+    public TourService(
+        ITourRepository repository,
+        IEquipmentRepository equipmentRepository,
+        IMapper mapper,
+        IInternalTourPurchaseTokenService tokenService,
+        ITourPublishNotificationService publishNotificationService)
     {
         _tourRepository = repository;
         _equipmentRepository = equipmentRepository;
         _mapper = mapper;
         _tokenService = tokenService;
+        _publishNotificationService = publishNotificationService;
     }
 
     public List<TourDto> GetAll()
@@ -195,6 +204,15 @@ public class TourService : ITourService
         tour.Publish(authorId);
 
         _tourRepository.Update(tour);
+
+        try
+        {
+            _publishNotificationService.NotifyTourPublished(tour);
+        }
+        catch (Exception ex)
+        {
+            Trace.TraceError("Failed to generate tour publish notifications for tour {0}. {1}", tour.Id, ex);
+        }
 
         return _mapper.Map<TourDto>(tour);
     }

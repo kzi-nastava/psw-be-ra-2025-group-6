@@ -23,5 +23,31 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
                 .Where(n => n.RecipientId == recipientId && n.Status == NotificationStatus.Unread)
                 .ToList();
         }
+
+        public List<Notification> GetByRecipient(long recipientId, int? limit = null)
+        {
+            var query = _dbContext.Notifications
+                .Where(n => n.RecipientId == recipientId);
+
+            if (limit.HasValue)
+            {
+                return query
+                    .OrderByDescending(n => n.Timestamp)
+                    .Take(limit.Value)
+                    .ToList();
+            }
+
+            return query
+                .OrderByDescending(n => n.Timestamp)
+                .ToList();
+        }
+
+        public bool ExistsForRecipientAndReference(long recipientId, long referenceId, string title)
+        {
+            return _dbContext.Notifications.Any(n =>
+                n.RecipientId == recipientId &&
+                n.ReferenceId == referenceId &&
+                n.Title == title);
+        }
     }
 }

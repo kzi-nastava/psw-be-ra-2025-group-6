@@ -14,6 +14,7 @@ public class StakeholderMapperProfile : Profile
         CreateMap<PagedResult<TourProblemMessage>, PagedResult<TourProblemMessageDto>>().ReverseMap();
         CreateMap<NotificationDto, Notification>().ReverseMap();
         CreateMap<PagedResult<Notification>, PagedResult<NotificationDto>>().ReverseMap();
+        CreateMap<TouristPreferences, TouristPreferencesDto>().ReverseMap();
         CreateMap<CreateUserDto, Person>();
     }
 }

@@ -21,12 +21,12 @@ public class AuthenticationService : IAuthenticationService
         _userProfileRepository = userProfileRepository;
     }
 
-    public AuthenticationTokensDto Login(CredentialsDto credentials)
+    public AuthenticationTokensDto? Login(CredentialsDto credentials)
     {
         var user = _userRepository.GetActiveByName(credentials.Username);
         if (user == null || credentials.Password != user.Password)
         {
-            throw new UnauthorizedAccessException("Invalid credentials");
+            return null;
         }
 
         long personId;
