@@ -1,5 +1,6 @@
 ﻿using Explorer.BuildingBlocks.Tests;
 using Explorer.Encounters.Infrastructure.Database;
+using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -20,6 +21,10 @@ namespace Explorer.Encounters.Tests
             using var scope = Factory.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<EncountersContext>();
             ReseedDatabase(context);
+            
+            // Also ensure Stakeholders Notifications table has Type column
+            var stakeholdersContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+            EnsureNotificationsTypeColumn(stakeholdersContext);
         }
 
         private static void ReseedDatabase(EncountersContext context)
@@ -44,6 +49,30 @@ namespace Explorer.Encounters.Tests
                 Array.Sort(scriptFiles);
                 var script = string.Join('\n', scriptFiles.Select(File.ReadAllText));
                 context.Database.ExecuteSqlRaw(script);
+            }
+        }
+        
+        private static void EnsureNotificationsTypeColumn(StakeholdersContext context)
+        {
+            try
+            {
+                context.Database.ExecuteSqlRaw(@"
+                    DO $$
+                    BEGIN
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns 
+                            WHERE table_schema = 'stakeholders' 
+                            AND table_name = 'Notifications' 
+                            AND column_name = 'Type'
+                        ) THEN
+                            ALTER TABLE stakeholders.""Notifications"" ADD COLUMN ""Type"" integer NOT NULL DEFAULT 0;
+                        END IF;
+                    END $$;
+                ");
+            }
+            catch
+            {
+                // Column already exists or table doesn't exist yet
             }
         }
     }
