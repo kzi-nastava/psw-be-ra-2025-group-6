@@ -2,6 +2,7 @@ using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
+using Explorer.Encounters.API.Internal;
 using Explorer.Encounters.Core.Domain;
 using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
 
@@ -14,6 +15,7 @@ namespace Explorer.Encounters.Core.UseCases
         private readonly IChallengeRepository _challengeRepository;
         private readonly ITouristXpProfileRepository _xpProfileRepository;
         private readonly IEncounterCompletionRepository _encounterCompletionRepository;
+        private readonly IInternalLeaderboardService _leaderboardService;
         private readonly IMapper _mapper;
 
         public QuizEncounterService(
@@ -22,6 +24,7 @@ namespace Explorer.Encounters.Core.UseCases
             IChallengeRepository challengeRepository,
             ITouristXpProfileRepository xpProfileRepository,
             IEncounterCompletionRepository encounterCompletionRepository,
+            IInternalLeaderboardService leaderboardService,
             IMapper mapper)
         {
             _quizEncounterRepository = quizEncounterRepository;
@@ -29,6 +32,7 @@ namespace Explorer.Encounters.Core.UseCases
             _challengeRepository = challengeRepository;
             _xpProfileRepository = xpProfileRepository;
             _encounterCompletionRepository = encounterCompletionRepository;
+            _leaderboardService = leaderboardService;
             _mapper = mapper;
         }
 
@@ -259,14 +263,35 @@ namespace Explorer.Encounters.Core.UseCases
 
             if (isSuccessful)
             {
+                // Record encounter completion
                 var encounterCompletion = new EncounterCompletion(userId, dto.ChallengeId, xpAwarded);
                 _encounterCompletionRepository.Create(encounterCompletion);
 
+                // Update XP profile
                 var xpProfile = _xpProfileRepository.GetByUserId(userId);
                 if (xpProfile != null)
                 {
                     xpProfile.AddXP(xpAwarded);
                     _xpProfileRepository.Update(xpProfile);
+                }
+
+                // UPDATE LEADERBOARD STATS
+                var coinsEarned = xpAwarded / 2;
+                try
+                {
+                    Console.WriteLine($"[QUIZ ENCOUNTER] Updating leaderboard for user {userId}: XP={xpAwarded}, Challenges=1, Coins={coinsEarned}");
+                    _leaderboardService.UpdateUserStatsAsync(
+                        userId,
+                        xpGained: xpAwarded,
+                        challengesCompleted: 1,
+                        toursCompleted: 0,
+                        coinsEarned).GetAwaiter().GetResult();
+                    Console.WriteLine($"[QUIZ ENCOUNTER] Leaderboard updated successfully for user {userId}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[QUIZ ENCOUNTER] Error updating leaderboard for user {userId}: {ex.Message}");
+                    // Don't fail the completion if leaderboard update fails
                 }
             }
 

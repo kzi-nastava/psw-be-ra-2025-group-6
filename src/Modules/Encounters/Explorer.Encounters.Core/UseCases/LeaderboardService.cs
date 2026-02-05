@@ -73,7 +73,16 @@ public class LeaderboardService : ILeaderboardService
         if (entry == null)
         {
             // Create new entry if doesn't exist - use actual username
-            var username = _stakeholderService.GetUsername(userId);
+            string username;
+            try
+            {
+                username = _stakeholderService.GetUsername(userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                username = $"User_{userId}";
+            }
+            
             entry = new LeaderboardEntry(userId, username);
             entry = _leaderboardEntryRepository.Create(entry);
         }
@@ -98,7 +107,18 @@ public class LeaderboardService : ILeaderboardService
         if (entry == null)
         {
             // Create new entry with actual username if doesn't exist
-            var username = _stakeholderService.GetUsername(userId);
+            string username;
+            try
+            {
+                username = _stakeholderService.GetUsername(userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                // User not found in stakeholders, use default username
+                username = $"User_{userId}";
+                Console.WriteLine($"[LEADERBOARD] Warning: User {userId} not found in stakeholders, using default username");
+            }
+            
             entry = new LeaderboardEntry(userId, username);
             entry.UpdateStats(xpGained, challengesCompleted, toursCompleted, coinsEarned);
             _leaderboardEntryRepository.Create(entry);
@@ -226,7 +246,16 @@ public class LeaderboardService : ILeaderboardService
         if (entry == null)
         {
             // Create entry if doesn't exist
-            var username = _stakeholderService.GetUsername(userId);
+            string username;
+            try
+            {
+                username = _stakeholderService.GetUsername(userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                username = $"User_{userId}";
+            }
+            
             entry = new LeaderboardEntry(userId, username, clubId);
             _leaderboardEntryRepository.Create(entry);
         }
