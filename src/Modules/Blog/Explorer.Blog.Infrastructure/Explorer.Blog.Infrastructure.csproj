@@ -12,45 +12,8 @@
 		<ProjectReference Include="..\Explorer.Blog.Core\Explorer.Blog.Core.csproj" />
 	</ItemGroup>
 
-</Project>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
-</Project>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
-</Project>
-  </ItemGroup>
-
-</Project>
-  </ItemGroup>
-
-</Project>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
-</Project>
-  </ItemGroup>
-
-</Project>
-</Project>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
-</Project>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
-</Project>
-  </ItemGroup>
-
-</Project>
-
-</Project>
-  </ItemGroup>
-
-</Project>
-  </ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Migrations\" />
+	</ItemGroup>
 
 </Project>

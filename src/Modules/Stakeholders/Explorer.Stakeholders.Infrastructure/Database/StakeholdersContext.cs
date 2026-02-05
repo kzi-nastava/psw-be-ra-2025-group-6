@@ -19,14 +19,12 @@ public class StakeholdersContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<ProfilePost> ProfilePosts { get; set; }
     public DbSet<ClubPost> ClubPosts { get; set; }
-<<<<<<<<< Temporary merge branch 1
     public DbSet<SocialMessage> SocialMessages { get; set; }
     public DbSet<ClubMember> ClubMembers { get; set; }
+    public DbSet<ClubMembershipRequest> ClubMembershipRequests { get; set; }
 
     public DbSet<Achievement> Achievement { get; set; }
-=========
     public DbSet<ClubMember> ClubMembers { get; set; }
->>>>>>>>> Temporary merge branch 2
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
@@ -85,6 +83,8 @@ public class StakeholdersContext : DbContext
         j.ToTable("UserAchievements");
     });
 
+
+        modelBuilder.Entity<ClubMembershipRequest>().ToTable("ClubMembershipRequests");
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)

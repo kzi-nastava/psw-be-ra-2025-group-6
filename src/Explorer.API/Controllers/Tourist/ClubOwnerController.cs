@@ -44,21 +44,13 @@ namespace Explorer.API.Controllers.Tourist
             }
         }
 
-        /// <summary>
-        /// Get all members of the club - Owner only
-        /// </summary>
         [HttpGet("{clubId}/members")]
         public ActionResult<List<ClubMemberDto>> GetMembers(long clubId)
         {
             try
             {
-                var ownerId = User.PersonId();
-                var result = _clubService.GetMembers(clubId, ownerId);
+                var result = _clubService.GetMembers(clubId);
                 return Ok(result);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
             }
             catch (KeyNotFoundException ex)
             {

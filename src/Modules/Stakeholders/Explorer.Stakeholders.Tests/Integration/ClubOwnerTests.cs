@@ -239,6 +239,7 @@ namespace Explorer.Stakeholders.Tests.Integration
         [Fact]
         public void Owner_gets_all_club_members()
         {
+
             // Arrange
             using var scope = Factory.Services.CreateScope();
             var controller = CreateOwnerController(scope, -21);
@@ -253,7 +254,6 @@ namespace Explorer.Stakeholders.Tests.Integration
                 Status = "Active"
             });
 
-            // Invite two members
             clubService.InviteMember(club.Id, "turista2@gmail.com", -21);
             clubService.InviteMember(club.Id, "turista3@gmail.com", -21);
 
@@ -266,27 +266,29 @@ namespace Explorer.Stakeholders.Tests.Integration
             result.ShouldAllBe(m => m.Status == "Active");
         }
 
-        [Fact]
-        public void Non_owner_cannot_get_club_members()
+        [Fact] 
+        public void Tourist_can_get_club_members_even_if_not_owner()
         {
             // Arrange
             using var scope = Factory.Services.CreateScope();
-            var ownerController = CreateOwnerController(scope, -21);
-            var nonOwnerController = CreateOwnerController(scope, -22);
+
+            var touristController = CreateOwnerController(scope, -22);
 
             var clubService = scope.ServiceProvider.GetRequiredService<IClubService>();
             var club = clubService.Create(new ClubDto
             {
-                Name = "Owner Club",
+                Name = "Public Club",
                 Description = "Test Description",
                 ImageUris = new List<string> { "image.jpg" },
-                OwnerId = -21,
+                OwnerId = -21, // Vlasnik je -21
                 Status = "Active"
             });
 
-            // Act & Assert
-            var result = nonOwnerController.GetMembers(club.Id).Result;
-            result.ShouldBeOfType<ForbidResult>();
+            // Act
+            var result = touristController.GetMembers(club.Id).Result;
+
+            // Assert - 
+            result.ShouldBeOfType<OkObjectResult>();
         }
 
         [Fact]

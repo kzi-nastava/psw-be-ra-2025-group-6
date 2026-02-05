@@ -50,5 +50,7 @@ public class StakeholderProfile : Profile
         CreateMap<ClubMember, ClubMemberDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
             .ReverseMap();
+        CreateMap<ClubMembershipRequest, ClubMembershipRequestDto>().ReverseMap();
+        CreateMap<ClubMember, ClubMemberDto>().ReverseMap();
     }
 }
