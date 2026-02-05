@@ -5,6 +5,8 @@ using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using Shared;
+using Shared.Achievements;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,22 +18,34 @@ public class ProfilePostService : IProfilePostService
     private readonly ITourInfoGateway _tourInfoGateway;
     private readonly IBlogInfoGateway _blogInfoGateway;
     private readonly IMapper _mapper;
+    private readonly IDomainEventDispatcher _eventDispatcher;
 
-    public ProfilePostService(IProfilePostRepository repository, ITourInfoGateway tourInfoGateway, IBlogInfoGateway blogInfoGateway, IMapper mapper)
+    public ProfilePostService(IProfilePostRepository repository, ITourInfoGateway tourInfoGateway, IBlogInfoGateway blogInfoGateway, IMapper mapper, IDomainEventDispatcher eventDispatcher)
     {
         _repository = repository;
         _tourInfoGateway = tourInfoGateway;
         _blogInfoGateway = blogInfoGateway;
         _mapper = mapper;
+        _eventDispatcher = eventDispatcher;
     }
 
     public ProfilePostDto Create(ProfilePostDto dto)
     {
         ValidateResource(dto).GetAwaiter().GetResult();
-        var entity = new ProfilePost(dto.AuthorId, dto.Text, MapResourceType(dto.ResourceType), dto.ResourceId);
+
+        HandleProfilePostAchievements(dto.AuthorId);
+
+        var entity = new ProfilePost(
+            dto.AuthorId,
+            dto.Text,
+            MapResourceType(dto.ResourceType),
+            dto.ResourceId
+        );
+
         var created = _repository.Create(entity);
         return _mapper.Map<ProfilePostDto>(created);
     }
+
 
     public ProfilePostDto Update(ProfilePostDto dto)
     {
@@ -97,4 +111,23 @@ public class ProfilePostService : IProfilePostService
     {
         return dto.HasValue ? (ProfileResourceType?)dto.Value : null;
     }
+
+    private void HandleProfilePostAchievements(long authorId)
+    {
+        var postCount = GetByAuthor(authorId).Count;
+
+        if (postCount == 0)
+        {
+            _eventDispatcher
+                .DispatchAsync(new AchievementUnlockedEvent(authorId, 17))
+                .GetAwaiter().GetResult();
+        }
+        else if (postCount == 9)
+        {
+            _eventDispatcher
+                .DispatchAsync(new AchievementUnlockedEvent(authorId, 18))
+                .GetAwaiter().GetResult();
+        }
+    }
+
 }

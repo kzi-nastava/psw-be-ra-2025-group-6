@@ -130,14 +130,24 @@ namespace Explorer.Encounters.Core.UseCases
             var completion = new EncounterCompletion(userId, request.ChallengeId, challenge.XP);
             _completionRepository.Create(completion);
 
-            // ? UPDATE LEADERBOARD STATS ?
+            // UPDATE LEADERBOARD STATS - with proper error handling
             var coinsEarned = challenge.XP / 2;
-            _ = _leaderboardService.UpdateUserStatsAsync(
-                userId,
-                xpGained: challenge.XP,
-                challengesCompleted: 1,
-                toursCompleted: 0,
-                coinsEarned);
+            try
+            {
+                Console.WriteLine($"[MISC ENCOUNTER] Updating leaderboard for user {userId}: XP={challenge.XP}, Challenges=1, Coins={coinsEarned}");
+                _leaderboardService.UpdateUserStatsAsync(
+                    userId,
+                    xpGained: challenge.XP,
+                    challengesCompleted: 1,
+                    toursCompleted: 0,
+                    coinsEarned).GetAwaiter().GetResult();
+                Console.WriteLine($"[MISC ENCOUNTER] Leaderboard updated successfully for user {userId}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MISC ENCOUNTER] Error updating leaderboard for user {userId}: {ex.Message}");
+                // Don't fail the completion if leaderboard update fails
+            }
 
             return new CompleteEncounterResponseDto
             {

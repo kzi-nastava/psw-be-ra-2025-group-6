@@ -5,6 +5,8 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Execution;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Shared;
+using Shared.Achievements;
 using Explorer.Encounters.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Execution;
@@ -16,6 +18,7 @@ public class TourExecutionService : ITourExecutionService
     private readonly IInternalTourPurchaseTokenService _tokenService;
     private readonly IInternalLeaderboardService _leaderboardService;
     private readonly IMapper _mapper;
+    private readonly IDomainEventDispatcher _eventDispatcher;
     private const double ProximityThresholdMeters = 50.0;
 
     public TourExecutionService(
@@ -23,13 +26,14 @@ public class TourExecutionService : ITourExecutionService
         ITourExecutionRepository executionRepository,
         IInternalTourPurchaseTokenService tokenService,
         IInternalLeaderboardService leaderboardService,
-        IMapper mapper)
+        IMapper mapper, IDomainEventDispatcher eventDispatcher)
     {
         _tourRepository = tourRepository;
         _executionRepository = executionRepository;
         _tokenService = tokenService;
         _leaderboardService = leaderboardService;
         _mapper = mapper;
+        _eventDispatcher = eventDispatcher;
     }
 
     public TourExecutionStartResultDto StartExecution(TourExecutionStartDto dto, long touristId)
@@ -44,10 +48,35 @@ public class TourExecutionService : ITourExecutionService
             throw new InvalidOperationException("Tour must be purchased before starting. Please add it to your cart and checkout.");
 
 
+        // ACHIEVEMENTS:
+        var previousExecutions = _executionRepository.GetAll(touristId).Count;
+
+
+        if (previousExecutions == 0)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(touristId, 1)).GetAwaiter().GetResult();
+
+
+        if (previousExecutions == 4)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(touristId, 2)).GetAwaiter().GetResult();
+
+
+        if (previousExecutions == 19)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(touristId, 3)).GetAwaiter().GetResult();
+
+        var now = DateTime.Now;
+        var hour = now.Hour;
+
+        //00:00 - 03:00 
+        if (hour >= 0 && hour < 3)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(touristId, 19)).GetAwaiter().GetResult();
+
+        //  03:00 - 06:00 
+        if (hour >= 3 && hour < 6)
+            _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(touristId, 20)).GetAwaiter().GetResult();
+
+
         var initial = new TrackPoint(dto.Latitude, dto.Longitude);
-
         var execution = new TourExecution(dto.TourId, touristId, initial);
-
         var created = _executionRepository.Create(execution);
 
         KeyPointDto? firstKeyPoint = null;
@@ -84,6 +113,7 @@ public class TourExecutionService : ITourExecutionService
         };
     }
 
+
     public TourExecutionStartResultDto? GetActiveExecution(long touristId, long? tourId = null)
     {
         var execution = _executionRepository.GetActiveForTourist(touristId, tourId);
@@ -99,7 +129,6 @@ public class TourExecutionService : ITourExecutionService
             var orderedKeyPoints = tour.KeyPoints.OrderBy(kp => kp.Id).ToList();
             var completedIds = execution.CompletedKeyPoints.Select(ckp => ckp.KeyPointId).ToHashSet();
             
-            // Find the NEXT uncompleted key point (not the first one!)
             var nextKp = orderedKeyPoints.FirstOrDefault(kp => !completedIds.Contains(kp.Id));
             
             if (nextKp != null)
@@ -128,7 +157,7 @@ public class TourExecutionService : ITourExecutionService
             Status = execution.Status.ToString(),
             StartTime = execution.StartTime,
             InitialPosition = new TrackPointDto { Latitude = execution.InitialPosition.Latitude, Longitude = execution.InitialPosition.Longitude },
-            FirstKeyPoint = nextKeyPoint,  // This is actually the NEXT key point now
+            FirstKeyPoint = nextKeyPoint,
             RouteToFirstKeyPoint = route
         };
     }
@@ -149,7 +178,9 @@ public class TourExecutionService : ITourExecutionService
                 KeyPointCompleted = false,
                 ProgressPercentage = execution.ProgressPercentage,
                 LastActivity = execution.LastActivity,
-                AllCompletedKeyPoints = new List<CompletedKeyPointDto>()
+                AllCompletedKeyPoints = new List<CompletedKeyPointDto>(),
+                HasAvailableChallenges = false,
+                AvailableChallengeIds = new List<long>()
             };
         }
 
@@ -204,7 +235,6 @@ public class TourExecutionService : ITourExecutionService
             };
         }
 
-        // Map all completed key points
         var allCompletedKeyPoints = execution.CompletedKeyPoints
             .Select(ckp => new CompletedKeyPointDto
             {
@@ -222,7 +252,9 @@ public class TourExecutionService : ITourExecutionService
             ProgressPercentage = execution.ProgressPercentage,
             NextKeyPoint = nextKeyPointDto,
             LastActivity = execution.LastActivity,
-            AllCompletedKeyPoints = allCompletedKeyPoints
+            AllCompletedKeyPoints = allCompletedKeyPoints,
+            HasAvailableChallenges = nearbyKeyPoint != null,
+            AvailableChallengeIds = new List<long>()
         };
     }
 
@@ -255,7 +287,6 @@ public class TourExecutionService : ITourExecutionService
         execution.Complete();
         _executionRepository.Update(execution);
 
-        // Mark token as used ONLY when tour is completed (not abandoned)
         _tokenService.MarkTokenAsUsed(touristId, execution.TourId);
 
         // ? UPDATE LEADERBOARD STATS ?
@@ -346,7 +377,6 @@ public class TourExecutionService : ITourExecutionService
     {
         if (orderedKeyPoints.Count == 0) return 0;
 
-        // Simple percentage: (completed / total) * 100
         var completedCount = completedKeyPoints.Count;
         var totalCount = orderedKeyPoints.Count;
 
