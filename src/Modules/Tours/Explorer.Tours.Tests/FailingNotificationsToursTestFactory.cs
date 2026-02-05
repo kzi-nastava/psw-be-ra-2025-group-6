@@ -1,5 +1,5 @@
-using Explorer.Tours.Core.Domain;
-using Explorer.Tours.Core.UseCases.Authoring;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public.Authoring;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,7 +25,7 @@ public class FailingNotificationsToursTestFactory : ToursTestFactory
 
 public class FailingTourPublishNotificationService : ITourPublishNotificationService
 {
-    public void NotifyTourPublished(Tour tour)
+    public void NotifyTourPublished(TourDto tour)
     {
         throw new InvalidOperationException("Simulated notification failure.");
     }

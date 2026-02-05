@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Search;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,8 +24,9 @@ builder.Services.AddScoped<ISearchService, SearchService>();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Test"))
 {
+    using var scope = app.Services.CreateScope();
     var stakeholdersDb = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
     MigrateWithBaselineIfNeeded(stakeholdersDb, "stakeholders", "20260102064851_Init", "Users");
 }
@@ -59,7 +61,14 @@ static void MigrateWithBaselineIfNeeded(DbContext db, string schema, string base
 
     if (!historyExists)
     {
-        db.Database.ExecuteSqlRaw(history.GetCreateScript());
+        try
+        {
+            db.Database.ExecuteSqlRaw(history.GetCreateScript());
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.DuplicateTable)
+        {
+            // Parallel test runs can race here; ignore if another instance created the table.
+        }
     }
 
     var historyHasRows = TableHasAnyRows(connection, schema, "__EFMigrationsHistory");
@@ -68,7 +77,14 @@ static void MigrateWithBaselineIfNeeded(DbContext db, string schema, string base
     if (!historyHasRows && hasSentinelTable)
     {
         var productVersion = db.Model.GetProductVersion() ?? "8.0.0";
-        db.Database.ExecuteSqlRaw(history.GetInsertScript(new HistoryRow(baselineMigrationId, productVersion)));
+        try
+        {
+            db.Database.ExecuteSqlRaw(history.GetInsertScript(new HistoryRow(baselineMigrationId, productVersion)));
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+        {
+            // Parallel test runs can race to insert the same baseline row.
+        }
     }
 
     db.Database.Migrate();

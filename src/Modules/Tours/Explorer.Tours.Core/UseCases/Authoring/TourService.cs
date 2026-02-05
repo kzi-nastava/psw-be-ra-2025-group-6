@@ -35,7 +35,8 @@ public class TourService : ITourService
 
     public List<TourDto> GetAll()
     {
-        var result = _tourRepository.GetAll();
+        var result = _tourRepository.GetAll()
+            .Where(t => t.Status != TourStatus.ARCHIVED);
 
         var items = _mapper.Map<List<TourDto>>(result);
         return new List<TourDto>(items);
@@ -43,10 +44,21 @@ public class TourService : ITourService
 
     public PagedResult<TourDto> GetPaged(int page, int pageSize)
     {
-        var result = _tourRepository.GetPaged(page, pageSize);
+        var result = _tourRepository.GetAll()
+            .Where(t => t.Status != TourStatus.ARCHIVED)
+            .OrderBy(t => t.Id);
 
-        var items = result.Results.Select(_mapper.Map<TourDto>).ToList();
-        return new PagedResult<TourDto>(items, result.TotalCount);
+        var realPage = page < 1 ? 1 : page;
+        var realPageSize = pageSize < 1 ? 10 : pageSize;
+
+        var totalCount = result.Count();
+        var items = result
+            .Skip((realPage - 1) * realPageSize)
+            .Take(realPageSize)
+            .Select(_mapper.Map<TourDto>)
+            .ToList();
+
+        return new PagedResult<TourDto>(items, totalCount);
     }
 
     public List<TourDto> GetByAuthorId(long authorId)
@@ -207,7 +219,7 @@ public class TourService : ITourService
 
         try
         {
-            _publishNotificationService.NotifyTourPublished(tour);
+            _publishNotificationService.NotifyTourPublished(_mapper.Map<TourDto>(tour));
         }
         catch (Exception ex)
         {

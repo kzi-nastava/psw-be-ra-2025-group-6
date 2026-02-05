@@ -1,6 +1,7 @@
 using Explorer.API.Contracts;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers;
@@ -28,8 +29,9 @@ public class AuthenticationController : ControllerBase
         var tokens = _authenticationService.Login(credentials);
         if (tokens == null)
         {
+            var context = HttpContext ?? new DefaultHttpContext();
             return Unauthorized(ApiErrorFactory.Create(
-                HttpContext,
+                context,
                 ApiErrorCodes.AuthRequired,
                 "Invalid credentials.",
                 "Check your username/password or create/seed a user before logging in."));

@@ -1,5 +1,5 @@
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using Explorer.Tours.Core.UseCases.Tourist;
+using Explorer.Tours.API.Public.Tourist;
 using System.Collections.Generic;
 using System.Linq;
 

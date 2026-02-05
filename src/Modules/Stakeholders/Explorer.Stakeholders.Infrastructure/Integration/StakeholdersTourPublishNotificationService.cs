@@ -1,8 +1,8 @@
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using Explorer.Tours.Core.Domain;
-using Explorer.Tours.Core.UseCases.Authoring;
-using Explorer.Tours.Core.UseCases.Tourist;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public.Authoring;
+using Explorer.Tours.API.Public.Tourist;
 
 namespace Explorer.Stakeholders.Infrastructure.Integration;
 
@@ -20,7 +20,7 @@ public class StakeholdersTourPublishNotificationService : ITourPublishNotificati
         _notificationRepository = notificationRepository;
     }
 
-    public void NotifyTourPublished(Tour tour)
+    public void NotifyTourPublished(TourDto tour)
     {
         var preferences = _preferencesRepository.GetAll();
         foreach (var preference in preferences)
