@@ -115,7 +115,7 @@ public class StakeholdersContext : DbContext
             builder.Property(p => p.Tags).HasColumnType("text[]");
             builder.HasIndex(p => p.TouristId).IsUnique();
             builder
-                .HasOne<User>()
+                .HasOne<Person>()
                 .WithOne()
                 .HasForeignKey<TouristPreferences>(p => p.TouristId)
                 .OnDelete(DeleteBehavior.Cascade);

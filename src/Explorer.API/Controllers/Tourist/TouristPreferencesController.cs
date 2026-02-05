@@ -27,7 +27,7 @@ public class TouristPreferencesController : ControllerBase
     [HttpGet("me")]
     public ActionResult<TouristPreferencesDto> GetMine()
     {
-        var touristId = User.UserId();
+        var touristId = User.PersonId();
         var result = _preferencesService.GetByTouristId(touristId);
         _logger.LogDebug("TouristPreferences GET /me: touristId used: {TouristId}, found: {Found}", touristId, result != null);
         if (result == null)
@@ -42,7 +42,9 @@ public class TouristPreferencesController : ControllerBase
                 BoatRating = 0,
                 Tags = new List<string>(),
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                LastSeenRecommendationsAt = null,
+                LastNotifiedAt = null
             });
         }
 
@@ -52,7 +54,7 @@ public class TouristPreferencesController : ControllerBase
     [HttpPut("me")]
     public ActionResult<TouristPreferencesDto> UpsertMine([FromBody] TouristPreferencesUpsertDto dto)
     {
-        var touristId = User.UserId();
+        var touristId = User.PersonId();
         var result = _preferencesService.Upsert(touristId, dto);
         _logger.LogDebug("TouristPreferences PUT /me: touristId used: {TouristId}", touristId);
         return Ok(result);
@@ -61,7 +63,25 @@ public class TouristPreferencesController : ControllerBase
     [HttpDelete("me")]
     public IActionResult DeleteMine()
     {
-        _preferencesService.Delete(User.UserId());
+        _preferencesService.Delete(User.PersonId());
         return NoContent();
+    }
+
+    [HttpGet]
+    public ActionResult<TouristPreferencesDto> GetMineAlias()
+    {
+        return GetMine();
+    }
+
+    [HttpPut]
+    public ActionResult<TouristPreferencesDto> UpsertMineAlias([FromBody] TouristPreferencesUpsertDto dto)
+    {
+        return UpsertMine(dto);
+    }
+
+    [HttpDelete]
+    public IActionResult DeleteMineAlias()
+    {
+        return DeleteMine();
     }
 }

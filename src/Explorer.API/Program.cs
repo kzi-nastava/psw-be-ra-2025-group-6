@@ -1,4 +1,5 @@
 using Explorer.API.Middleware;
+using Explorer.API.Recommendations;
 using Explorer.API.Startup;
 using System.Data;
 using System.Data.Common;
@@ -21,6 +22,8 @@ builder.Services.ConfigureAuth();
 builder.Services.RegisterModules();
 
 builder.Services.AddScoped<ISearchService, SearchService>();
+builder.Services.Configure<RecommendationsOptions>(builder.Configuration.GetSection("Recommendations"));
+builder.Services.AddSingleton<InMemoryRecommendationsStore>();
 
 var app = builder.Build();
 

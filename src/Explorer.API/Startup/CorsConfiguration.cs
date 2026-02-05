@@ -12,7 +12,7 @@ public static class CorsConfiguration
                 builder =>
                 {
                     builder.WithOrigins(ParseCorsOrigins())
-                        .WithHeaders(HeaderNames.ContentType, HeaderNames.Authorization, "access_token")
+                        .WithHeaders(HeaderNames.ContentType, HeaderNames.Authorization, "access_token", "x-suppress-notification")
                         .WithMethods("GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS");
                 });
         });

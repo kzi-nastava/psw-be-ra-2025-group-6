@@ -42,6 +42,48 @@ public class TouristPreferencesIntegrationTests : BaseStakeholdersIntegrationTes
     }
 
     [Fact]
+    public async Task Tourist_can_update_preferences()
+    {
+        using var client = CreateClient();
+        await Authenticate(client, "turista1@gmail.com", "turista1");
+
+        var first = new TouristPreferencesUpsertDto
+        {
+            PreferredDifficulty = 1,
+            WalkRating = 3,
+            BikeRating = 1,
+            CarRating = 2,
+            BoatRating = 0,
+            Tags = new List<string> { "city", "river" }
+        };
+
+        var second = new TouristPreferencesUpsertDto
+        {
+            PreferredDifficulty = 0,
+            WalkRating = 2,
+            BikeRating = 2,
+            CarRating = 1,
+            BoatRating = 1,
+            Tags = new List<string> { "nature" }
+        };
+
+        var firstResponse = await client.PutAsJsonAsync("/api/tourist/preferences", first);
+        firstResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var secondResponse = await client.PutAsJsonAsync("/api/tourist/preferences", second);
+        secondResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var getResponse = await client.GetAsync("/api/tourist/preferences");
+        getResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var result = await getResponse.Content.ReadFromJsonAsync<TouristPreferencesDto>();
+        result.ShouldNotBeNull();
+        result.PreferredDifficulty.ShouldBe(0);
+        result.WalkRating.ShouldBe(2);
+        result.Tags.ShouldContain("nature");
+    }
+
+    [Fact]
     public async Task Non_tourist_cannot_access_preferences()
     {
         using var client = CreateClient();

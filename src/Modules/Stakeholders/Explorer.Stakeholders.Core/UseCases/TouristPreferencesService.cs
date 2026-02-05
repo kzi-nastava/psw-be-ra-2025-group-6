@@ -61,6 +61,24 @@ public class TouristPreferencesService : ITouristPreferencesService
         _repository.Delete(existing.Id);
     }
 
+    public TouristPreferencesDto? MarkRecommendationsSeen(long touristId, DateTime seenAt)
+    {
+        var existing = _repository.GetByTouristId(touristId);
+        if (existing == null) return null;
+        existing.MarkRecommendationsSeen(seenAt);
+        var updated = _repository.Update(existing);
+        return _mapper.Map<TouristPreferencesDto>(updated);
+    }
+
+    public TouristPreferencesDto? MarkRecommendationsNotified(long touristId, DateTime notifiedAt)
+    {
+        var existing = _repository.GetByTouristId(touristId);
+        if (existing == null) return null;
+        existing.MarkRecommendationsNotified(notifiedAt);
+        var updated = _repository.Update(existing);
+        return _mapper.Map<TouristPreferencesDto>(updated);
+    }
+
     private static List<string> NormalizeTags(IEnumerable<string>? tags)
     {
         if (tags == null) return new List<string>();

@@ -15,6 +15,24 @@ public class TouristPreferencesSnapshot
     public int CarRating { get; init; }
     public int BoatRating { get; init; }
     public List<string> Tags { get; init; } = new();
+    public DateTime? LastSeenRecommendationsAt { get; init; }
+    public DateTime? LastNotifiedAt { get; init; }
+}
+
+public class TourRecommendationsDto
+{
+    public List<long> TourIds { get; init; } = new();
+    public List<long> NewTourIds { get; init; } = new();
+}
+
+public class TourRecommendationSummary
+{
+    public List<long> TourIds { get; init; } = new();
+    public List<long> NewTourIds { get; init; } = new();
+    public int NewMatchingCount { get; init; }
+    public DateTime? NewestMatchingPublishedAt { get; init; }
+    public long? NewestMatchingTourId { get; init; }
+    public long? NewestMatchingTourAuthorId { get; init; }
 }
 
 public static class TourRecommendationScoring

@@ -21,7 +21,50 @@ public class TourRecommendationService(
     public List<TourDto> GetRecommended(long touristId, int limit)
     {
         var preferences = _preferencesGateway.GetByTouristId(touristId);
-        _logger.LogDebug("TourRecommendations: touristId={TouristId} preferencesFound={Found}", touristId, preferences != null);
+        var recommended = GetRecommendedTours(preferences);
+        if (limit <= 0) limit = 6;
+        return recommended.Take(limit).ToList();
+    }
+
+    public TourRecommendationSummary GetRecommendationSummary(long touristId, int? limit = null)
+    {
+        var preferences = _preferencesGateway.GetByTouristId(touristId);
+        var recommended = GetRecommendedTours(preferences);
+        if (recommended.Count == 0)
+        {
+            return new TourRecommendationSummary();
+        }
+
+        var lastSeen = preferences?.LastSeenRecommendationsAt ?? DateTime.MinValue;
+        var newTours = recommended
+            .Where(t => (t.PublishedTime ?? DateTime.MinValue) > lastSeen)
+            .ToList();
+
+        var newestNewTour = newTours
+            .OrderByDescending(t => t.PublishedTime ?? DateTime.MinValue)
+            .FirstOrDefault();
+
+        var limited = limit.HasValue ? recommended.Take(limit.Value).ToList() : recommended;
+        var limitedIds = limited.Select(t => t.Id).ToList();
+        var newLimitedIds = limited
+            .Where(t => (t.PublishedTime ?? DateTime.MinValue) > lastSeen)
+            .Select(t => t.Id)
+            .ToList();
+
+        return new TourRecommendationSummary
+        {
+            TourIds = limitedIds,
+            NewTourIds = newLimitedIds,
+            NewMatchingCount = newTours.Count,
+            NewestMatchingPublishedAt = newestNewTour?.PublishedTime,
+            NewestMatchingTourId = newestNewTour?.Id,
+            NewestMatchingTourAuthorId = newestNewTour?.AuthorId
+        };
+    }
+
+    private List<TourDto> GetRecommendedTours(TouristPreferencesSnapshot? preferences)
+    {
+        _logger.LogDebug("TourRecommendations: preferencesFound={Found}", preferences != null);
         if (preferences == null) return new List<TourDto>();
 
         var tours = _tourRepository.GetPublishedTours();
@@ -42,7 +85,8 @@ public class TourRecommendationService(
                     tour.Id, tags, tour.Difficulty, tour.PublishedTime, matchedTagsCount, difficultyMatch, travelMatch, score);
             }
         }
-        var scored = tourDtos
+
+        return tourDtos
             .Select(t => new
             {
                 Tour = t,
@@ -51,10 +95,7 @@ public class TourRecommendationService(
             .Where(x => x.Score >= TourRecommendationScoring.RecommendationThreshold)
             .OrderByDescending(x => x.Score)
             .ThenByDescending(x => x.Tour.PublishedTime ?? DateTime.MinValue)
-            .Take(limit)
             .Select(x => x.Tour)
             .ToList();
-
-        return scored;
     }
 }

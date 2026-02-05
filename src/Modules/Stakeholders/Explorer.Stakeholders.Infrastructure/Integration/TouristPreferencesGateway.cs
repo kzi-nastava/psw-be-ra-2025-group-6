@@ -26,7 +26,9 @@ public class TouristPreferencesGateway : ITouristPreferencesGateway
             BikeRating = preferences.BikeRating,
             CarRating = preferences.CarRating,
             BoatRating = preferences.BoatRating,
-            Tags = NormalizeTags(preferences.Tags)
+            Tags = NormalizeTags(preferences.Tags),
+            LastSeenRecommendationsAt = preferences.LastSeenRecommendationsAt,
+            LastNotifiedAt = preferences.LastNotifiedAt
         };
     }
 

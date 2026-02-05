@@ -22,7 +22,7 @@ public class TourRecommendationsController : ControllerBase
     public ActionResult<List<TourDto>> GetRecommended([FromQuery] int limit = 6)
     {
         if (limit <= 0) limit = 6;
-        var result = _recommendationService.GetRecommended(User.UserId(), limit);
+        var result = _recommendationService.GetRecommended(User.PersonId(), limit);
         return Ok(result);
     }
 }

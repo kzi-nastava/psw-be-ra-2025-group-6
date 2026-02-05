@@ -18,6 +18,8 @@ public class TouristPreferences : Entity
     public List<string> Tags { get; private set; } = new();
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    public DateTime? LastSeenRecommendationsAt { get; private set; }
+    public DateTime? LastNotifiedAt { get; private set; }
 
     private TouristPreferences() { }
 
@@ -39,6 +41,8 @@ public class TouristPreferences : Entity
         Tags = tags ?? new List<string>();
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+        LastSeenRecommendationsAt = null;
+        LastNotifiedAt = null;
         Validate();
     }
 
@@ -58,6 +62,18 @@ public class TouristPreferences : Entity
         Tags = tags ?? new List<string>();
         UpdatedAt = DateTime.UtcNow;
         Validate();
+    }
+
+    public void MarkRecommendationsSeen(DateTime seenAt)
+    {
+        LastSeenRecommendationsAt = seenAt;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void MarkRecommendationsNotified(DateTime notifiedAt)
+    {
+        LastNotifiedAt = notifiedAt;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     private void Validate()
