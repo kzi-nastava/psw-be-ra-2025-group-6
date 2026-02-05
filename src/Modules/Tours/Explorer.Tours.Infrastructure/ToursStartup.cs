@@ -1,5 +1,6 @@
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Payments.API.Internal;
+using Explorer.Tours.API.Internal;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Admin;
 using Explorer.Tours.API.Public.Administration;
@@ -55,6 +56,7 @@ public static class ToursStartup
         services.AddScoped<IKeyPointService, KeyPointService>();
         services.AddScoped<ITourReviewService, TourReviewService>();
         services.AddScoped<ITourPlannerService, TourPlannerService>();
+        services.AddScoped<ITourCheckpointPlanService, TourCheckpointPlanService>();
 
         services.AddScoped<ITouristViewService, TouristViewService>();
         services.AddScoped<IQuizService, QuizService>();
@@ -64,6 +66,7 @@ public static class ToursStartup
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<ITourDataProvider, TourDataProvider>();
+        services.AddScoped<ISaleInfoProvider, SaleInfoProvider>();
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
         services.AddScoped<IJournalRepository, JournalDbRepository>();
@@ -75,12 +78,14 @@ public static class ToursStartup
         services.AddScoped<IPublicEntityRequestRepository, PublicEntityRequestDbRepository>();
         services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
         services.AddScoped<ITourPlannerRepository, TourPlannerDbRepository>();
+        services.AddScoped<ITourCheckpointPlanRepository, TourCheckpointPlanDbRepository>();
 
 
         // Repo for executions
         services.AddScoped<Core.Domain.RepositoryInterfaces.ITourExecutionRepository, Tours.Infrastructure.Database.Repositories.TourExecutionDbRepository>();
 
         services.AddScoped<IQuizRepository, QuizDbRepository>();
+        services.AddScoped<ITourReviewHelpfulRepository, TourReviewHelpfulDbRepository>();
 
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));

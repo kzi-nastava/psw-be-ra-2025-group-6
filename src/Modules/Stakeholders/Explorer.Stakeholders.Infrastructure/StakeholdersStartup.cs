@@ -1,6 +1,7 @@
 using Explorer.BuildingBlocks.Core.Integration;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Payments.API.Internal;
 using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.API.Services;
@@ -10,6 +11,7 @@ using Explorer.Stakeholders.Core.UseCases;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Stakeholders.Infrastructure.Database.Repositories;
+using Explorer.Stakeholders.Infrastructure.DataProviders;
 using Explorer.Stakeholders.Infrastructure.Integration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,6 +52,7 @@ public static class StakeholdersStartup
         services.AddScoped<IClubMembershipService, TemporaryClubMembershipService>();
 
         services.AddScoped<IInternalStakeholderService, InternalStakeholdersService>();
+        services.AddScoped<INotificationDataProvider, NotificationDataProvider>();
 
         services.AddScoped<ISocialMessageService, SocialMessageService>();
 
@@ -66,6 +69,7 @@ public static class StakeholdersStartup
         services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
         services.AddScoped<IReviewAppRepository, ReviewAppDbRepository>();
         services.AddScoped<IClubRepository, ClubDbRepository>();
+        services.AddScoped<IClubMemberRepository, ClubMemberDbRepository>();
         services.AddScoped<ITouristPositionRepository, TouristPositionRepository>();
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
         services.AddScoped<ITourProblemMessageRepository, TourProblemMessageDatabaseRepository>();

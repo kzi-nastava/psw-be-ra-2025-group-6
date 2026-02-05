@@ -7,6 +7,7 @@ using Explorer.Tours.Core.UseCases.Tourist;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using Explorer.BuildingBlocks.Core.UseCases;
 
 namespace Explorer.Tours.API.Controllers.Tourist
 {
@@ -30,6 +31,21 @@ namespace Explorer.Tours.API.Controllers.Tourist
             var touristId = User.PersonId();
             var tours = _tourService.GetAvailableForTourist(touristId);
             return Ok(tours);
+        }
+
+        [HttpGet("available")]
+        public ActionResult<PagedResult<TourDto>> GetAvailableTours([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var touristId = User.PersonId();
+            var tours = _tourService.GetAvailableForTouristPaged(touristId, page, pageSize);
+            return Ok(tours);
+        }
+
+        [HttpGet("{id:long}/key-points")]
+        public ActionResult<List<KeyPointDto>> GetKeyPoints(long id)
+        {
+            var tour = _tourService.Get(id);
+            return Ok(tour.KeyPoints ?? new List<KeyPointDto>());
         }
     }
 }

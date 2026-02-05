@@ -175,6 +175,11 @@ public class TourController : ControllerBase
         }
     }
 
-
-
+    [AllowAnonymous]
+    [HttpGet("public")]
+    public ActionResult<List<TourDto>> GetPublishedTours()
+    {
+        var result = _tourService.GetPublished();
+        return Ok(result);
+    }
 }

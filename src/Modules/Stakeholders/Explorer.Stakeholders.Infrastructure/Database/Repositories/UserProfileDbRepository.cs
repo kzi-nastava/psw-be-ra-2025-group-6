@@ -78,4 +78,8 @@ public class UserProfileDbRepository : IUserProfileRepository
         _dbContext.SaveChanges();
     }
 
+    public List<UserProfile> GetAll()
+    {
+        return _dbContext.UserProfiles.ToList();
+    }
 }

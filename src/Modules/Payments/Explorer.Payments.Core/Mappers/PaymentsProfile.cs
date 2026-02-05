@@ -8,8 +8,22 @@ public class PaymentsProfile : Profile
 {
     public PaymentsProfile()
     {
-        CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
+        CreateMap<ShoppingCart, ShoppingCartDto>()
+            .ForMember(dest => dest.BundleItems, opt => opt.MapFrom(src => src.BundleItems))
+            .ReverseMap();
+        
         CreateMap<OrderItem, OrderItemDto>().ReverseMap();
+        CreateMap<BundleOrderItem, BundleOrderItemDto>().ReverseMap();
         CreateMap<TourPurchaseToken, TourPurchaseTokenDto>().ReverseMap();
+        CreateMap<Wallet, WalletDto>().ReverseMap();
+        
+        CreateMap<Bundle, BundleDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ReverseMap()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<BundleStatus>(src.Status)));
+        
+        CreateMap<Coupon, CouponDto>().ReverseMap();
+        CreateMap<Sale, SaleDto>().ReverseMap();
+        CreateMap<PaymentRecord, PaymentRecordDto>().ReverseMap();
     }
 }

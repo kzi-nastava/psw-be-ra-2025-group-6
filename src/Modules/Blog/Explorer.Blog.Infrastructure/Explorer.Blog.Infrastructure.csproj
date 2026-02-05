@@ -1,15 +1,56 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\BuildingBlocks\Explorer.BuildingBlocks.Infrastructure\Explorer.BuildingBlocks.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\Stakeholders\Explorer.Stakeholders.Infrastructure\Explorer.Stakeholders.Infrastructure.csproj" />
-    <ProjectReference Include="..\Explorer.Blog.Core\Explorer.Blog.Core.csproj" />
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\BuildingBlocks\Explorer.BuildingBlocks.Infrastructure\Explorer.BuildingBlocks.Infrastructure.csproj" />
+		<ProjectReference Include="..\..\Stakeholders\Explorer.Stakeholders.Infrastructure\Explorer.Stakeholders.Infrastructure.csproj" />
+		<ProjectReference Include="..\Explorer.Blog.Core\Explorer.Blog.Core.csproj" />
+	</ItemGroup>
+
+</Project>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+</Project>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+</Project>
+  </ItemGroup>
+
+</Project>
+  </ItemGroup>
+
+</Project>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+</Project>
+  </ItemGroup>
+
+</Project>
+</Project>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+</Project>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+</Project>
+  </ItemGroup>
+
+</Project>
+
+</Project>
+  </ItemGroup>
+
+</Project>
   </ItemGroup>
 
 </Project>
