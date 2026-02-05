@@ -19,4 +19,9 @@ public class KeyPointDbRepository : IKeyPointRepository
     {
         return _dbSet.Where(kp => kp.IsPublic).ToList();
     }
+
+    public List<KeyPoint> GetAll()
+    {
+        return _dbSet.ToList();
+    }
 }

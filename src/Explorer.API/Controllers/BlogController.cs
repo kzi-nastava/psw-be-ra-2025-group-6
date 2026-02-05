@@ -258,6 +258,13 @@ public class BlogController : ControllerBase
         return Ok(_blogService.GetPaged(page, pageSize));
     }
 
+    [AllowAnonymous]
+    [HttpGet("public")]
+    public ActionResult<PagedResult<BlogDto>> GetAllPublic([FromQuery] int page, [FromQuery] int pageSize)
+    {
+        return Ok(_blogService.GetPaged(page, pageSize));
+    }
+
     [HttpPatch("{id:long}/description")]
     public ActionResult<BlogDto> UpdateBlogDescription(long id, [FromBody] BlogDescriptionUpdateDto dto)
     {
