@@ -42,6 +42,8 @@ public class ToursProfile : Profile
         CreateMap<QuizAnswerOption, QuizAnswerOptionDto>().ReverseMap();
         CreateMap<Tour, TouristTourDto>()
            .ForMember(dest => dest.FirstKeyPoint, opt => opt.MapFrom(src => src.GetFirstKeyPoint()))
-           .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.Duration));
+           .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.Duration))
+           .ForMember(dest => dest.AuthorId, opt => opt.MapFrom(src => src.AuthorId))
+           .ReverseMap();
     }
 }

@@ -16,6 +16,8 @@ using Explorer.Stakeholders.Infrastructure.Integration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Shared;
+using Shared.Notifications;
 
 namespace Explorer.Stakeholders.Infrastructure;
 
@@ -60,6 +62,9 @@ public static class StakeholdersStartup
         services.AddScoped<INotificationPublisher, StakeholdersNotificationPublisher>();
         services.AddScoped<IAchievementService, AchievementService>();
 
+        services.AddTransient<
+            IDomainEventHandler<NotificationRequestedEvent>,
+            NotificationRequestHandler>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)

@@ -41,11 +41,36 @@ namespace Explorer.Tours.API.Controllers.Tourist
             return Ok(tours);
         }
 
+
+        [HttpPost("{tourId:long}/bookmark")]
+        public ActionResult BookmarkTour(long tourId)
+        {
+            var touristId = User.PersonId();
+            _touristService.BookmarkTour(touristId, tourId);
+            return Ok();
+        }
+
+        [HttpDelete("{tourId:long}/bookmark")]
+        public ActionResult RemoveBookmark(long tourId)
+        {
+            var touristId = User.PersonId();
+            _touristService.RemoveBookmark(touristId, tourId);
+            return Ok();
+        }
+
+        [HttpGet("saved")]
+        public ActionResult<List<TouristTourDto>> GetSavedTours()
+        {
+            var touristId = User.PersonId();
+            var result = _touristService.GetSavedTours(touristId);
+            return Ok(result);
+        }
         [HttpGet("{id:long}/key-points")]
         public ActionResult<List<KeyPointDto>> GetKeyPoints(long id)
         {
             var tour = _tourService.Get(id);
             return Ok(tour.KeyPoints ?? new List<KeyPointDto>());
+
         }
     }
 }

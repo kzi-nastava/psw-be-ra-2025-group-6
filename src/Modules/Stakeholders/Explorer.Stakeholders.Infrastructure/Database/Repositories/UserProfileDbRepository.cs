@@ -43,6 +43,7 @@ public class UserProfileDbRepository : IUserProfileRepository
         return userProfile;
     }
 
+
     public List<Achievement> GetAchievements(long userId)
     {
         var profile = _dbContext.UserProfiles

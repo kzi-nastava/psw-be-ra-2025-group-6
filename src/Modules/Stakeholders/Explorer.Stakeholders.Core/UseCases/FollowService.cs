@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
-using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.API.Services;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
@@ -17,19 +17,22 @@ public class FollowService : IFollowService
     private readonly IUserProfileRepository _profileRepository;
     private readonly IMapper _mapper;
     private readonly IDomainEventDispatcher _eventDispatcher;
+    private readonly INotificationService _notificationService;
 
     public FollowService(
         IFollowRepository followRepository,
         IUserRepository userRepository,
         IUserProfileRepository profileRepository,   
         IMapper mapper,
-        IDomainEventDispatcher eventDispatcher)
+        IDomainEventDispatcher eventDispatcher,
+        INotificationService notificationService)
     {
         _followRepository = followRepository;
         _userRepository = userRepository;
         _profileRepository = profileRepository;
         _mapper = mapper;
         _eventDispatcher = eventDispatcher;
+        _notificationService = notificationService;
     }
 
     public FollowDto Follow(long followerId, long followedId)
@@ -52,6 +55,19 @@ public class FollowService : IFollowService
 
         var follow = new Follow(followerId, followedId);
         var created = _followRepository.Create(follow);
+
+        if (followerId != followedId)
+        {
+            var followerUsername = follower.Username;
+
+            _notificationService.Create(new NotificationDto
+            {
+                RecipientId = followedId,
+                SenderId = followerId,
+                Content = $"{followerUsername} started following you.",
+                ReferenceId = followerId
+            });
+        }
 
         return _mapper.Map<FollowDto>(created);
     }

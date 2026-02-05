@@ -12,4 +12,5 @@ public interface IBlogRepository
     void Delete(BlogPost blog);
     List<BlogPost> GetAll();
     int CountVisibleComments(long blogId);
+    void HideComment(long blogId, long commentId, long adminId);
 }

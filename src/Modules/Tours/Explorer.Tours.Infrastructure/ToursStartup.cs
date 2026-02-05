@@ -78,8 +78,8 @@ public static class ToursStartup
         services.AddScoped<IPublicEntityRequestRepository, PublicEntityRequestDbRepository>();
         services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
         services.AddScoped<ITourPlannerRepository, TourPlannerDbRepository>();
+        services.AddScoped<ITourBookmarkRepository, TourBookmarkDbRepository>();
         services.AddScoped<ITourCheckpointPlanRepository, TourCheckpointPlanDbRepository>();
-
 
         // Repo for executions
         services.AddScoped<Core.Domain.RepositoryInterfaces.ITourExecutionRepository, Tours.Infrastructure.Database.Repositories.TourExecutionDbRepository>();
