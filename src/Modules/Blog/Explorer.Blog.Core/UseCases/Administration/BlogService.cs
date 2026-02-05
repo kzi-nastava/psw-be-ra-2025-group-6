@@ -6,13 +6,10 @@ using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Internal;
-using Explorer.Stakeholders.Core.Domain;
 using Shared;
 using Shared.Achievements;
 using Shared.Notifications;
-using System.ComponentModel.Design;
 using System.Diagnostics;
-using System.Security.Cryptography.Xml;
 
 namespace Explorer.Blog.Core.UseCases.Administration;
 
@@ -252,6 +249,7 @@ public class BlogService : IBlogService
         if (blog == null) throw new Exception("Blog not found");
 
         var comments = blog.Comments
+            .Where(c => !c.IsHidden)
             .Select((c, index) => new CommentDto
             {    
                 Id = c.Id,
@@ -438,10 +436,22 @@ public class BlogService : IBlogService
 
     private BlogDto MapBlogWithUsername(BlogPost blog, long? userId = null)
     {
+        Console.WriteLine($"Blog {blog.Id}: Comments count in entity = {blog.Comments?.Count ?? -1}");
+        Console.WriteLine($"Blog {blog.Id}: Visible comments = {blog.Comments?.Count(c => !c.IsHidden) ?? -1}");
+
         var dto = _mapper.Map<BlogDto>(blog);
         dto.Username = _stakeholderService.GetUsername(blog.UserId);
         dto.AuthorProfilePicture = _stakeholderService.GetProfilePicture(blog.UserId);
-        dto.VisibleCommentCount = _blogRepository.CountVisibleComments(blog.Id);
+        dto.VisibleCommentCount = blog.Comments?.Count(c => !c.IsHidden) ?? 0;
+
+        Console.WriteLine($"Blog {blog.Id}: DTO Comments count = {dto.Comments?.Count ?? -1}");
+
+        if (dto.Comments != null)
+        {
+            dto.Comments = dto.Comments
+                .Where(c => !c.IsHidden)
+                .ToList();
+        }
 
         if (userId.HasValue)
         {
@@ -595,8 +605,7 @@ public class BlogService : IBlogService
         report.Approve(adminId, note);
         _reportRepository.Update(report);
 
-        blog.HideComment(report.CommentId, adminId);
-        _blogRepository.Update(blog);
+        _blogRepository.HideComment(report.BlogId, report.CommentId, adminId);
 
         _reportRepository.DeleteOpenByComment(report.BlogId, report.CommentId);
 
@@ -670,7 +679,7 @@ public class BlogService : IBlogService
 
         if (filter.MinComments.HasValue)
         {
-            query = query.Where(b => b.Comments.Count >= filter.MinComments.Value);
+            query = query.Where(b => b.Comments.Count(c => !c.IsHidden) >= filter.MinComments.Value);
         }
 
         if (filter.MinScore.HasValue)
@@ -688,7 +697,7 @@ public class BlogService : IBlogService
 
         if (filter.CreatedTo.HasValue)
         {
-            query = query.Where(b => b.CreatedAt <= filter.CreatedFrom.Value);
+            query = query.Where(b => b.CreatedAt <= filter.CreatedTo.Value);
         }
 
         query = (filter.SortBy, filter.SortDirection) switch
@@ -696,8 +705,8 @@ public class BlogService : IBlogService
             (BlogSortBy.CREATEDAT, SortDirection.ASC) => query.OrderBy(b => b.CreatedAt),
             (BlogSortBy.CREATEDAT, SortDirection.DESC) => query.OrderByDescending(b => b.CreatedAt),
 
-            (BlogSortBy.COMMENTCOUNT, SortDirection.ASC) => query.OrderBy(b => b.Comments.Count),
-            (BlogSortBy.COMMENTCOUNT, SortDirection.DESC) => query.OrderByDescending(b => b.Comments.Count),
+            (BlogSortBy.COMMENTCOUNT, SortDirection.ASC) => query.OrderBy(b => b.Comments.Count(c => !c.IsHidden)),
+            (BlogSortBy.COMMENTCOUNT, SortDirection.DESC) => query.OrderByDescending(b => b.Comments.Count(c => !c.IsHidden)),
 
             (BlogSortBy.SCORE, SortDirection.ASC) => query.OrderBy(b =>
                 b.Votes.Count(v => v.Type == VoteType.Upvote) - b.Votes.Count(v => v.Type == VoteType.Downvote)),
