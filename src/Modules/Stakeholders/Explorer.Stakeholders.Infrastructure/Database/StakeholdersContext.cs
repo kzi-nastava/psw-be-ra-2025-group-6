@@ -18,6 +18,7 @@ public class StakeholdersContext : DbContext
     public DbSet<ProfilePost> ProfilePosts { get; set; }
     public DbSet<ClubPost> ClubPosts { get; set; }
     public DbSet<ClubMember> ClubMembers { get; set; }
+    public DbSet<ClubMembershipRequest> ClubMembershipRequests { get; set; }
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
@@ -46,6 +47,8 @@ public class StakeholdersContext : DbContext
         ConfigureProfilePosts(modelBuilder);
         ConfigureClubPosts(modelBuilder);
         ConfigureFollowing(modelBuilder);
+
+        modelBuilder.Entity<ClubMembershipRequest>().ToTable("ClubMembershipRequests");
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)

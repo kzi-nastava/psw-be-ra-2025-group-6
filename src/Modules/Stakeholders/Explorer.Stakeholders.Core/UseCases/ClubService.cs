@@ -81,31 +81,23 @@ namespace Explorer.Stakeholders.Core.UseCases
             return _mapper.Map<ClubDto>(updated);
         }
 
-        public List<ClubMemberDto> GetMembers(long clubId, long ownerId)
+        public List<ClubMemberDto> GetMembers(long clubId)
         {
-            var club = _clubRepository.Get(clubId);
-            if (!club.IsOwner(ownerId))
-                throw new UnauthorizedAccessException("Only the owner can view members");
-
             var members = _clubMemberRepository.GetByClubId(clubId);
-            var memberDtos = new List<ClubMemberDto>();
 
-            foreach (var member in members)
+            var dtos = _mapper.Map<List<ClubMemberDto>>(members);
+
+            foreach (var dto in dtos)
             {
-                var person = _personRepository.GetById(member.UserId);
-                memberDtos.Add(new ClubMemberDto
+                // Pronalazimo osobu preko UserId koji je mapiran iz ClubMember entiteta
+                var person = _personRepository.GetById(dto.UserId);
+                if (person != null)
                 {
-                    Id = member.Id,
-                    ClubId = member.ClubId,
-                    UserId = member.UserId,
-                    UserName = person.Name + " " + person.Surname,
-                    UserEmail = person.Email,
-                    JoinedAt = member.JoinedAt,
-                    Status = member.Status.ToString()
-                });
+                    dto.UserEmail = person.Email;                                
+                }
             }
 
-            return memberDtos;
+            return dtos;
         }
 
         public ClubMemberDto InviteMember(long clubId, string username, long ownerId)
