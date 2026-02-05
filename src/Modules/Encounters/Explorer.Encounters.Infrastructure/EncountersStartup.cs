@@ -37,6 +37,7 @@ namespace Explorer.Encounters.Infrastructure
 
             services.AddScoped<ILeaderboardService, LeaderboardService>();
             services.AddScoped<IInternalLeaderboardService, InternalLeaderboardService>();
+            services.AddScoped<ILeaderboardNotificationService, LeaderboardNotificationService>();
 
             services.AddScoped<IQuizEncounterService, QuizEncounterService>();
 
