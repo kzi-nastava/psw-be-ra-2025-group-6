@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
-using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.API.Services;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using Shared;
+using Shared.Achievements;
 
 namespace Explorer.Stakeholders.Core.UseCases;
 
@@ -12,16 +14,25 @@ public class FollowService : IFollowService
 {
     private readonly IFollowRepository _followRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IUserProfileRepository _profileRepository;
     private readonly IMapper _mapper;
+    private readonly IDomainEventDispatcher _eventDispatcher;
+    private readonly INotificationService _notificationService;
 
     public FollowService(
         IFollowRepository followRepository,
         IUserRepository userRepository,
-        IMapper mapper)
+        IUserProfileRepository profileRepository,   
+        IMapper mapper,
+        IDomainEventDispatcher eventDispatcher,
+        INotificationService notificationService)
     {
         _followRepository = followRepository;
         _userRepository = userRepository;
+        _profileRepository = profileRepository;
         _mapper = mapper;
+        _eventDispatcher = eventDispatcher;
+        _notificationService = notificationService;
     }
 
     public FollowDto Follow(long followerId, long followedId)
@@ -38,8 +49,25 @@ public class FollowService : IFollowService
         if (_followRepository.Exists(followerId, followedId))
             throw new ArgumentException("Already following");
 
+        // Achievements
+        HandleFollowingAchievements(followerId);
+        HandleFollowerAchievements(followedId);
+
         var follow = new Follow(followerId, followedId);
         var created = _followRepository.Create(follow);
+
+        if (followerId != followedId)
+        {
+            var followerUsername = follower.Username;
+
+            _notificationService.Create(new NotificationDto
+            {
+                RecipientId = followedId,
+                SenderId = followerId,
+                Content = $"{followerUsername} started following you.",
+                ReferenceId = followerId
+            });
+        }
 
         return _mapper.Map<FollowDto>(created);
     }
@@ -78,4 +106,96 @@ public class FollowService : IFollowService
     {
         return _followRepository.IsFollowing(followerId, followedId);
     }
+
+    public List<UserProfileDto> GetFollowersList(long userId, long currentUserId)
+    {
+        var followers = _followRepository.GetFollowers(userId);
+        var result = new List<UserProfileDto>();
+
+        foreach (var follower in followers)
+        {
+            try
+            {
+                var profile = _profileRepository.Get(follower.Id);
+
+                result.Add(new UserProfileDto
+                {
+                    UserId = follower.Id,
+                    Name = profile.Name,
+                    Surname = profile.Surname,
+                    ProfilePicture = profile.ProfilePicture,
+                    Biography = profile.Biography,
+                    Quote = profile.Quote,
+                    IsFollowedByMe = _followRepository.IsFollowing(currentUserId, follower.Id),
+                    Username = follower.Username
+                });
+            }
+            catch (NotFoundException)
+            {
+                continue;
+            }
+        }
+        return result;
+    }
+
+    public List<UserProfileDto> GetFollowingList(long userId, long currentUserId)
+    {
+        var following = _followRepository.GetFollowing(userId);
+        var result = new List<UserProfileDto>();
+
+        foreach (var followedUser in following)
+        {
+            try
+            {
+                var profile = _profileRepository.Get(followedUser.Id);
+
+                result.Add(new UserProfileDto
+                {
+                    UserId = followedUser.Id,
+                    Name = profile.Name,
+                    Surname = profile.Surname,
+                    ProfilePicture = profile.ProfilePicture,
+                    Biography = profile.Biography,
+                    Quote = profile.Quote,
+                    IsFollowedByMe = _followRepository.IsFollowing(currentUserId, followedUser.Id),
+                    Username = followedUser.Username
+                });
+            }
+            catch (NotFoundException)
+            {
+                continue;
+            }
+        }
+        return result;
+    }
+
+    private void HandleFollowingAchievements(long followerId)
+    {
+        var followingCount = GetFollowing(followerId).Count;
+
+        if (followingCount == 0)
+        {
+            _eventDispatcher
+                .DispatchAsync(new AchievementUnlockedEvent(followerId, 10))
+                .GetAwaiter().GetResult();
+        }
+        else if (followingCount == 19)
+        {
+            _eventDispatcher
+                .DispatchAsync(new AchievementUnlockedEvent(followerId, 12))
+                .GetAwaiter().GetResult();
+        }
+    }
+    private void HandleFollowerAchievements(long followedId)
+    {
+        var followersCount = GetFollowersCount(followedId);
+
+        if (followersCount == 49)
+        {
+            _eventDispatcher
+                .DispatchAsync(new AchievementUnlockedEvent(followedId, 11))
+                .GetAwaiter().GetResult();
+        }
+    }
+
 }

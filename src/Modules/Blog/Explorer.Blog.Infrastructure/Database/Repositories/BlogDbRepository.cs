@@ -20,7 +20,10 @@ public class BlogDbRepository : IBlogRepository
 
     public List<BlogPost> GetByUser(long userId)
     {
-        return _dbSet.Where(b => b.UserId == userId).ToList();
+        return _dbSet
+            .Include(b => b.Comments)
+            .Include(b => b.Votes)
+            .AsNoTracking().Where(b => b.UserId == userId).ToList();
     }
 
     public BlogPost Create(BlogPost blog)
@@ -32,7 +35,11 @@ public class BlogDbRepository : IBlogRepository
 
     public BlogPost Update(BlogPost blog)
     {
-        var existingBlog = _dbSet.Include(b => b.Votes).FirstOrDefault(b => b.Id == blog.Id);
+        var existingBlog = _dbSet
+            .Include(b => b.Comments)
+            .Include(b => b.Votes)
+            .FirstOrDefault(b => b.Id == blog.Id);
+
         if (existingBlog == null)
             throw new NotFoundException($"Blog with Id {blog.Id} not found.");
 
@@ -52,7 +59,7 @@ public class BlogDbRepository : IBlogRepository
 
     public PagedResult<BlogPost> GetPaged(int page, int pageSize)
     {
-        var task = _dbSet.Include(b => b.Location).GetPagedById(page, pageSize);
+        var task = _dbSet.Include(b => b.Location).Include(b => b.Comments).Include(b => b.Votes).GetPagedById(page, pageSize);
         task.Wait();
         return task.Result;
     }
@@ -77,12 +84,22 @@ public class BlogDbRepository : IBlogRepository
         return _dbSet
             .Include(b => b.Votes)
             .Include(b => b.Comments)
-            .Include(b => b.Location)
+            .Include(b => b.Location).AsNoTracking()
             .ToList();
     }
 
     public int CountVisibleComments(long blogId)
     {
         return DbContext.Comments.Count(c => c.BlogId == blogId && !c.IsHidden);
+    }
+
+    public void HideComment(long blogId, long commentId, long adminId)
+    {
+        var c = DbContext.Comments.FirstOrDefault(x => x.BlogId == blogId && x.Id == commentId);
+        if (c == null) throw new NotFoundException("Comment not found");
+
+        c.Hide(adminId);
+
+        DbContext.SaveChanges();
     }
 }

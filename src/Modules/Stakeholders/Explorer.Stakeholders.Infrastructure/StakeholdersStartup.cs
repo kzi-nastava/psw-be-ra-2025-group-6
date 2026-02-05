@@ -16,6 +16,8 @@ using Explorer.Stakeholders.Infrastructure.Integration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Shared;
+using Shared.Notifications;
 
 namespace Explorer.Stakeholders.Infrastructure;
 
@@ -55,9 +57,15 @@ public static class StakeholdersStartup
         services.AddScoped<IInternalStakeholderService, InternalStakeholdersService>();
         services.AddScoped<INotificationDataProvider, NotificationDataProvider>();
 
+        services.AddScoped<ISocialMessageService, SocialMessageService>();
+
         // Register integration adapter
         services.AddScoped<INotificationPublisher, StakeholdersNotificationPublisher>();
+        services.AddScoped<IAchievementService, AchievementService>();
 
+        services.AddTransient<
+            IDomainEventHandler<NotificationRequestedEvent>,
+            NotificationRequestHandler>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -77,6 +85,8 @@ public static class StakeholdersStartup
         services.AddScoped<IClubPostRepository, ClubPostDbRepository>();
         services.AddScoped<IBlogInfoGateway, BlogInfoGateway>();
         services.AddScoped<IFollowRepository, FollowDbRepository>();
+        services.AddScoped<ISocialMessageRepository, SocialMessageDatabaseRepository>();
+        services.AddScoped<IAchievementRepository, AchievementRepository>();
         services.AddScoped<IClubMembershipRequestRepository, ClubMembershipRequestDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));

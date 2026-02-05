@@ -77,4 +77,20 @@ public class FollowController : ControllerBase
         var result = _followService.IsFollowing(followerId, followedId);
         return Ok(result);
     }
+
+    [HttpGet("profiles-followers/{userId:long}")]
+    public ActionResult<List<UserProfileDto>> GetFollowersProfiles(long userId)
+    {
+        var currentUserId = User.PersonId();
+        var followers = _followService.GetFollowersList(userId, currentUserId);
+        return Ok(followers);
+    }
+
+    [HttpGet("profiles-following/{userId:long}")]
+    public ActionResult<List<UserProfileDto>> GetFollowingProfiles(long userId)
+    {
+        var currentUserId = User.PersonId();
+        var following = _followService.GetFollowingList(userId, currentUserId);
+        return Ok(following);
+    }
 }

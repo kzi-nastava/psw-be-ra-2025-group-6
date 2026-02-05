@@ -1,5 +1,7 @@
 ﻿using Explorer.Stakeholders.Core.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Explorer.Stakeholders.Infrastructure.Database;
 
@@ -17,8 +19,11 @@ public class StakeholdersContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<ProfilePost> ProfilePosts { get; set; }
     public DbSet<ClubPost> ClubPosts { get; set; }
+    public DbSet<SocialMessage> SocialMessages { get; set; }
     public DbSet<ClubMember> ClubMembers { get; set; }
     public DbSet<ClubMembershipRequest> ClubMembershipRequests { get; set; }
+
+    public DbSet<Achievement> Achievement { get; set; }
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
@@ -27,6 +32,26 @@ public class StakeholdersContext : DbContext
         modelBuilder.HasDefaultSchema("stakeholders");
 
         modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
+
+        modelBuilder.Entity<Achievement>().HasIndex(u => u.Code).IsUnique();
+
+        var roleConverter = new ValueConverter<List<UserRole>, int[]>(
+        v => v.Select(r => (int)r).ToArray(),
+        v => v.Select(i => (UserRole)i).ToList()
+    );
+
+        var roleComparer = new ValueComparer<List<UserRole>>(
+            (c1, c2) => c1.SequenceEqual(c2),
+            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+            c => c.ToList()
+        );
+
+        modelBuilder.Entity<Achievement>()
+            .Property(a => a.Role)
+            .HasColumnName("Role")
+            .HasColumnType("integer[]")
+            .HasConversion(roleConverter)
+            .Metadata.SetValueComparer(roleComparer);
 
         modelBuilder.Entity<TouristPosition>().HasIndex(tp => tp.TouristId).IsUnique();
 
@@ -47,6 +72,16 @@ public class StakeholdersContext : DbContext
         ConfigureProfilePosts(modelBuilder);
         ConfigureClubPosts(modelBuilder);
         ConfigureFollowing(modelBuilder);
+        ConfigureSocialMessages(modelBuilder);
+
+        modelBuilder.Entity<UserProfile>()
+    .HasMany(up => up.Achievements)
+    .WithMany(a => a.UserProfiles)
+    .UsingEntity(j =>
+    {
+        j.ToTable("UserAchievements");
+    });
+
 
         modelBuilder.Entity<ClubMembershipRequest>().ToTable("ClubMembershipRequests");
     }
@@ -144,6 +179,7 @@ public class StakeholdersContext : DbContext
             builder.HasIndex(p => p.ClubId);
         });
     }
+
     private static void ConfigureFollowing(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Follow>(builder =>
@@ -164,6 +200,23 @@ public class StakeholdersContext : DbContext
                    .WithMany()
                    .HasForeignKey(f => f.FollowedId)
                    .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
+
+    private static void ConfigureSocialMessages(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SocialMessage>(builder =>
+        {
+            builder.ToTable("SocialMessages");
+
+            builder.HasKey(m => m.Id);
+
+            builder.Property(m => m.SenderId).IsRequired();
+            builder.Property(m => m.ReceiverId).IsRequired();
+            builder.Property(m => m.Content).IsRequired().HasMaxLength(2000);
+            builder.Property(m => m.Timestamp).IsRequired();
+
+            builder.HasIndex(m => new { m.SenderId, m.ReceiverId });
         });
     }
 }

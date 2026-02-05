@@ -26,7 +26,7 @@ namespace Explorer.Tours.Core.UseCases
             var isAuthor = (userRole == "Author");
             var isAdmin = (userRole == "Administrator");
             var baseUrl =
-    isAuthor ? "/author-tours/form/" :
+    isAuthor ? "/author-tours/" :
     isAdmin ? "/tours/" :
                "/published-tours/";
 

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Explorer.API.Controllers
 {
-    [Authorize(Policy = "registeredUserPolicy")]
+    [Authorize]
     [Route("api/notifications")]
     [ApiController]
     public class NotificationController : ControllerBase

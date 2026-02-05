@@ -10,6 +10,7 @@ public class BlogContext : DbContext
     public DbSet<CommentLike> CommentLikes { get; set; }
     public DbSet<CommentReport> CommentReports { get; set; }
     public DbSet<BlogLocation> BlogLocations { get; set; }
+    public DbSet<BlogBookmark> BlogBookmarks { get; set; }
 
     public BlogContext(DbContextOptions<BlogContext> options) : base(options) { }
 
@@ -21,6 +22,7 @@ public class BlogContext : DbContext
         ConfigureComments(modelBuilder);
         ConfigureCommentLikes(modelBuilder);
         ConfigureCommentReports(modelBuilder);
+        ConfigureBlogBookmarks(modelBuilder);
 
         modelBuilder.Entity<BlogPost>(b =>
         {
@@ -125,6 +127,22 @@ public class BlogContext : DbContext
             b.HasOne<BlogPost>()
                 .WithMany()
                 .HasForeignKey(x => x.BlogId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
+
+    private static void ConfigureBlogBookmarks(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<BlogBookmark>(b =>
+        {
+            b.ToTable("BlogBookmarks", "blog");
+            b.HasKey(x => x.Id);
+
+            b.HasIndex(x => new { x.UserId, x.BlogPostId }).IsUnique();
+
+            b.HasOne<BlogPost>()
+                .WithMany()
+                .HasForeignKey(x => x.BlogPostId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }
