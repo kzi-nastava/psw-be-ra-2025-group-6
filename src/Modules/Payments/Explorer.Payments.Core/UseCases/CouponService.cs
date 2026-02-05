@@ -20,7 +20,12 @@ public class CouponService : ICouponService
 
     public CouponDto Create(long authorId, CreateCouponDto dto)
     {
-        var coupon = new Coupon(authorId, dto.DiscountPercent, dto.TourId, dto.ValidUntil);
+        // Convert ValidUntil to UTC if provided
+        var validUntil = dto.ValidUntil.HasValue 
+            ? ConvertToUtc(dto.ValidUntil.Value)
+            : (DateTime?)null;
+        
+        var coupon = new Coupon(authorId, dto.DiscountPercent, dto.TourId, validUntil);
         var result = _couponRepository.Create(coupon);
         return _mapper.Map<CouponDto>(result);
     }
@@ -32,7 +37,12 @@ public class CouponService : ICouponService
         if (existingCoupon.AuthorId != authorId)
             throw new ForbiddenException("You can only update your own coupons");
 
-        existingCoupon.Update(dto.DiscountPercent, dto.TourId, dto.ValidUntil);
+        // Convert ValidUntil to UTC if provided
+        var validUntil = dto.ValidUntil.HasValue 
+            ? ConvertToUtc(dto.ValidUntil.Value)
+            : (DateTime?)null;
+
+        existingCoupon.Update(dto.DiscountPercent, dto.TourId, validUntil);
         var result = _couponRepository.Update(existingCoupon);
         return _mapper.Map<CouponDto>(result);
     }
@@ -70,5 +80,20 @@ public class CouponService : ICouponService
             return null;
 
         return _mapper.Map<CouponDto>(coupon);
+    }
+
+    /// <summary>
+    /// Converts a DateTime to UTC. If the DateTime is already in UTC kind, returns as-is.
+    /// If it's unspecified (from JSON), assumes it's UTC and sets the kind.
+    /// </summary>
+    private static DateTime ConvertToUtc(DateTime dateTime)
+    {
+        return dateTime.Kind switch
+        {
+            DateTimeKind.Utc => dateTime,
+            DateTimeKind.Local => dateTime.ToUniversalTime(),
+            DateTimeKind.Unspecified => DateTime.SpecifyKind(dateTime, DateTimeKind.Utc),
+            _ => dateTime
+        };
     }
 }
