@@ -11,5 +11,6 @@ namespace Explorer.Encounters.Core.Domain.RepositoryInterfaces
         Challenge Update(Challenge challenge);
         void Delete(long id);
         List<Challenge> GetPendingApproval();
+        List<Challenge> GetByKeyPointId(long keyPointId);
     }
 }

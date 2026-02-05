@@ -14,5 +14,11 @@ namespace Explorer.Encounters.API.Dtos
         public bool IsCreatedByTourist { get; set; }
         public string? ImagePath { get; set; }
         public int ActivationRadiusMeters { get; set; }
+        public long? KeyPointId { get; set; }
+        public bool IsRequiredForSecret { get; set; }
+
+        // For Social Encounter type
+        public int? RequiredPeople { get; set; }
+        public double? SocialRadiusMeters { get; set; }
     }
 }

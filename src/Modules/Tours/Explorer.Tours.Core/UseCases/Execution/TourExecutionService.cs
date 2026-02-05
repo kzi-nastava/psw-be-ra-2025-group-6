@@ -129,7 +129,6 @@ public class TourExecutionService : ITourExecutionService
             var orderedKeyPoints = tour.KeyPoints.OrderBy(kp => kp.Id).ToList();
             var completedIds = execution.CompletedKeyPoints.Select(ckp => ckp.KeyPointId).ToHashSet();
             
-            // Find the NEXT uncompleted key point (not the first one!)
             var nextKp = orderedKeyPoints.FirstOrDefault(kp => !completedIds.Contains(kp.Id));
             
             if (nextKp != null)
@@ -158,7 +157,7 @@ public class TourExecutionService : ITourExecutionService
             Status = execution.Status.ToString(),
             StartTime = execution.StartTime,
             InitialPosition = new TrackPointDto { Latitude = execution.InitialPosition.Latitude, Longitude = execution.InitialPosition.Longitude },
-            FirstKeyPoint = nextKeyPoint,  // This is actually the NEXT key point now
+            FirstKeyPoint = nextKeyPoint,
             RouteToFirstKeyPoint = route
         };
     }
@@ -179,7 +178,9 @@ public class TourExecutionService : ITourExecutionService
                 KeyPointCompleted = false,
                 ProgressPercentage = execution.ProgressPercentage,
                 LastActivity = execution.LastActivity,
-                AllCompletedKeyPoints = new List<CompletedKeyPointDto>()
+                AllCompletedKeyPoints = new List<CompletedKeyPointDto>(),
+                HasAvailableChallenges = false,
+                AvailableChallengeIds = new List<long>()
             };
         }
 
@@ -234,7 +235,6 @@ public class TourExecutionService : ITourExecutionService
             };
         }
 
-        // Map all completed key points
         var allCompletedKeyPoints = execution.CompletedKeyPoints
             .Select(ckp => new CompletedKeyPointDto
             {
@@ -252,7 +252,9 @@ public class TourExecutionService : ITourExecutionService
             ProgressPercentage = execution.ProgressPercentage,
             NextKeyPoint = nextKeyPointDto,
             LastActivity = execution.LastActivity,
-            AllCompletedKeyPoints = allCompletedKeyPoints
+            AllCompletedKeyPoints = allCompletedKeyPoints,
+            HasAvailableChallenges = nearbyKeyPoint != null,
+            AvailableChallengeIds = new List<long>()
         };
     }
 
@@ -285,7 +287,6 @@ public class TourExecutionService : ITourExecutionService
         execution.Complete();
         _executionRepository.Update(execution);
 
-        // Mark token as used ONLY when tour is completed (not abandoned)
         _tokenService.MarkTokenAsUsed(touristId, execution.TourId);
 
         // ? UPDATE LEADERBOARD STATS ?
@@ -376,7 +377,6 @@ public class TourExecutionService : ITourExecutionService
     {
         if (orderedKeyPoints.Count == 0) return 0;
 
-        // Simple percentage: (completed / total) * 100
         var completedCount = completedKeyPoints.Count;
         var totalCount = orderedKeyPoints.Count;
 

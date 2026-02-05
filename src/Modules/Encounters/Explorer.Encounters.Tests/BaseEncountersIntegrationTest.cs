@@ -24,8 +24,8 @@ namespace Explorer.Encounters.Tests
 
         private static void ReseedDatabase(EncountersContext context)
         {
+            context.Database.ExecuteSqlRaw("DROP SCHEMA IF EXISTS encounters CASCADE;");
             context.Database.ExecuteSqlRaw("CREATE SCHEMA IF NOT EXISTS encounters;");
-            context.Database.EnsureCreated();
             
             try
             {
