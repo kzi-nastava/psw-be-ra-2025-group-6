@@ -40,10 +40,7 @@ namespace Explorer.Stakeholders.Core.UseCases
             var notifications = _notificationRepository.GetByRecipient(recipientId);
             return _mapper.Map<List<NotificationDto>>(notifications);
         }
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/development-new
         public NotificationDto MarkAsRead(long notificationId)
         {
             var notification = _notificationRepository.Get(notificationId);

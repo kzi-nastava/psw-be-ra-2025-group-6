@@ -32,7 +32,7 @@ namespace Explorer.Tours.API.Controllers.Tourist
             return Ok(tours);
         }
 
-<<<<<<< HEAD
+
         [HttpPost("{tourId:long}/bookmark")]
         public ActionResult BookmarkTour(long tourId)
         {
@@ -55,13 +55,13 @@ namespace Explorer.Tours.API.Controllers.Tourist
             var touristId = User.PersonId();
             var result = _touristService.GetSavedTours(touristId);
             return Ok(result);
-=======
+        }
         [HttpGet("{id:long}/key-points")]
         public ActionResult<List<KeyPointDto>> GetKeyPoints(long id)
         {
             var tour = _tourService.Get(id);
             return Ok(tour.KeyPoints ?? new List<KeyPointDto>());
->>>>>>> origin/development-new
+
         }
     }
 }
