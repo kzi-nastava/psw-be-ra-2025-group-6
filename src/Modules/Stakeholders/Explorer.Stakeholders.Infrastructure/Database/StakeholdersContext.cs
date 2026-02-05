@@ -24,7 +24,6 @@ public class StakeholdersContext : DbContext
     public DbSet<ClubMembershipRequest> ClubMembershipRequests { get; set; }
 
     public DbSet<Achievement> Achievement { get; set; }
-    public DbSet<ClubMember> ClubMembers { get; set; }
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 

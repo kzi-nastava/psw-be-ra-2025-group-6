@@ -20,13 +20,14 @@ public class TourService : ITourService
     private readonly IDomainEventDispatcher _eventDispatcher;
     private readonly ITourDataProvider _tourDataProvider;
 
-    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper, IInternalTourPurchaseTokenService tokenService, IDomainEventDispatcher eventDispatcher)
+    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper, IInternalTourPurchaseTokenService tokenService, IDomainEventDispatcher eventDispatcher) { }
     public TourService(
         ITourRepository repository, 
         IEquipmentRepository equipmentRepository, 
         IMapper mapper, 
         IInternalTourPurchaseTokenService tokenService,
-        ITourDataProvider tourDataProvider)
+        ITourDataProvider tourDataProvider,
+        IDomainEventDispatcher eventDispatcher)
     {
         _tourRepository = repository;
         _equipmentRepository = equipmentRepository;
