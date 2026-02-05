@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Explorer.Encounters.API.Public;
 using Explorer.Encounters.Core.Domain;
 using System;
+using System.Linq;
 
 namespace Explorer.Encounters.Core.UseCases
 {
@@ -12,18 +13,48 @@ namespace Explorer.Encounters.Core.UseCases
     {
         private readonly IChallengeRepository _repository;
         private readonly ISocialEncounterRepository _socialEncounterRepository;
+        private readonly ITourStatusGateway _tourStatusGateway;
         private readonly IMapper _mapper;
 
-        public PublicChallengeService(IChallengeRepository repository, ISocialEncounterRepository socialEncounterRepository, IMapper _mapper)
+        public PublicChallengeService(
+            IChallengeRepository repository, 
+            ISocialEncounterRepository socialEncounterRepository,
+            ITourStatusGateway tourStatusGateway,
+            IMapper mapper)
         {
             _repository = repository;
             _socialEncounterRepository = socialEncounterRepository;
-            this._mapper = _mapper;
+            _tourStatusGateway = tourStatusGateway;
+            _mapper = mapper;
         }
 
         public List<ChallengeDto> GetActive()
         {
-            return _mapper.Map<List<ChallengeDto>>(_repository.GetAllActive());
+            var allActiveChallenges = _repository.GetAllActive();
+            
+            // Filter out KeyPoint challenges from unpublished tours
+            var filteredChallenges = new List<Challenge>();
+            
+            foreach (var challenge in allActiveChallenges)
+            {
+                // Non-KeyPoint challenges are always visible
+                if (!challenge.KeyPointId.HasValue)
+                {
+                    filteredChallenges.Add(challenge);
+                    continue;
+                }
+
+                // Check if tour is published (CONFIRMED status)
+                var tourStatus = _tourStatusGateway.GetTourStatusByKeyPointId(challenge.KeyPointId.Value).Result;
+                
+                // Only include KeyPoint challenges if tour is published
+                if (tourStatus == "CONFIRMED")
+                {
+                    filteredChallenges.Add(challenge);
+                }
+            }
+
+            return _mapper.Map<List<ChallengeDto>>(filteredChallenges);
         }
 
         public ChallengeDto Get(long id)
@@ -58,8 +89,8 @@ namespace Explorer.Encounters.Core.UseCases
             // If Social type, automatically create SocialEncounter
             if (parsedType == ChallengeType.Social)
             {
-                var requiredPeople = dto.RequiredPeople ?? 3; // Default 3
-                var socialRadius = dto.SocialRadiusMeters ?? 100.0; // Default 100m
+                var requiredPeople = dto.RequiredPeople ?? 3;
+                var socialRadius = dto.SocialRadiusMeters ?? 100.0;
 
                 var socialEncounter = new SocialEncounter(created.Id, requiredPeople, socialRadius);
                 _socialEncounterRepository.Create(socialEncounter);

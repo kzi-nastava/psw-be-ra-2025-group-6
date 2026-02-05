@@ -130,17 +130,31 @@ namespace Explorer.Encounters.Core.UseCases
             if (!Enum.TryParse<ChallengeType>(dto.Type, true, out var parsedType))
                 throw new ArgumentException("Invalid challenge type.");
 
-            // Update data - UKLJU?UJE?I ImagePath!
-            existing.Update(
-                dto.Title, 
-                dto.Description, 
-                dto.Longitude, 
-                dto.Latitude, 
-                dto.XP, 
-                parsedType, 
-                dto.ImagePath, // ? PROSLE?UJE ImagePath!
-                dto.ActivationRadiusMeters > 0 ? dto.ActivationRadiusMeters : 50
-            );
+            if (existing.KeyPointId != null)
+            {
+                existing.UpdateKeyPointChallenge(
+                    dto.Title,
+                    dto.Description,
+                    dto.XP,
+                    parsedType,
+                    dto.IsRequiredForSecret,
+                    dto.ImagePath,
+                    dto.ActivationRadiusMeters > 0 ? dto.ActivationRadiusMeters : 50
+                );
+            }
+            else
+            {
+                existing.Update(
+                    dto.Title, 
+                    dto.Description, 
+                    dto.Longitude, 
+                    dto.Latitude, 
+                    dto.XP, 
+                    parsedType, 
+                    dto.ImagePath,
+                    dto.ActivationRadiusMeters > 0 ? dto.ActivationRadiusMeters : 50
+                );
+            }
 
             // Allow status change if provided
             if (!string.IsNullOrWhiteSpace(dto.Status) && Enum.TryParse<ChallengeStatus>(dto.Status, true, out var parsedStatus))
@@ -160,6 +174,7 @@ namespace Explorer.Encounters.Core.UseCases
         public ChallengeDto Get(long id)
         {
             var c = _repository.Get(id);
+            if (c == null) throw new KeyNotFoundException("Challenge not found.");
             return _mapper.Map<ChallengeDto>(c);
         }
 

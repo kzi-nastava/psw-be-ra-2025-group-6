@@ -242,7 +242,7 @@ public class AuthorChallengesControllerTests : BaseEncountersIntegrationTest
     {
         var claims = new List<Claim>
         {
-            new Claim("id", userId.ToString()),
+            new Claim("personId", userId.ToString()),
             new Claim(ClaimTypes.Role, "author")
         };
         var identity = new ClaimsIdentity(claims, "TestAuth");

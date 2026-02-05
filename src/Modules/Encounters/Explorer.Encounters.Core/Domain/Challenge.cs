@@ -3,7 +3,7 @@ using Explorer.BuildingBlocks.Core.Domain;
 namespace Explorer.Encounters.Core.Domain
 {
     public enum ChallengeStatus { Draft, Active, Archived }
-    public enum ChallengeType { Social, Location, Misc }
+    public enum ChallengeType { Social, Location, Misc, Quiz }
 
     public class Challenge : AggregateRoot
     {
@@ -21,7 +21,11 @@ namespace Explorer.Encounters.Core.Domain
         public long? KeyPointId { get; private set; }
         public bool IsRequiredForSecret { get; private set; }
 
-        private Challenge() { }
+        private Challenge() 
+        {
+            Title = string.Empty;
+            Description = string.Empty;
+        }
 
         public Challenge(string title, string description, double longitude, double latitude, int xp, ChallengeType type, string? imagePath = null, int activationRadiusMeters = 50, ChallengeStatus status = ChallengeStatus.Draft)
         {
@@ -51,7 +55,7 @@ namespace Explorer.Encounters.Core.Domain
             if (longitude < -180 || longitude > 180) throw new ArgumentException("Invalid Longitude.");
             if (latitude < -90 || latitude > 90) throw new ArgumentException("Invalid Latitude.");
             if (xp < 0) throw new ArgumentException("XP must be non-negative.");
-            if (creatorId <= 0) throw new ArgumentException("Invalid CreatorId.");
+            if (creatorId == 0) throw new ArgumentException("Invalid CreatorId.");
             if (activationRadiusMeters <= 0) throw new ArgumentException("Activation radius must be positive.");
 
             Title = title;
@@ -62,9 +66,9 @@ namespace Explorer.Encounters.Core.Domain
             Type = type;
             Status = ChallengeStatus.Draft;
             CreatorId = creatorId;
-            IsCreatedByTourist = true;
             ImagePath = imagePath;
             ActivationRadiusMeters = activationRadiusMeters;
+            IsCreatedByTourist = true;
         }
 
         public Challenge(string title, string description, int xp, ChallengeType type, long keyPointId, bool isRequiredForSecret, string? imagePath = null, int activationRadiusMeters = 50)
@@ -72,7 +76,7 @@ namespace Explorer.Encounters.Core.Domain
             if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("Invalid Title.");
             if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
             if (xp < 0) throw new ArgumentException("XP must be non-negative.");
-            if (keyPointId <= 0) throw new ArgumentException("Invalid KeyPointId.");
+            if (keyPointId == 0) throw new ArgumentException("Invalid KeyPointId.");
             if (activationRadiusMeters <= 0) throw new ArgumentException("Activation radius must be positive.");
 
             Title = title;
@@ -95,8 +99,8 @@ namespace Explorer.Encounters.Core.Domain
             if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("Invalid Title.");
             if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
             if (xp < 0) throw new ArgumentException("XP must be non-negative.");
-            if (keyPointId <= 0) throw new ArgumentException("Invalid KeyPointId.");
-            if (authorId <= 0) throw new ArgumentException("Invalid AuthorId.");
+            if (keyPointId == 0) throw new ArgumentException("Invalid KeyPointId.");
+            if (authorId == 0) throw new ArgumentException("Invalid AuthorId.");
             if (activationRadiusMeters <= 0) throw new ArgumentException("Activation radius must be positive.");
 
             Title = title;
@@ -152,6 +156,23 @@ namespace Explorer.Encounters.Core.Domain
             Latitude = latitude;
             XP = xp;
             Type = type;
+            ImagePath = imagePath;
+            ActivationRadiusMeters = activationRadiusMeters;
+        }
+
+        public void UpdateKeyPointChallenge(string title, string description, int xp, ChallengeType type, bool isRequiredForSecret, string? imagePath = null, int activationRadiusMeters = 50)
+        {
+            if (Status == ChallengeStatus.Archived) throw new InvalidOperationException("Cannot modify archived challenge.");
+            if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("Invalid Title.");
+            if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
+            if (xp < 0) throw new ArgumentException("XP must be non-negative.");
+            if (activationRadiusMeters <= 0) throw new ArgumentException("Activation radius must be positive.");
+
+            Title = title;
+            Description = description;
+            XP = xp;
+            Type = type;
+            IsRequiredForSecret = isRequiredForSecret;
             ImagePath = imagePath;
             ActivationRadiusMeters = activationRadiusMeters;
         }
