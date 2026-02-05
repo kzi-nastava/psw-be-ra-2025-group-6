@@ -56,16 +56,28 @@ namespace Explorer.API.Controllers.Tourist
         [HttpDelete("{id:long}")]
         public ActionResult Delete(long id)
         {
-            var clubToDelete = _clubService.Get(id);
-            if (clubToDelete == null) return NotFound();
-
-            var userId = long.Parse(User.FindFirst("id").Value);
-            if (clubToDelete.OwnerId != userId)
+            try
             {
-                return Forbid();
+                var clubToDelete = _clubService.Get(id);
+                if (clubToDelete == null) return NotFound();
+
+                var userId = long.Parse(User.FindFirst("id").Value);
+                if (clubToDelete.OwnerId != userId)
+                {
+                    return Forbid();
+                }
+
+                _clubService.Delete(id); 
+                return Ok();
             }
-            _clubService.Delete(id);
-            return Ok();
+            catch (InvalidOperationException ex) 
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Došlo je do neočekivane greške na serveru.");
+            }
         }
     }
 }

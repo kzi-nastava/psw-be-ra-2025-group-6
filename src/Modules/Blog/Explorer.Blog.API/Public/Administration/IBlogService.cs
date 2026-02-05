@@ -5,11 +5,11 @@ namespace Explorer.Blog.API.Public.Administration;
 
 public interface IBlogService
 {
-    PagedResult<BlogDto> GetPaged(int page, int pageSize);
+    PagedResult<BlogDto> GetPaged(int page, int pageSize, long? userId = null);
     List<BlogDto> GetByUser(long id);
     BlogDto Create(BlogCreateDto blog, long id);
     BlogDto Update(BlogDto blog);
-    BlogDto GetById(long id);
+    BlogDto GetById(long id, long? userId = null);
     BlogDto Delete(long id);
     void AddImages(long blogId, List<string> imagePaths);
     CommentDto AddComment(long blogId, long userId, string text);
@@ -35,5 +35,8 @@ public interface IBlogService
     PagedResult<BlogDto> GetFollowingBlogs(int page, int pageSize, long userId);
 
     List<BlogDto> GetFilteredBlogs(FilterBlogDto filter);
+    void Save(long userId, long blogPostId);
+    void Unsave(long userId, long blogPostId);
+    PagedResult<BlogDto> GetSavedByUser(int page, int pageSize, long userId);
 }
 

@@ -1,4 +1,4 @@
-INSERT INTO stakeholders."Users"("Id","Username","Password","Role","IsActive")
+﻿INSERT INTO stakeholders."Users"("Id","Username","Password","Role","IsActive")
 VALUES (-1, 'admin@gmail.com', 'admin123', 'Administrator', true);
 
 INSERT INTO stakeholders."Users"("Id", "Username", "Password", "Role", "IsActive")
@@ -18,6 +18,9 @@ VALUES (-22, 'turista2@gmail.com', 'turista2', 'Tourist', true);
 
 INSERT INTO stakeholders."Users"("Id", "Username", "Password", "Role", "IsActive")
 VALUES (-23, 'turista3@gmail.com', 'turista3', 'Tourist', true);
+
+INSERT INTO stakeholders."Users"("Id", "Username", "Password", "Role", "IsActive")
+VALUES (-24, 'turista4@gmail.com', 'turista4', 'Tourist', true);
 
 INSERT INTO stakeholders."Users"("Id", "Username", "Password", "Role", "IsActive")
 VALUES (-100, 'profileuser1@gmail.com', 'test1234', 'Tourist', true);

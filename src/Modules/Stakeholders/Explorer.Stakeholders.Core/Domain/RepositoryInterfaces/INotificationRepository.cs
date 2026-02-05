@@ -5,6 +5,7 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
 {
     public interface INotificationRepository : ICrudRepository<Notification>
     {
+        List<Notification> GetByRecipient(long recipientId);
         List<Notification> GetUnreadByRecipient(long recipientId);
     }
 }

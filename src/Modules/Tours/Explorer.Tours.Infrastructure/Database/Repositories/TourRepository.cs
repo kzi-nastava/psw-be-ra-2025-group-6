@@ -99,7 +99,16 @@ public class TourRepository : ITourRepository
         if (existingTour == null)
             throw new NotFoundException("Not found: " + tour.Id);
 
+        // SetValues() can update init properties via reflection
         DbContext.Entry(existingTour).CurrentValues.SetValues(tour);
+        
+        // Only update CoverImage if it has changed (avoid exception when tour is archived)
+        if (existingTour.CoverImage != tour.CoverImage)
+        {
+            existingTour.SetCoverImage(tour.CoverImage);
+        }
+        
+        // Duration needs explicit marking as modified since it's a complex type with converter
         DbContext.Entry(existingTour).Property(t => t.Duration).IsModified = true;
 
         try
@@ -129,14 +138,22 @@ public class TourRepository : ITourRepository
         _dbSet.Remove(entity);
         DbContext.SaveChanges();
     }
-    public List<Tour> GetPublishedTours()
+
+    public List<Tour> GetPublishedWithKeyPoints()
     {
         return DbContext.Tours
-            .Include(t => t.Equipment)
             .Include(t => t.KeyPoints)
             .Where(t => t.Status == TourStatus.CONFIRMED)
             .ToList();
     }
 
+    public List<Tour> GetPublishedTours()
+    {
+        return DbContext.Tours
+            .Include(t => t.Equipment)
+            .Include(t => t.KeyPoints)
+            .Where(t => t.Status == TourStatus.CONFIRMED && t.PublishedTime != null)
+            .ToList();
+    }
 
 }

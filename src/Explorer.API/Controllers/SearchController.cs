@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Search;
 using Explorer.Stakeholders.Infrastructure.Authentication;
+using Explorer.API.Contracts;
 
 namespace Explorer.API.Controllers
 {
@@ -24,7 +25,15 @@ namespace Explorer.API.Controllers
             [FromQuery] SearchEntityType[] types)
         {
             var personId = User.PersonId();
-            var userRole = User.Role().ToString();
+            if (!User.TryRole(out var role))
+            {
+                return Unauthorized(ApiErrorFactory.Create(
+                    HttpContext,
+                    ApiErrorCodes.AuthRequired,
+                    "Login required to search.",
+                    "User role claim is missing."));
+            }
+            var userRole = role.ToString();
 
             var request = new SearchRequest
             {

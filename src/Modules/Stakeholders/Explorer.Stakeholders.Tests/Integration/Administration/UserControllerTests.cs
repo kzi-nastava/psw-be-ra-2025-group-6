@@ -1,5 +1,7 @@
 ﻿using Explorer.Stakeholders.API.Dtos; // adjust if needed
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Net;
@@ -8,6 +10,7 @@ using System.Net.Http.Json;
 
 namespace Explorer.Stakeholders.Tests.Integration.AdminUsers
 {
+    [Collection("Sequential")]
     public class UserControllerTests : IAsyncLifetime, IClassFixture<StakeholdersTestFactory>
     {
         private readonly StakeholdersTestFactory _factory;
@@ -47,6 +50,17 @@ namespace Explorer.Stakeholders.Tests.Integration.AdminUsers
 
             await using var scope = _factory.Services.CreateAsyncScope();
             var ctx = scope.ServiceProvider.GetRequiredService<Explorer.Stakeholders.Infrastructure.Database.StakeholdersContext>();
+            await ctx.Database.ExecuteSqlRawAsync("CREATE SCHEMA IF NOT EXISTS stakeholders;");
+            await ctx.Database.EnsureCreatedAsync();
+            try
+            {
+                var databaseCreator = ctx.Database.GetService<IRelationalDatabaseCreator>();
+                databaseCreator.CreateTables();
+            }
+            catch
+            {
+                // Tables already exist
+            }
             await ctx.Database.ExecuteSqlRawAsync(sql);
         }
 

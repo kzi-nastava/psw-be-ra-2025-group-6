@@ -11,10 +11,11 @@ public class Tour : AggregateRoot
     public TourDifficulty Difficulty { get; init; }
     public List<string>? Tags { get; init; }
     public float Price { get; init; }
+    public string? CoverImage { get; private set; }
     
     public TourStatus Status { get; private set; }
 
-    public long AuthorId { get; init; }
+    public long AuthorId { get; set; }
 
     public List<Equipment>? Equipment { get; private set; }
 
@@ -40,7 +41,8 @@ public class Tour : AggregateRoot
         TourStatus status,
         List<Equipment> equipment,
         List<KeyPoint> keypoints,
-        List<TourDuration> durations)
+        List<TourDuration> durations,
+        string? coverImage = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Invalid Name.");
@@ -61,6 +63,7 @@ public class Tour : AggregateRoot
         Price = price;
         Status = status;
         Equipment = equipment ?? new List<Equipment>();
+        CoverImage = coverImage;
 
         KeyPoints = keypoints ?? new List<KeyPoint>();
         DistanceInKm = 0;
@@ -73,7 +76,8 @@ public class Tour : AggregateRoot
         string description,
         TourDifficulty difficulty,
         List<string> tags,
-        long AuthorId)
+        long AuthorId,
+        string? coverImage = null)
     {
 
         if (string.IsNullOrWhiteSpace(name))
@@ -95,6 +99,7 @@ public class Tour : AggregateRoot
         Status = TourStatus.DRAFT;
         this.AuthorId = AuthorId;
         Equipment = new List<Equipment>();
+        CoverImage = coverImage;
 
         KeyPoints = new List<KeyPoint>();
         DistanceInKm = 0;
@@ -158,6 +163,15 @@ public class Tour : AggregateRoot
 
         KeyPoints.Add(keyPoint);
     }
+
+    /// <summary>
+    /// Returns the first key point as the reference point for distance calculations.
+    /// This keeps distance search consistent when tours only store coordinates on key points.
+    /// </summary>
+    public KeyPoint? GetReferenceKeyPoint()
+    {
+        return KeyPoints?.FirstOrDefault();
+    }
     public void SetDistance(double distance)
     {
         if (distance < 0) throw new ArgumentException("Distance cannot be negative.");
@@ -189,6 +203,37 @@ public class Tour : AggregateRoot
             Duration.Add(duration);
         }
     }
+    
+
+    public bool IsWithinRadius(double centerLat, double centerLon, double radiusInKm)
+    {
+        var referencePoint = GetReferenceKeyPoint();
+        if (referencePoint == null) return false;
+
+        var distance = HaversineDistanceInKm(centerLat, centerLon, referencePoint.Latitude, referencePoint.Longitude);
+        return distance <= radiusInKm;
+    }
+
+    public double DistanceTo(double centerLat, double centerLon)
+    {
+        var referencePoint = GetReferenceKeyPoint();
+        if (referencePoint == null) return double.PositiveInfinity;
+
+        return HaversineDistanceInKm(centerLat, centerLon, referencePoint.Latitude, referencePoint.Longitude);
+    }
+
+    private static double HaversineDistanceInKm(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double R = 6371.0;
+        var dLat = ToRadians(lat2 - lat1);
+        var dLon = ToRadians(lon2 - lon1);
+        var a =
+            Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+            Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+            Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        return R * c;
+    }
     public KeyPoint? GetFirstKeyPoint()
     {
         return KeyPoints.FirstOrDefault();
@@ -214,5 +259,14 @@ public class Tour : AggregateRoot
         PublishedTime = DateTime.UtcNow;
     }
 
+    public void SetCoverImage(string? coverImage)
+    {
+        if (Status == TourStatus.ARCHIVED)
+            throw new InvalidOperationException("Cannot modify cover image of an archived tour.");
+        
+        CoverImage = coverImage;
+    }
+
+    private static double ToRadians(double angle) => Math.PI * angle / 180.0;
 
 }

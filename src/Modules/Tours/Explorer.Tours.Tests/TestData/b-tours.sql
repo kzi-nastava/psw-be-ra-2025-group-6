@@ -1,5 +1,5 @@
 INSERT INTO tours."Tours"
-("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration", "CoverImage")
 VALUES 
 (
     -1,
@@ -11,11 +11,12 @@ VALUES
     0,
     3,
     0,
-    '[]'::jsonb
+    '[]'::jsonb,
+    NULL
 );
 
 INSERT INTO tours."Tours"
-("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration", "CoverImage")
 VALUES 
 (
     -2,
@@ -27,11 +28,12 @@ VALUES
     0,
     3,
     0,
-    '[]'::jsonb
+    '[]'::jsonb,
+    NULL
 );
 
 INSERT INTO tours."Tours"
-("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration", "CoverImage")
 VALUES 
 (
     -3,
@@ -43,11 +45,12 @@ VALUES
     1,
     4,
     0,
-    '[]'::jsonb
+    '[]'::jsonb,
+    NULL
 );
 
 INSERT INTO tours."Tours"
-("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration")
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration", "CoverImage")
 VALUES
     (
         -4,
@@ -59,10 +62,12 @@ VALUES
         2,
         4,
         0,
-        '[]'::jsonb
+        '[]'::jsonb,
+        NULL
     );
 
 INSERT INTO tours."Tours"
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration", "CoverImage")
 VALUES
     (
         -5,
@@ -74,5 +79,57 @@ VALUES
         1,
         4,
         0,
-        '[]'::jsonb
+        '[]'::jsonb,
+        NULL
     );
+
+INSERT INTO tours."Tours"
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration", "CoverImage")
+VALUES
+(
+    -10,
+    'Novi Sad Center Walk',
+    'Setnja kroz centar Novog Sada',
+    0,
+    ARRAY['city', 'short'],
+    0,
+    1,
+    3,
+    0,
+    '[]'::jsonb,
+    NULL
+);
+
+INSERT INTO tours."Tours"
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration", "CoverImage")
+VALUES
+(
+    -11,
+    'Novi Sad Riverside',
+    'Setnja uz Dunav',
+    1,
+    ARRAY['river', 'easy'],
+    0,
+    1,
+    4,
+    0,
+    '[]'::jsonb,
+    NULL
+);
+
+INSERT INTO tours."Tours"
+("Id", "Name", "Description", "Difficulty", "Tags", "Price", "Status", "AuthorId", "DistanceInKm", "Duration", "CoverImage")
+VALUES
+(
+    -12,
+    'Subotica Scenic Tour',
+    'Duz Subotice',
+    1,
+    ARRAY['north', 'day'],
+    0,
+    1,
+    4,
+    0,
+    '[]'::jsonb,
+    NULL
+);

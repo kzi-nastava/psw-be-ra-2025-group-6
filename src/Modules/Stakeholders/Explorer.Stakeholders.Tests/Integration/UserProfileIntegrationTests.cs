@@ -56,7 +56,10 @@ public class UserProfileIntegrationTests : BaseStakeholdersIntegrationTest
             Surname = "UpdatedSurname",
             ProfilePicture = "updated.jpg",
             Biography = "Updated bio.",
-            Quote = "Updated quote."
+            Quote = "Updated quote.",
+            IsFollowedByMe = false,
+            Username = "profileuser1"//,
+            //UserId = -100
         };
 
         // Act
@@ -82,7 +85,10 @@ public class UserProfileIntegrationTests : BaseStakeholdersIntegrationTest
             Surname = "NewSurname",
             ProfilePicture = "new.jpg",
             Biography = "New bio.",
-            Quote = "New quote."
+            Quote = "New quote.",
+            IsFollowedByMe = false,
+            //UserId = -101,
+            Username = "profileuser2"
         };
 
         // Act

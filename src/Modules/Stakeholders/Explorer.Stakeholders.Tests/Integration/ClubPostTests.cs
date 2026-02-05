@@ -11,6 +11,8 @@ using Xunit;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 using System.Linq;
+using Explorer.Tours.API.Public.Authoring;
+using Explorer.Blog.API.Public.Administration;
 
 namespace Explorer.Stakeholders.Tests.Integration
 {
@@ -115,7 +117,8 @@ namespace Explorer.Stakeholders.Tests.Integration
                 "Test club",
                 "Test description",
                 new List<string> { "img.jpg" },
-                -21 
+                -21,
+                Core.Domain.ClubStatus.Active
             );
             dbContext.Clubs.Add(club);
             dbContext.SaveChanges();
@@ -149,6 +152,8 @@ namespace Explorer.Stakeholders.Tests.Integration
             using var scope = Factory.Services.CreateScope();
             var controller = CreateController(scope, "-21");
             var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+            dbContext.ClubPosts.RemoveRange(dbContext.ClubPosts.Where(p => p.ClubId == -2));
+            dbContext.SaveChanges();
             dbContext.ClubPosts.Add(new Core.Domain.ClubPost(-21, -2, "Post 1", null, null, DateTime.UtcNow, null));
             dbContext.ClubPosts.Add(new Core.Domain.ClubPost(-22, -2, "Post 2", null, null, DateTime.UtcNow, null));
             dbContext.SaveChanges();
@@ -163,7 +168,11 @@ namespace Explorer.Stakeholders.Tests.Integration
 
         private static ClubPostController CreateController(IServiceScope scope, string userId)
         {
-            var controller = new ClubPostController(scope.ServiceProvider.GetRequiredService<IClubPostService>());
+            var clubPostService = scope.ServiceProvider.GetRequiredService<IClubPostService>();
+            var tourService = scope.ServiceProvider.GetRequiredService<ITourService>();
+            var blogService = scope.ServiceProvider.GetRequiredService<IBlogService>();
+
+            var controller = new ClubPostController(clubPostService, tourService, blogService);
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {

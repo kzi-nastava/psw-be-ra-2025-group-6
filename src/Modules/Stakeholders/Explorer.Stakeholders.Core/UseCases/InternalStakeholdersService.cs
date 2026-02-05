@@ -1,5 +1,6 @@
 ﻿using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Stakeholders.Core.UseCases;
@@ -18,7 +19,7 @@ public class InternalStakeholdersService : IInternalStakeholderService
     public string GetUsername(long userId)
     {
         var user = _userRepository.GetById(userId);
-        if (user == null) throw new Exception("User not found.");
+        if (user == null) return "Unknown";
 
         return user.Username;
     }
@@ -33,6 +34,11 @@ public class InternalStakeholdersService : IInternalStakeholderService
     {
         var followedUsers = _followRepository.GetFollowing(followerId);
         return followedUsers.Select(u => (long)u.Id).ToList();
+    }
+
+    public List<long> GetAdminIds()
+    {
+        return _userRepository.GetAll().Where(u => u.Role == UserRole.Administrator).Select(u => u.Id).ToList();
     }
 }
 

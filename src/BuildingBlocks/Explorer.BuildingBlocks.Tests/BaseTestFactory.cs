@@ -23,6 +23,7 @@ public abstract class BaseTestFactory<TDbContext> : WebApplicationFactory<Progra
             // Resolve TestData relative to the test project's output directory so it works regardless of content root
             var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "TestData"));
             InitializeDatabase(db, path, logger);
+            SeedAdditionalDatabases(scopedServices, path, logger);
         });
     }
 
@@ -30,6 +31,12 @@ public abstract class BaseTestFactory<TDbContext> : WebApplicationFactory<Progra
     {
         try
         {
+            var defaultSchema = context.Model.GetDefaultSchema();
+            if (!string.IsNullOrWhiteSpace(defaultSchema))
+            {
+                context.Database.ExecuteSqlRaw($"CREATE SCHEMA IF NOT EXISTS \"{defaultSchema}\";");
+            }
+
             context.Database.EnsureCreated();
             var databaseCreator = context.Database.GetService<IRelationalDatabaseCreator>();
             databaseCreator.CreateTables();
@@ -58,6 +65,10 @@ public abstract class BaseTestFactory<TDbContext> : WebApplicationFactory<Progra
     }
 
     protected abstract IServiceCollection ReplaceNeededDbContexts(IServiceCollection services);
+
+    protected virtual void SeedAdditionalDatabases(IServiceProvider services, string scriptFolder, ILogger logger)
+    {
+    }
 
     protected static Action<DbContextOptionsBuilder> SetupTestContext()
     {

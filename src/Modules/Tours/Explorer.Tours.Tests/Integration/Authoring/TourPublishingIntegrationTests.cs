@@ -27,32 +27,33 @@ public class TourPublishingIntegrationTests : BaseToursIntegrationTest
         var controller = CreateController(scope, authorId);
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        // 1. KORAK: Popravljamo turu jer u seed-u nema Opis i Tagove
-        // Moramo joj dodati opis i tagove da bi prošla prvu validaciju
+        // 1. KORAK: Priprema podataka
         var tourDto = ((ObjectResult)controller.Get(tourId).Result)?.Value as TourDto;
         tourDto.Description = "Validan opis za testiranje objave.";
         tourDto.Tags = new List<string> { "city", "history" };
         controller.Update(tourId, tourDto);
 
-        // 2. KORAK: Dodajemo 2 ključne tačke (da zadovoljimo AC 2)
+        // 2. KORAK: Dodavanje ključnih tačaka
         var kp1 = new KeyPointDto { Name = "KP1", Description = "D1", Latitude = 45.1, Longitude = 19.1, ImagePath = "img1.jpg", Secret = "S1" };
         var kp2 = new KeyPointDto { Name = "KP2", Description = "D2", Latitude = 45.2, Longitude = 19.2, ImagePath = "img2.jpg", Secret = "S2" };
 
         controller.AddKeyPoint(tourId, kp1);
         controller.AddKeyPoint(tourId, kp2);
 
-        // Act - Pozivamo Publish
-        var result = ((ObjectResult)controller.Publish(tourId).Result)?.Value as TourDto;
+        // Act
+        var result = (ObjectResult)controller.Publish(tourId).Result;
 
-        // Assert - Response
+        // Assert
         result.ShouldNotBeNull();
-        result.Status.ShouldBe(TourStatusDto.CONFIRMED);
-        result.PublishedTime.ShouldNotBeNull();
+        result.StatusCode.ShouldBe(200);
+
+        var resultValue = result.Value as TourDto;
+        resultValue.Status.ShouldBe(TourStatusDto.CONFIRMED);
+        resultValue.PublishedTime.ShouldNotBeNull();
 
         // Assert - Database
         var storedTour = dbContext.Tours.First(t => t.Id == tourId);
         storedTour.Status.ShouldBe(TourStatus.CONFIRMED);
-        storedTour.PublishedTime.ShouldNotBeNull();
     }
 
     [Fact]
@@ -65,22 +66,20 @@ public class TourPublishingIntegrationTests : BaseToursIntegrationTest
 
         var controller = CreateController(scope, authorId);
 
-        // 1. KORAK: Opet moramo popraviti turu (Opis i Tagovi)
-        // Ako ovo ne uradimo, pašće na validaciji opisa, a mi želimo da padne na validaciji tačaka
         var tourDto = ((ObjectResult)controller.Get(tourId).Result)?.Value as TourDto;
         tourDto.Description = "Validan opis, ali nema tacaka.";
         tourDto.Tags = new List<string> { "test" };
         controller.Update(tourId, tourDto);
 
-        // Act & Assert
-        // Nismo dodali tačke -> Očekujemo grešku vezanu za tačke
-        var exception = Should.Throw<InvalidOperationException>(() =>
-        {
-            controller.Publish(tourId);
-        });
+        // Act
+        var result = controller.Publish(tourId).Result as BadRequestObjectResult;
 
-        // Sada bi poruka trebalo da bude tačna
-        exception.Message.ShouldContain("Tour must have at least two key points");
+        // Assert
+        result.ShouldNotBeNull();
+        result.StatusCode.ShouldBe(400);
+
+        var json = result.Value.ToString();
+        json.ShouldContain("Tour must have at least two key points");
     }
 
     [Fact]
@@ -93,13 +92,13 @@ public class TourPublishingIntegrationTests : BaseToursIntegrationTest
 
         var controller = CreateController(scope, authorId);
 
-        // Act & Assert
-        var exception = Should.Throw<InvalidOperationException>(() =>
-        {
-            controller.Publish(tourId);
-        });
+        // Act
+        var result = controller.Publish(tourId).Result as BadRequestObjectResult;
 
-        exception.Message.ShouldContain("Only draft tours can be published");
+        // Assert
+        result.ShouldNotBeNull();
+        result.StatusCode.ShouldBe(400);
+        result.Value.ToString().ShouldContain("Only draft tours can be published");
     }
 
     [Fact]
@@ -112,11 +111,13 @@ public class TourPublishingIntegrationTests : BaseToursIntegrationTest
 
         var controller = CreateController(scope, intruderId);
 
-        // Act & Assert
-        Should.Throw<ForbiddenException>(() =>
-        {
-            controller.Publish(tourId);
-        });
+        // Act
+        var result = controller.Publish(tourId).Result as ObjectResult;
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.StatusCode.ShouldBe(403);
+        result.Value.ToString().ShouldContain("Only the owner can publish the tour");
     }
 
     private static TourController CreateController(IServiceScope scope, long personId)
