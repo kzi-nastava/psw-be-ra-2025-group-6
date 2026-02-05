@@ -1,4 +1,4 @@
-﻿using Explorer.Encounters.Core.Mappers;
+using Explorer.Encounters.Core.Mappers;
 using Explorer.Encounters.Infrastructure.Database; 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +8,8 @@ using Explorer.Encounters.Infrastructure.Database.Repositories;
 using Explorer.Encounters.Core.UseCases;
 using AutoMapper;
 using Explorer.Encounters.API.Public;
+using Explorer.Encounters.Infrastructure.Integration;
+using Npgsql;
 
 namespace Explorer.Encounters.Infrastructure
 {
@@ -30,6 +32,8 @@ namespace Explorer.Encounters.Infrastructure
             services.AddScoped<ISocialEncounterService, SocialEncounterService>();
 
             services.AddScoped<IHiddenLocationService, HiddenLocationService>();
+            
+            services.AddScoped<IQuizEncounterService, QuizEncounterService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services)
@@ -43,9 +47,19 @@ namespace Explorer.Encounters.Infrastructure
 
             services.AddScoped<IHiddenLocationAttemptRepository, HiddenLocationAttemptDbRepository>();
 
+            services.AddScoped<IQuizEncounterRepository, QuizEncounterDbRepository>();
+            services.AddScoped<IQuizCompletionRepository, QuizCompletionDbRepository>();
+
+            // Register TourStatusGateway for cross-module communication
+            services.AddScoped<Core.Domain.RepositoryInterfaces.ITourStatusGateway>(provider => 
+                new TourStatusGateway(DbConnectionStringBuilder.Build("tours")));
+
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("encounters"));
+            dataSourceBuilder.EnableDynamicJson();
+            var dataSource = dataSourceBuilder.Build();
 
             services.AddDbContext<EncountersContext>(opt =>
-                opt.UseNpgsql(DbConnectionStringBuilder.Build("encounters"),
+                opt.UseNpgsql(dataSource,
                     x => x.MigrationsHistoryTable("__EFMigrationsHistory", "encounters")));
         }
     }
