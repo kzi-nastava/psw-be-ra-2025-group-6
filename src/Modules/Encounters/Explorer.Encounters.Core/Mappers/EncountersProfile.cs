@@ -30,6 +30,21 @@ namespace Explorer.Encounters.Core.Mappers
 
             // HiddenLocationAttempt mappings
             CreateMap<HiddenLocationAttempt, HiddenLocationAttemptDto>().ReverseMap();
+
+            
+            // Leaderboard mappings
+            CreateMap<LeaderboardEntry, LeaderboardEntryDto>().ReverseMap();
+            CreateMap<ClubLeaderboard, ClubLeaderboardDto>().ReverseMap();
+
+
+            // QuizEncounter mappings
+            CreateMap<QuizEncounter, QuizEncounterDto>().ReverseMap();
+            CreateMap<QuizQuestion, EncounterQuizQuestionDto>()
+                .ForMember(dest => dest.AnswerOptions, opt => opt.MapFrom(src => src.AnswerOptions))
+                .ReverseMap();
+            CreateMap<QuizAnswerOption, EncounterQuizAnswerOptionDto>().ReverseMap();
+            CreateMap<QuizCompletion, QuizCompletionDto>().ReverseMap();
+
         }
 
         private class ChallengeDtoToChallengeConverter : ITypeConverter<ChallengeDto, Challenge>

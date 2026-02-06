@@ -54,5 +54,12 @@ namespace Explorer.Encounters.Infrastructure.Database.Repositories
                 .Where(c => c.IsCreatedByTourist && c.Status == ChallengeStatus.Draft)
                 .ToList();
         }
+
+        public List<Challenge> GetByKeyPointId(long keyPointId)
+        {
+            return _db.Set<Challenge>()
+                .Where(c => c.KeyPointId == keyPointId && c.Status == ChallengeStatus.Active)
+                .ToList();
+        }
     }
 }

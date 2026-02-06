@@ -8,7 +8,7 @@ using Explorer.Encounters.Core.Domain;
 
 namespace Explorer.Encounters.Infrastructure.Database
 {
-    public class EncountersContext: DbContext
+    public class EncountersContext : DbContext
     {
         public EncountersContext(DbContextOptions<EncountersContext> options) : base(options) { }
 
@@ -21,6 +21,12 @@ namespace Explorer.Encounters.Infrastructure.Database
 
         public DbSet<HiddenLocationAttempt> HiddenLocationAttempts { get; set; }
 
+        public DbSet<LeaderboardEntry> LeaderboardEntries { get; set; }
+        public DbSet<ClubLeaderboard> ClubLeaderboards { get; set; }
+
+        public DbSet<QuizEncounter> QuizEncounters { get; set; }
+        public DbSet<QuizQuestion> QuizQuestions { get; set; }
+        public DbSet<QuizCompletion> QuizCompletions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -37,6 +43,8 @@ namespace Explorer.Encounters.Infrastructure.Database
                 b.Property(c => c.IsCreatedByTourist);
                 b.Property(c => c.ImagePath);
                 b.Property(c => c.ActivationRadiusMeters).HasDefaultValue(50);
+                b.Property(c => c.KeyPointId);
+                b.Property(c => c.IsRequiredForSecret).HasDefaultValue(false);
             });
 
             modelBuilder.Entity<TouristXpProfile>(b =>
@@ -84,6 +92,75 @@ namespace Explorer.Encounters.Infrastructure.Database
                 b.Property(a => a.LastPositionUpdate).IsRequired();
             });
 
+
+            modelBuilder.Entity<LeaderboardEntry>(b =>
+            {
+                b.HasKey(l => l.Id);
+                b.Property(l => l.UserId).IsRequired();
+                b.Property(l => l.Username).IsRequired();
+                b.Property(l => l.TotalXP).IsRequired();
+                b.Property(l => l.CompletedChallenges).IsRequired();
+                b.Property(l => l.CompletedTours).IsRequired();
+                b.Property(l => l.AdventureCoins).IsRequired();
+                b.Property(l => l.CurrentRank).IsRequired();
+                b.Property(l => l.LastUpdated).IsRequired();
+                b.Property(l => l.ClubId);
+                b.HasIndex(l => l.UserId).IsUnique();
+                b.HasIndex(l => l.CurrentRank);
+            });
+
+            modelBuilder.Entity<ClubLeaderboard>(b =>
+            {
+                b.HasKey(c => c.Id);
+                b.Property(c => c.ClubId).IsRequired();
+                b.Property(c => c.ClubName).IsRequired();
+                b.Property(c => c.TotalXP).IsRequired();
+                b.Property(c => c.TotalCompletedChallenges).IsRequired();
+                b.Property(c => c.TotalCompletedTours).IsRequired();
+                b.Property(c => c.TotalAdventureCoins).IsRequired();
+                b.Property(c => c.MemberCount).IsRequired();
+                b.Property(c => c.CurrentRank).IsRequired();
+                b.Property(c => c.LastUpdated).IsRequired();
+                b.HasIndex(c => c.ClubId).IsUnique();
+                b.HasIndex(c => c.CurrentRank);
+            });
+                modelBuilder.Entity<QuizEncounter>(b =>
+                {
+                    b.HasKey(q => q.Id);
+                    b.Property(q => q.ChallengeId).IsRequired();
+                    b.Property(q => q.MinimumCorrectAnswers).IsRequired();
+                    b.Property(q => q.AudioStoryPath);
+                    b.HasIndex(q => q.ChallengeId).IsUnique();
+                    b.HasMany(q => q.Questions)
+                        .WithOne()
+                        .HasForeignKey(qq => qq.QuizEncounterId)
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+                modelBuilder.Entity<QuizQuestion>(b =>
+                {
+                    b.HasKey(q => q.Id);
+                    b.Property(q => q.Text).IsRequired();
+                    b.Property(q => q.AnswerOptions)
+                        .HasColumnType("jsonb")
+                        .IsRequired();
+                    b.Property(q => q.QuizEncounterId).IsRequired();
+                });
+
+                modelBuilder.Entity<QuizCompletion>(b =>
+                {
+                    b.HasKey(c => c.Id);
+                    b.Property(c => c.UserId).IsRequired();
+                    b.Property(c => c.QuizEncounterId).IsRequired();
+                    b.Property(c => c.ChallengeId).IsRequired();
+                    b.Property(c => c.CompletedAt).IsRequired();
+                    b.Property(c => c.CorrectAnswersCount).IsRequired();
+                    b.Property(c => c.TotalQuestionsCount).IsRequired();
+                    b.Property(c => c.IsSuccessful).IsRequired();
+                    b.Property(c => c.XpAwarded).IsRequired();
+                    b.HasIndex(c => new { c.UserId, c.ChallengeId }).IsUnique();
+
+                });
+            }
         }
     }
-}

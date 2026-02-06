@@ -1,4 +1,9 @@
 -- Drop tables in correct order (respecting foreign keys)
+DELETE FROM encounters."LeaderboardEntries";
+DELETE FROM encounters."ClubLeaderboards";
+DELETE FROM encounters."QuizCompletions";
+DELETE FROM encounters."QuizQuestions";
+DELETE FROM encounters."QuizEncounters";
 DELETE FROM encounters."HiddenLocationAttempts";
 DELETE FROM encounters."ActiveSocialParticipants";
 DELETE FROM encounters."EncounterCompletions";

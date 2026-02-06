@@ -10,31 +10,47 @@ namespace Explorer.Stakeholders.Core.UseCases
     {
         private readonly IUserRepository _userRepository;
         private readonly IPersonRepository _personRepository;
+        private readonly IUserProfileRepository _userProfileRepository;
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IPersonRepository personRepository, IMapper mapper)
+        public UserService(
+            IUserRepository userRepository, 
+            IPersonRepository personRepository, 
+            IUserProfileRepository userProfileRepository,
+            IMapper mapper)
         {
             _userRepository = userRepository;
             _personRepository = personRepository;
+            _userProfileRepository = userProfileRepository;
             _mapper = mapper;
         }
 
         public UserDto CreateUser(CreateUserDto dto)
         {
-
             var role = Enum.Parse<UserRole>(dto.Role, true);
 
-            // Kreiraj User entitet
             var user = new User(dto.Username, dto.Password, role, dto.IsActive);
+            Console.WriteLine($"[USER CREATE] Creating user with username: {dto.Username}");
+            
             _userRepository.Create(user);
+            Console.WriteLine($"[USER CREATE] User created with Id: {user.Id}");
 
-            // Kreiraj Person entitet i poveži sa User.Id
             var person = new Person(user.Id, dto.Name, dto.Surname, dto.Email);
             _personRepository.Create(person);
+            Console.WriteLine($"[USER CREATE] Person created with Id: {person.Id}, UserId: {person.UserId}");
 
-            // Mapiraj User u UserDto
+            try
+            {
+                var userProfile = new UserProfile(user.Id, dto.Name, dto.Surname, "", "", "");
+                _userProfileRepository.Create(userProfile);
+                Console.WriteLine($"[USER CREATE] UserProfile created with Id: {userProfile.Id}, UserId: {userProfile.UserId}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[USER CREATE] Failed to create UserProfile: {ex.Message}");
+            }
+
             return _mapper.Map<UserDto>(user);
-
         }
 
         public IEnumerable<UserDto> GetAllUsers()

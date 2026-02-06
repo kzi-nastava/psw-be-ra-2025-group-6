@@ -19,8 +19,7 @@ public class TouristEncounterController : ControllerBase
     }
 
     //Pogledati   private long GetTouristId() =>PersonId();
-    private long GetTouristId() =>
-    long.Parse(User.FindFirst("id")!.Value);
+    private long GetTouristId() => User.PersonId();
 
     /// <summary>
     /// Get tourist's XP profile (current XP, level, progress)

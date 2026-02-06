@@ -8,9 +8,10 @@ public class QuizQuestion : Entity
     public long QuizId { get; set; }
     public string Text { get; set; } = string.Empty;
     public bool AllowsMultipleAnswers { get; set; }
+    public string? AudioPath { get; set; }
     public ICollection<QuizAnswerOption> Options { get; set; }
 
-    public QuizQuestion(long quizId, string text, bool allowsMultipleAnswers, ICollection<QuizAnswerOption> options)
+    public QuizQuestion(long quizId, string text, bool allowsMultipleAnswers, ICollection<QuizAnswerOption> options, string? audioPath = null)
     {
        
         if (string.IsNullOrWhiteSpace(text)) throw new ArgumentException("Invalid Text.");
@@ -19,6 +20,7 @@ public class QuizQuestion : Entity
         QuizId = quizId;
         Text = text;
         AllowsMultipleAnswers = allowsMultipleAnswers;
+        AudioPath = audioPath;
         Options = options ?? new List<QuizAnswerOption>();
     }
 

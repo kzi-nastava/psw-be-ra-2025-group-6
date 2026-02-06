@@ -6,5 +6,6 @@ public class QuizQuestionDto
     public long QuizId { get; set; }
     public string Text { get; set; } = string.Empty;
     public bool AllowsMultipleAnswers { get; set; }
+    public string? AudioPath { get; set; }
     public List<QuizAnswerOptionDto> Options { get; set; } = new();
 }

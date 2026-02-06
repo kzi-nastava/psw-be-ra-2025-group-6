@@ -30,6 +30,10 @@ namespace Explorer.Encounters.Infrastructure.Database.Repositories
         {
             _context.TouristXpProfiles.Update(profile);
             _context.SaveChanges();
+            
+            // Force reload from database to ensure fresh data
+            _context.Entry(profile).Reload();
+            
             return profile;
         }
     }

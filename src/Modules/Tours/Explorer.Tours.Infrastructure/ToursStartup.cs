@@ -5,6 +5,7 @@ using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Admin;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.API.Public.Authoring;
+using Explorer.Tours.API.Internal;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
@@ -17,6 +18,7 @@ using Explorer.Tours.Core.UseCases.Shopping;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Core.UseCases.Authoring;
 using Explorer.Tours.API.Public.Shopping;
+using Explorer.Tours.Core.UseCases.Internal;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
 using Explorer.Tours.Infrastructure.Services;
@@ -61,6 +63,9 @@ public static class ToursStartup
         services.AddScoped<ITouristViewService, TouristViewService>();
         services.AddScoped<IQuizService, QuizService>();
         services.AddScoped<ITourSearchService, TourSearchService>();
+        
+        // ? Internal API
+        services.AddScoped<IInternalTourService, InternalTourService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)

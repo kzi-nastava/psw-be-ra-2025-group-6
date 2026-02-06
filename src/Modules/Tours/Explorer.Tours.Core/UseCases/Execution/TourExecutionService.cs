@@ -7,6 +7,7 @@ using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Shared;
 using Shared.Achievements;
+using Explorer.Encounters.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Execution;
 
@@ -15,6 +16,7 @@ public class TourExecutionService : ITourExecutionService
     private readonly ITourRepository _tourRepository;
     private readonly ITourExecutionRepository _executionRepository;
     private readonly IInternalTourPurchaseTokenService _tokenService;
+    private readonly IInternalLeaderboardService _leaderboardService;
     private readonly IMapper _mapper;
     private readonly IDomainEventDispatcher _eventDispatcher;
     private const double ProximityThresholdMeters = 50.0;
@@ -23,11 +25,13 @@ public class TourExecutionService : ITourExecutionService
         ITourRepository tourRepository,
         ITourExecutionRepository executionRepository,
         IInternalTourPurchaseTokenService tokenService,
+        IInternalLeaderboardService leaderboardService,
         IMapper mapper, IDomainEventDispatcher eventDispatcher)
     {
         _tourRepository = tourRepository;
         _executionRepository = executionRepository;
         _tokenService = tokenService;
+        _leaderboardService = leaderboardService;
         _mapper = mapper;
         _eventDispatcher = eventDispatcher;
     }
@@ -125,7 +129,6 @@ public class TourExecutionService : ITourExecutionService
             var orderedKeyPoints = tour.KeyPoints.OrderBy(kp => kp.Id).ToList();
             var completedIds = execution.CompletedKeyPoints.Select(ckp => ckp.KeyPointId).ToHashSet();
             
-            // Find the NEXT uncompleted key point (not the first one!)
             var nextKp = orderedKeyPoints.FirstOrDefault(kp => !completedIds.Contains(kp.Id));
             
             if (nextKp != null)
@@ -154,7 +157,7 @@ public class TourExecutionService : ITourExecutionService
             Status = execution.Status.ToString(),
             StartTime = execution.StartTime,
             InitialPosition = new TrackPointDto { Latitude = execution.InitialPosition.Latitude, Longitude = execution.InitialPosition.Longitude },
-            FirstKeyPoint = nextKeyPoint,  // This is actually the NEXT key point now
+            FirstKeyPoint = nextKeyPoint,
             RouteToFirstKeyPoint = route
         };
     }
@@ -175,7 +178,9 @@ public class TourExecutionService : ITourExecutionService
                 KeyPointCompleted = false,
                 ProgressPercentage = execution.ProgressPercentage,
                 LastActivity = execution.LastActivity,
-                AllCompletedKeyPoints = new List<CompletedKeyPointDto>()
+                AllCompletedKeyPoints = new List<CompletedKeyPointDto>(),
+                HasAvailableChallenges = false,
+                AvailableChallengeIds = new List<long>()
             };
         }
 
@@ -230,7 +235,6 @@ public class TourExecutionService : ITourExecutionService
             };
         }
 
-        // Map all completed key points
         var allCompletedKeyPoints = execution.CompletedKeyPoints
             .Select(ckp => new CompletedKeyPointDto
             {
@@ -248,7 +252,9 @@ public class TourExecutionService : ITourExecutionService
             ProgressPercentage = execution.ProgressPercentage,
             NextKeyPoint = nextKeyPointDto,
             LastActivity = execution.LastActivity,
-            AllCompletedKeyPoints = allCompletedKeyPoints
+            AllCompletedKeyPoints = allCompletedKeyPoints,
+            HasAvailableChallenges = nearbyKeyPoint != null,
+            AvailableChallengeIds = new List<long>()
         };
     }
 
@@ -272,7 +278,7 @@ public class TourExecutionService : ITourExecutionService
         return new UnlockedSecretsDto { Secrets = secrets };
     }
 
-    public TourExecutionResultDto CompleteExecution(long executionId, long touristId)
+    public async Task<TourExecutionResultDto> CompleteExecution(long executionId, long touristId)
     {
         var execution = _executionRepository.GetById(executionId);
         if (execution == null) throw new NotFoundException($"Tour execution with id {executionId} not found");
@@ -281,8 +287,19 @@ public class TourExecutionService : ITourExecutionService
         execution.Complete();
         _executionRepository.Update(execution);
 
-        // Mark token as used ONLY when tour is completed (not abandoned)
         _tokenService.MarkTokenAsUsed(touristId, execution.TourId);
+
+        // ? UPDATE LEADERBOARD STATS ?
+        var tour = _tourRepository.Get(execution.TourId);
+        var xpGained = CalculateXP(tour);
+        var coinsEarned = CalculateCoins(tour);
+        
+        await _leaderboardService.UpdateUserStatsAsync(
+            touristId,
+            xpGained,
+            challengesCompleted: 0,
+            toursCompleted: 1,
+            coinsEarned);
 
         return new TourExecutionResultDto
         {
@@ -360,7 +377,6 @@ public class TourExecutionService : ITourExecutionService
     {
         if (orderedKeyPoints.Count == 0) return 0;
 
-        // Simple percentage: (completed / total) * 100
         var completedCount = completedKeyPoints.Count;
         var totalCount = orderedKeyPoints.Count;
 
@@ -374,5 +390,28 @@ public class TourExecutionService : ITourExecutionService
             new TrackPointDto { Latitude = startLat, Longitude = startLng },
             new TrackPointDto { Latitude = endLat, Longitude = endLng }
         };
+    }
+
+    private int CalculateXP(Tour tour)
+    {
+        // Base XP calculation based on tour difficulty and length
+        var baseXP = tour.Difficulty switch
+        {
+            TourDifficulty.EASY => 50,
+            TourDifficulty.MEDIUM => 100,
+            TourDifficulty.HARD => 150,
+            _ => 50
+        };
+
+        // Bonus XP for longer tours
+        var distanceBonus = (int)(tour.DistanceInKm * 10);
+        
+        return baseXP + distanceBonus;
+    }
+
+    private int CalculateCoins(Tour tour)
+    {
+        // Adventure Coins = XP / 2
+        return CalculateXP(tour) / 2;
     }
 }

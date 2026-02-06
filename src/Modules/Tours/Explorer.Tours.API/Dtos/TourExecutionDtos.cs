@@ -64,8 +64,10 @@ public class ProgressResponseDto
     public NextKeyPointDto? NextKeyPoint { get; set; }
     public DateTime LastActivity { get; set; }
     
-    // Lista svih kompletiranih ta?aka (za prikaz ukupnog broja)
     public List<CompletedKeyPointDto> AllCompletedKeyPoints { get; set; } = new();
+    
+    public bool HasAvailableChallenges { get; set; }
+    public List<long> AvailableChallengeIds { get; set; } = new();
 }
 
 public class CompletedKeyPointDto

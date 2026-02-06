@@ -6,7 +6,7 @@ public interface ITourExecutionService
 {
     TourExecutionStartResultDto StartExecution(TourExecutionStartDto dto, long touristId);
     TourExecutionStartResultDto? GetActiveExecution(long touristId, long? tourId = null);
-    TourExecutionResultDto CompleteExecution(long executionId, long touristId);
+    Task<TourExecutionResultDto> CompleteExecution(long executionId, long touristId);
     TourExecutionResultDto AbandonExecution(long executionId, long touristId);
     List<TourExecutionResultDto> GetExecutedTours(long touristId);
 
@@ -14,5 +14,4 @@ public interface ITourExecutionService
 
     ProgressResponseDto CheckProgress(long executionId, TrackPointDto dto, long touristId);
     UnlockedSecretsDto GetUnlockedSecrets(long executionId, long touristId);
-
 }
