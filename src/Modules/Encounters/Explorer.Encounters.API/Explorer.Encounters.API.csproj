@@ -6,11 +6,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-
-  <ItemGroup>
-    <Folder Include="Internal\" />
-  </ItemGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>

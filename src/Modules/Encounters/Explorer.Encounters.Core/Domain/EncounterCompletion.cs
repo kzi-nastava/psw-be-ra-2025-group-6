@@ -13,8 +13,8 @@ namespace Explorer.Encounters.Core.Domain
 
         public EncounterCompletion(long userId, long challengeId, int xpAwarded)
         {
-            if (userId <= 0) throw new ArgumentException("Invalid UserId.");
-            if (challengeId <= 0) throw new ArgumentException("Invalid ChallengeId.");
+            if (userId == 0) throw new ArgumentException("Invalid UserId.");
+            if (challengeId == 0) throw new ArgumentException("Invalid ChallengeId.");
             if (xpAwarded < 0) throw new ArgumentException("XP awarded cannot be negative.");
 
             UserId = userId;

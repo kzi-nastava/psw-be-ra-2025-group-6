@@ -9,17 +9,19 @@ namespace Explorer.Stakeholders.Core.Domain
         public long SenderId { get; private set; }
         public string Content { get; private set; }
         public NotificationStatus Status { get; private set; }
+        public NotificationType Type { get; private set; }
         public DateTime Timestamp { get; private set; }
         public long ReferenceId { get; private set; } // e.g., TourProblemId or TourProblemMessageId
 
         private Notification() { /* Required for EF Core */ }
 
-        public Notification(long recipientId, long senderId, string content, long referenceId)
+        public Notification(long recipientId, long senderId, string content, long referenceId, NotificationType type = NotificationType.General)
         {
             RecipientId = recipientId;
             SenderId = senderId;
             Content = content;
             Status = NotificationStatus.Unread;
+            Type = type;
             Timestamp = DateTime.UtcNow;
             ReferenceId = referenceId;
             Validate();
@@ -44,5 +46,34 @@ namespace Explorer.Stakeholders.Core.Domain
     {
         Unread,
         Read
+    }
+
+    public enum NotificationType
+    {
+        // General notifications
+        General = 0,
+        
+        // Tour Problem notifications (existing functionality)
+        TourProblemDeadlineSet = 10,
+        TourProblemMessage = 11,
+        TourProblemResolved = 12,
+        TourProblemNotResolved = 13,
+        TourProblemClosed = 14,
+        TourProblemPenalized = 15,
+        TourSuspended = 16,
+        
+        // Leaderboard notifications (new functionality)
+        RankIncreased = 100,
+        RankDecreased = 101,
+        EnteredTop10 = 102,
+        EnteredTop3 = 103,
+        BecameFirst = 104,
+        MilestoneXP = 105,
+        MilestoneChallenges = 106,
+        MilestoneTours = 107,
+        ClubRankChanged = 108,
+        ClubMemberContribution = 109,
+        NearRankingAlert = 110,
+        WeeklySummary = 111
     }
 }

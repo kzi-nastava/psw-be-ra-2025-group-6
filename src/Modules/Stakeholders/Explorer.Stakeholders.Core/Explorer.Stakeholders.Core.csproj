@@ -10,6 +10,7 @@
 		<ProjectReference Include="..\..\..\Shared\Shared.csproj" />
 		<ProjectReference Include="..\Explorer.Stakeholders.API\Explorer.Stakeholders.API.csproj" />
 		<ProjectReference Include="..\..\..\BuildingBlocks\Explorer.BuildingBlocks.Core\Explorer.BuildingBlocks.Core.csproj" />
+		<ProjectReference Include="..\..\Encounters\Explorer.Encounters.API\Explorer.Encounters.API.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

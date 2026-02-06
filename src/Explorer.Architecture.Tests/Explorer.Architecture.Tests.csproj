@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Explorer.API\Explorer.API.csproj" />
+    <ProjectReference Include="..\Search\Search.csproj" />
   </ItemGroup>
 
 </Project>

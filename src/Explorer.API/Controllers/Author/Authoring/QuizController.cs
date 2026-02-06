@@ -69,6 +69,37 @@ public class QuizController : ControllerBase
         return Ok();
     }
 
+    [HttpPost("upload-audio")]
+    [Authorize(Policy = "authorPolicy")]
+    public async Task<IActionResult> UploadAudio(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest("No audio file uploaded.");
+
+        var allowedExtensions = new[] { ".mp3", ".wav", ".ogg", ".m4a" };
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        
+        if (!allowedExtensions.Contains(extension))
+            return BadRequest("Invalid audio file format. Allowed formats: mp3, wav, ogg, m4a");
+
+        var uniqueFileName = Guid.NewGuid().ToString() + extension;
+        var audioPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "audio", "quiz");
+        var filePath = Path.Combine(audioPath, uniqueFileName);
+
+        if (!Directory.Exists(audioPath))
+        {
+            Directory.CreateDirectory(audioPath);
+        }
+
+        await using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        var dbPath = $"/audio/quiz/{uniqueFileName}";
+        return Ok(new { url = dbPath });
+    }
+
     [HttpGet]
     [Authorize(Policy = "touristPolicy")]
     public ActionResult<List<QuizDto>> GetAll()

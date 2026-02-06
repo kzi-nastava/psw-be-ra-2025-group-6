@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
+using Explorer.Encounters.API.Internal;
 using Explorer.Encounters.Core.Domain;
 using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
 using System;
@@ -18,6 +19,7 @@ namespace Explorer.Encounters.Core.UseCases
         private readonly IChallengeRepository _challengeRepository;
         private readonly ITouristXpProfileRepository _profileRepository;
         private readonly IEncounterCompletionRepository _completionRepository;
+        private readonly IInternalLeaderboardService _leaderboardService;
         private readonly IMapper _mapper;
 
         // Koliko sekundi čekamo da korisnik pošalje heartbeat pre nego što ga smatramo neaktivnim
@@ -29,6 +31,7 @@ namespace Explorer.Encounters.Core.UseCases
             IChallengeRepository challengeRepository,
             ITouristXpProfileRepository profileRepository,
             IEncounterCompletionRepository completionRepository,
+            IInternalLeaderboardService leaderboardService,
             IMapper mapper)
         {
             _socialEncounterRepository = socialEncounterRepository;
@@ -36,6 +39,7 @@ namespace Explorer.Encounters.Core.UseCases
             _challengeRepository = challengeRepository;
             _profileRepository = profileRepository;
             _completionRepository = completionRepository;
+            _leaderboardService = leaderboardService;
             _mapper = mapper;
         }
 
@@ -444,6 +448,25 @@ namespace Explorer.Encounters.Core.UseCases
                 // Zabeležavanje completion
                 var completion = new EncounterCompletion(participant.UserId, challenge.Id, challenge.XP);
                 _completionRepository.Create(completion);
+
+                // UPDATE LEADERBOARD STATS
+                var coinsEarned = challenge.XP / 2;
+                try
+                {
+                    Console.WriteLine($"[SOCIAL ENCOUNTER] Updating leaderboard for user {participant.UserId}: XP={challenge.XP}, Challenges=1, Coins={coinsEarned}");
+                    _leaderboardService.UpdateUserStatsAsync(
+                        participant.UserId,
+                        xpGained: challenge.XP,
+                        challengesCompleted: 1,
+                        toursCompleted: 0,
+                        coinsEarned).GetAwaiter().GetResult();
+                    Console.WriteLine($"[SOCIAL ENCOUNTER] Leaderboard updated successfully for user {participant.UserId}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[SOCIAL ENCOUNTER] Error updating leaderboard for user {participant.UserId}: {ex.Message}");
+                    // Don't fail the completion if leaderboard update fails
+                }
 
                 // Brisanje participanta (encounter završen za njega)
                 _participantRepository.Delete(participant.Id);

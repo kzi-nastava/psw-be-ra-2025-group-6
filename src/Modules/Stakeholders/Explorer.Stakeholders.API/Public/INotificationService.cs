@@ -8,6 +8,8 @@ namespace Explorer.Stakeholders.API.Public
         NotificationDto Create(NotificationDto notification);
         List<NotificationDto> GetByRecipient(long recipientId);
         List<NotificationDto> GetUnreadByRecipient(long recipientId);
+        List<NotificationDto> GetUnreadByRecipientAndType(long recipientId, string type);
+        List<NotificationDto> GetByRecipientAndType(long recipientId, string type);
         NotificationDto MarkAsRead(long notificationId);
     }
 }

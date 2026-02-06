@@ -141,8 +141,12 @@ public class StakeholdersContext : DbContext
     private static void ConfigureNotification(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Notification>()
-            .Property(n => n.Status)
-            .HasConversion<string>();
+        .Property(n => n.Status)
+        .HasConversion<string>();
+        
+        modelBuilder.Entity<Notification>()
+        .Property(n => n.Type)
+        .HasConversion<int>();
     }
 
     private static void ConfigureProfilePosts(ModelBuilder modelBuilder)

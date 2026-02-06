@@ -331,7 +331,7 @@ public class TourExecutionTests : BaseToursIntegrationTest
     }
 
     [Fact]
-    public void Completes_execution_successfully()
+    public async Task Completes_execution_successfully()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
@@ -363,7 +363,7 @@ public class TourExecutionTests : BaseToursIntegrationTest
         var executionId = startData!.TourExecutionId;
 
         // Act - Complete execution
-        var completeResult = controller.Complete(executionId);
+        var completeResult = await controller.Complete(executionId);
         var ok = completeResult.Result as OkObjectResult;
 
         // Assert
@@ -418,7 +418,7 @@ public class TourExecutionTests : BaseToursIntegrationTest
     }
 
     [Fact]
-    public void Complete_fails_for_execution_belonging_to_different_tourist()
+    public async Task Complete_fails_for_execution_belonging_to_different_tourist()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
@@ -443,7 +443,7 @@ public class TourExecutionTests : BaseToursIntegrationTest
         var executionId = startData!.TourExecutionId;
 
         // Act & Assert - Tourist 2 tries to complete tourist 1's execution
-        Should.Throw<InvalidOperationException>(() => controller2.Complete(executionId));
+        await Should.ThrowAsync<InvalidOperationException>(() => controller2.Complete(executionId));
     }
 
     private static TourExecutionController CreateController(IServiceScope scope, long touristId)
