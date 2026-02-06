@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Explorer.API.Controllers
 {
-    [Authorize(Policy = "registeredUserPolicy")]
+    [Authorize]
     [Route("api/notifications")]
     [ApiController]
     public class NotificationController : ControllerBase
@@ -76,6 +76,13 @@ namespace Explorer.API.Controllers
         /// <summary>
         /// Mark notification as read
         /// </summary>
+        [HttpGet]
+        public ActionResult<List<NotificationDto>> GetAll()
+        {
+            var result = _notificationService.GetByRecipient(User.PersonId());
+            return Ok(result);
+        }
+
         [HttpPut("{notificationId:long}/mark-as-read")]
         public ActionResult<NotificationDto> MarkAsRead(long notificationId)
         {

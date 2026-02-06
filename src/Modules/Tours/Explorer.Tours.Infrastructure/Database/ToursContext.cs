@@ -23,6 +23,7 @@ public class ToursContext : DbContext
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Meetup> Meetups { get; set; }
     public DbSet<TourPlanner> TourPlanners { get; set; }
+    public DbSet<TourCheckpointPlan> TourCheckpointPlans { get; set; }
 
     public DbSet<TourReview> TourReviews { get; set; }
     public DbSet<Facility> Facility { get; set; }
@@ -33,26 +34,46 @@ public class ToursContext : DbContext
 
     public DbSet<PublicEntityRequest> PublicEntityRequests { get; set; }
 
+    public DbSet<TourReviewHelpfulVote> TourReviewHelpfulVotes { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
+
+    public DbSet<TourBookmark> TourBookmarks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("tours");
 
+        modelBuilder.Entity<Tour>(builder =>
+        {
+            builder.ToTable("Tours");
+            builder.Property(t => t.AuthorId)
+                .HasColumnName("AuthorId")
+                .IsRequired();
+
+            builder.Property(t => t.Duration)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, new JsonSerializerOptions()),
+                    v => JsonSerializer.Deserialize<List<TourDuration>>(v, new JsonSerializerOptions())!
+                )
+                .HasColumnType("jsonb");
+        });
+
         ConfigureTouristEquipment(modelBuilder);
         ConfigureTourPlanner(modelBuilder);
+        ConfigureTourCheckpointPlans(modelBuilder);
 
         modelBuilder.Entity<Tour>()
-    .HasMany(t => t.Equipment)
-    .WithOne()
-    .HasForeignKey(e => e.TourId)
-    .OnDelete(DeleteBehavior.SetNull);
+            .HasMany(t => t.Equipment)
+            .WithOne()
+            .HasForeignKey(e => e.TourId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<Tour>()
-    .HasMany(t => t.KeyPoints)
-    .WithOne()
-    .HasForeignKey(kp => kp.TourId)
-    .OnDelete(DeleteBehavior.Cascade);
+            .HasMany(t => t.KeyPoints)
+            .WithOne()
+            .HasForeignKey(kp => kp.TourId)
+            .OnDelete(DeleteBehavior.Cascade);
 
 
         modelBuilder.Entity<TourExecutionEntity>(b =>
@@ -71,6 +92,18 @@ public class ToursContext : DbContext
                 v => JsonSerializer.Deserialize<List<TourDuration>>(v, new JsonSerializerOptions())!
             )
             .HasColumnType("jsonb");
+
+        modelBuilder.Entity<TourReviewHelpfulVote>(b =>
+        {
+            b.ToTable("TourReviewHelpfulVotes", "tours");
+            b.HasKey(v => v.Id);
+            b.HasIndex(v => new { v.ReviewId, v.UserId }).IsUnique();
+            b.Property(v => v.CreatedAt).IsRequired();
+            b.HasOne<TourReview>()
+                .WithMany()
+                .HasForeignKey(v => v.ReviewId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 
 
@@ -116,6 +149,27 @@ public class ToursContext : DbContext
             b.HasKey(tp => tp.Id);
             b.HasIndex(tp => tp.UserId);
             b.HasIndex(tp => tp.TourId);
+        });
+    }
+
+    private static void ConfigureTourCheckpointPlans(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TourCheckpointPlan>(b =>
+        {
+            b.HasKey(tp => tp.Id);
+            b.HasIndex(tp => tp.UserId);
+            b.HasIndex(tp => tp.PlannerItemId);
+            b.HasIndex(tp => tp.KeyPointId);
+
+            b.HasOne<TourPlanner>()
+                .WithMany()
+                .HasForeignKey(tp => tp.PlannerItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne<KeyPoint>()
+                .WithMany()
+                .HasForeignKey(tp => tp.KeyPointId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

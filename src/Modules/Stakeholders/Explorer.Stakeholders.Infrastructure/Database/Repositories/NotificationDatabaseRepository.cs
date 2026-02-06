@@ -21,6 +21,15 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
         {
             return _dbContext.Notifications
                 .Where(n => n.RecipientId == recipientId && n.Status == NotificationStatus.Unread)
+                .OrderByDescending(n => n.Timestamp)
+                .ToList();
+        }
+
+        public List<Notification> GetByRecipient(long recipientId)
+        {
+            return _dbContext.Notifications
+                .Where(n => n.RecipientId == recipientId)
+                .OrderByDescending(n => n.Timestamp)
                 .ToList();
         }
 

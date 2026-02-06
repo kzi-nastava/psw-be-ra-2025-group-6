@@ -20,6 +20,8 @@ public class StakeholdersContext : DbContext
     public DbSet<ProfilePost> ProfilePosts { get; set; }
     public DbSet<ClubPost> ClubPosts { get; set; }
     public DbSet<SocialMessage> SocialMessages { get; set; }
+    public DbSet<ClubMember> ClubMembers { get; set; }
+    public DbSet<ClubMembershipRequest> ClubMembershipRequests { get; set; }
 
     public DbSet<Achievement> Achievement { get; set; }
 
@@ -80,6 +82,8 @@ public class StakeholdersContext : DbContext
         j.ToTable("UserAchievements");
     });
 
+
+        modelBuilder.Entity<ClubMembershipRequest>().ToTable("ClubMembershipRequests");
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)

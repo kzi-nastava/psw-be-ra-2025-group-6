@@ -7,5 +7,6 @@ public interface IInternalStakeholderService
     List<long> GetAllTouristIds();
     List<(long PersonId, string Username)> GetAllTouristsWithPersonIds();
     List<(long ClubId, string ClubName)> GetAllClubs();
+    List<long> GetAdminIds();
 }
 

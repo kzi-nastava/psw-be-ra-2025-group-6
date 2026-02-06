@@ -1,5 +1,6 @@
 ﻿using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Core.Domain;
 
@@ -94,6 +95,11 @@ public class InternalStakeholdersService : IInternalStakeholderService
     {
         var clubs = _clubRepository.GetAll();
         return clubs.Select(c => (c.Id, c.Name)).ToList();
+    }
+
+    public List<long> GetAdminIds()
+    {
+        return _userRepository.GetAll().Where(u => u.Role == UserRole.Administrator).Select(u => u.Id).ToList();
     }
 }
 

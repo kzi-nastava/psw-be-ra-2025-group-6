@@ -10,6 +10,7 @@ public class TourDto
     public float Price { get; set; }
     public TourStatusDto Status { get; set; }
     public long AuthorId { get; set; }
+    public string? CoverImage { get; set; }
 
     public List<EquipmentDto>? Equipment { get; set; }
     public List<KeyPointDto>? KeyPoints { get; set; } = new List<KeyPointDto>();
@@ -18,4 +19,12 @@ public class TourDto
     public double? MarkerLng { get; set; }
     public List<TourDurationDto>? Duration { get; set;  }
     public DateTime? PublishedTime { get; set; }
+    
+    // Sale/Discount information
+    public double? OriginalPrice { get; set; }
+    public double? DiscountedPrice { get; set; }
+    public int? DiscountPercent { get; set; }
+    public bool IsOnSale { get; set; }
+    public DateTime? SaleStartDate { get; set; }
+    public DateTime? SaleEndDate { get; set; }
 }

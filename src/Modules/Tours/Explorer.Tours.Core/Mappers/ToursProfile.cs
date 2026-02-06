@@ -27,6 +27,7 @@ public class ToursProfile : Profile
         CreateMap<TourReview, TourReviewDto>().ReverseMap();
         CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
         CreateMap<TourPlanner, TourPlannerDto>().ReverseMap();
+        CreateMap<TourCheckpointPlan, TourCheckpointPlanDto>().ReverseMap();
         
         // Public entity request mappings
         CreateMap<PublicEntityRequest, PublicEntityRequestDto>().ReverseMap();
@@ -41,6 +42,8 @@ public class ToursProfile : Profile
         CreateMap<QuizAnswerOption, QuizAnswerOptionDto>().ReverseMap();
         CreateMap<Tour, TouristTourDto>()
            .ForMember(dest => dest.FirstKeyPoint, opt => opt.MapFrom(src => src.GetFirstKeyPoint()))
-           .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.Duration));
+           .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.Duration))
+           .ForMember(dest => dest.AuthorId, opt => opt.MapFrom(src => src.AuthorId))
+           .ReverseMap();
     }
 }

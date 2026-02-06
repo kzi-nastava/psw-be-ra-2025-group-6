@@ -262,4 +262,11 @@ public class TourController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+    [AllowAnonymous]
+    [HttpGet("public")]
+    public ActionResult<List<TourDto>> GetPublishedTours()
+    {
+        var result = _tourService.GetPublished();
+        return Ok(result);
+    }
 }

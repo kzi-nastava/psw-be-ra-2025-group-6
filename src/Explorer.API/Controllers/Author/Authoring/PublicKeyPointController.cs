@@ -23,4 +23,12 @@ public class PublicKeyPointController : ControllerBase
         var result = _keyPointService.GetPublicKeyPoints();
         return Ok(result);
     }
+
+    [AllowAnonymous]
+    [HttpGet("all")]
+    public ActionResult<List<KeyPointDto>> GetAllKeyPoints()
+    {
+        var result = _keyPointService.GetAll();
+        return Ok(result);
+    }
 }

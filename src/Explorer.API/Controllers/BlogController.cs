@@ -6,7 +6,7 @@ using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection.Metadata;
+using System.Globalization;
 
 namespace Explorer.API.Controllers;
 
@@ -38,8 +38,8 @@ public class BlogController : ControllerBase
                                                         [FromForm] string? city = null,
                                                         [FromForm] string? country = null,
                                                         [FromForm] string? region = null,
-                                                        [FromForm] double? latitude = null,
-                                                        [FromForm] double? longitude = null)
+                                                        [FromForm] string? latitude = null,
+                                                        [FromForm] string? longitude = null)
     {
         var userId = User.PersonId();
         if (!User.TryRole(out var userRole))
@@ -53,6 +53,9 @@ public class BlogController : ControllerBase
         if (userRole != UserRole.Author && userRole != UserRole.Tourist)
             return Forbid();
 
+        var latValue = ParseCoordinate(latitude, "Invalid latitude.");
+        var lonValue = ParseCoordinate(longitude, "Invalid longitude.");
+
         var blogDto = new BlogCreateDto { 
             Title = title, 
             Description = description, 
@@ -60,8 +63,8 @@ public class BlogController : ControllerBase
             City = city,
             Country = country,
             Region = region,
-            Latitude = latitude,
-            Longitude = longitude
+            Latitude = latValue,
+            Longitude = lonValue
         };
         var createdBlog = _blogService.Create(blogDto, userId);
 
@@ -90,6 +93,26 @@ public class BlogController : ControllerBase
         _blogService.AddImages(createdBlog.Id, imagePaths);
         createdBlog.Images = imagePaths;
         return Ok(createdBlog);
+    }
+
+    private static double? ParseCoordinate(string? value, string errorMessage)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+
+        // First try invariant culture to handle dot decimal separator.
+        if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var invariant))
+            return invariant;
+
+        // Then try current culture.
+        if (double.TryParse(value, NumberStyles.Float, CultureInfo.CurrentCulture, out var current))
+            return current;
+
+        // Fallback: normalize comma to dot and try invariant again.
+        var normalized = value.Replace(',', '.');
+        if (double.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out var normalizedValue))
+            return normalizedValue;
+
+        throw new ArgumentException(errorMessage);
     }
 
     [HttpPut("{id:long}")]
@@ -145,7 +168,8 @@ public class BlogController : ControllerBase
     [HttpGet("{id:long}")]
     public ActionResult<BlogDto> GetBlog(long id)
     {
-        var blog = _blogService.GetById(id);
+        var userId = User.PersonId();
+        var blog = _blogService.GetById(id, userId);
 
         if (blog == null)
         {
@@ -255,6 +279,14 @@ public class BlogController : ControllerBase
     [HttpGet("paged")]
     public ActionResult<PagedResult<BlogDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
     {
+        var userId = User.PersonId();
+        return Ok(_blogService.GetPaged(page, pageSize, userId));
+    }
+
+    [AllowAnonymous]
+    [HttpGet("public")]
+    public ActionResult<PagedResult<BlogDto>> GetAllPublic([FromQuery] int page, [FromQuery] int pageSize)
+    {
         return Ok(_blogService.GetPaged(page, pageSize));
     }
 
@@ -345,6 +377,30 @@ public class BlogController : ControllerBase
     {
         var userId = User.PersonId();
         var result = _blogService.GetFollowingBlogs(page, pageSize, userId);
+        return Ok(result);
+    }
+
+    [HttpPost("{id:long}/bookmark")]
+    public ActionResult BookmarkBlog(long id)
+    {
+        var userId = User.PersonId();
+        _blogService.Save(userId, id);
+        return Ok();
+    }
+
+    [HttpDelete("{id:long}/bookmark")]
+    public ActionResult RemoveBookmark(long id)
+    {
+        var userId = User.PersonId();
+        _blogService.Unsave(userId, id);
+        return NoContent();
+    }
+
+    [HttpGet("saved")]
+    public ActionResult<PagedResult<BlogDto>> GetSavedBlogs([FromQuery] int page, [FromQuery] int pageSize)
+    {
+        var userId = User.PersonId();
+        var result = _blogService.GetSavedByUser(page, pageSize, userId);
         return Ok(result);
     }
 }

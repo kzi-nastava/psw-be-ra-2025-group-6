@@ -43,6 +43,7 @@ public class UserProfileDbRepository : IUserProfileRepository
         return userProfile;
     }
 
+
     public List<Achievement> GetAchievements(long userId)
     {
         var profile = _dbContext.UserProfiles
@@ -78,4 +79,8 @@ public class UserProfileDbRepository : IUserProfileRepository
         _dbContext.SaveChanges();
     }
 
+    public List<UserProfile> GetAll()
+    {
+        return _dbContext.UserProfiles.ToList();
+    }
 }

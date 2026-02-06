@@ -34,6 +34,7 @@ public static class BlogStartup
         services.AddScoped<IBlogRepository, BlogDbRepository>();
         services.AddScoped<ICommentLikeRepository, CommentLikeDbRepository>();
         services.AddScoped<ICommentReportRepository, CommentReportDbRepository>();
+        services.AddScoped<IBlogBookmarkRepository, BlogBookmarkDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("blog"));
         dataSourceBuilder.EnableDynamicJson();

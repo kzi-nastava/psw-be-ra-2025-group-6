@@ -2,13 +2,12 @@
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Shared;
 using Shared.Achievements;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Explorer.Stakeholders.Core.UseCases;
 
@@ -19,14 +18,25 @@ public class ProfilePostService : IProfilePostService
     private readonly IBlogInfoGateway _blogInfoGateway;
     private readonly IMapper _mapper;
     private readonly IDomainEventDispatcher _eventDispatcher;
+    private readonly INotificationService _notificationService;
+    private readonly IInternalStakeholderService _stakeholderService;
 
-    public ProfilePostService(IProfilePostRepository repository, ITourInfoGateway tourInfoGateway, IBlogInfoGateway blogInfoGateway, IMapper mapper, IDomainEventDispatcher eventDispatcher)
+    public ProfilePostService(
+        IProfilePostRepository repository, 
+        ITourInfoGateway tourInfoGateway, 
+        IBlogInfoGateway blogInfoGateway, 
+        IMapper mapper, 
+        IDomainEventDispatcher eventDispatcher,
+        INotificationService notificationService,
+        IInternalStakeholderService stakeholderService)
     {
         _repository = repository;
         _tourInfoGateway = tourInfoGateway;
         _blogInfoGateway = blogInfoGateway;
         _mapper = mapper;
         _eventDispatcher = eventDispatcher;
+        _notificationService = notificationService;
+        _stakeholderService = stakeholderService;
     }
 
     public ProfilePostDto Create(ProfilePostDto dto)
@@ -43,6 +53,25 @@ public class ProfilePostService : IProfilePostService
         );
 
         var created = _repository.Create(entity);
+
+        if (dto.ResourceType == ProfileResourceTypeDto.Blog && dto.ResourceId.HasValue)
+        {
+            var blog = _blogInfoGateway.GetById(dto.ResourceId.Value).GetAwaiter().GetResult();
+            if (blog != null)
+            {
+                {
+                    var reposterName = _stakeholderService.GetUsername(dto.AuthorId);
+
+                    _notificationService.Create(new NotificationDto
+                    {
+                        RecipientId = blog.AuthorId,          
+                        SenderId = dto.AuthorId,             
+                        Content = $"{reposterName} reposted your blog: \"{blog.Title}\"",
+                        ReferenceId = created.Id                 
+                    });
+                }
+            }
+        }
         return _mapper.Map<ProfilePostDto>(created);
     }
 

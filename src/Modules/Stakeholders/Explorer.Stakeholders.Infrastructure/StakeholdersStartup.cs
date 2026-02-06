@@ -1,6 +1,7 @@
 using Explorer.BuildingBlocks.Core.Integration;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Payments.API.Internal;
 using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.API.Services;
@@ -10,10 +11,13 @@ using Explorer.Stakeholders.Core.UseCases;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Stakeholders.Infrastructure.Database.Repositories;
+using Explorer.Stakeholders.Infrastructure.DataProviders;
 using Explorer.Stakeholders.Infrastructure.Integration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Shared;
+using Shared.Notifications;
 
 namespace Explorer.Stakeholders.Infrastructure;
 
@@ -41,6 +45,7 @@ public static class StakeholdersStartup
 
         services.AddScoped<IClubService, ClubService>();
         services.AddScoped<IClubSearchService, ClubSearchService>();
+        services.AddScoped<IMembershipRequestService, MembershipRequestService>();
 
         services.AddScoped<ITourProblemService, TourProblemService>();
         services.AddScoped<ITourProblemMessageService, TourProblemMessageService>();
@@ -55,6 +60,7 @@ public static class StakeholdersStartup
         services.AddScoped<IClubMembershipService, TemporaryClubMembershipService>();
 
         services.AddScoped<IInternalStakeholderService, InternalStakeholdersService>();
+        services.AddScoped<INotificationDataProvider, NotificationDataProvider>();
 
         services.AddScoped<ISocialMessageService, SocialMessageService>();
 
@@ -62,6 +68,9 @@ public static class StakeholdersStartup
         services.AddScoped<INotificationPublisher, StakeholdersNotificationPublisher>();
         services.AddScoped<IAchievementService, AchievementService>();
 
+        services.AddTransient<
+            IDomainEventHandler<NotificationRequestedEvent>,
+            NotificationRequestHandler>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -71,6 +80,7 @@ public static class StakeholdersStartup
         services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
         services.AddScoped<IReviewAppRepository, ReviewAppDbRepository>();
         services.AddScoped<IClubRepository, ClubDbRepository>();
+        services.AddScoped<IClubMemberRepository, ClubMemberDbRepository>();
         services.AddScoped<ITouristPositionRepository, TouristPositionRepository>();
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
         services.AddScoped<ITourProblemMessageRepository, TourProblemMessageDatabaseRepository>();
@@ -82,6 +92,7 @@ public static class StakeholdersStartup
         services.AddScoped<IFollowRepository, FollowDbRepository>();
         services.AddScoped<ISocialMessageRepository, SocialMessageDatabaseRepository>();
         services.AddScoped<IAchievementRepository, AchievementRepository>();
+        services.AddScoped<IClubMembershipRequestRepository, ClubMembershipRequestDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();

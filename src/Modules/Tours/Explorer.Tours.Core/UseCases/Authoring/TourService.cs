@@ -18,14 +18,23 @@ public class TourService : ITourService
     private readonly IMapper _mapper;
     private readonly IInternalTourPurchaseTokenService _tokenService;
     private readonly IDomainEventDispatcher _eventDispatcher;
+    private readonly ITourDataProvider _tourDataProvider;
 
-    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper, IInternalTourPurchaseTokenService tokenService, IDomainEventDispatcher eventDispatcher)
+    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper, IInternalTourPurchaseTokenService tokenService, IDomainEventDispatcher eventDispatcher) { }
+    public TourService(
+        ITourRepository repository, 
+        IEquipmentRepository equipmentRepository, 
+        IMapper mapper, 
+        IInternalTourPurchaseTokenService tokenService,
+        ITourDataProvider tourDataProvider,
+        IDomainEventDispatcher eventDispatcher)
     {
         _tourRepository = repository;
         _equipmentRepository = equipmentRepository;
         _mapper = mapper;
         _tokenService = tokenService;
         _eventDispatcher = eventDispatcher;
+        _tourDataProvider = tourDataProvider;
     }
 
     public List<TourDto> GetAll()
@@ -33,6 +42,13 @@ public class TourService : ITourService
         var result = _tourRepository.GetAll();
 
         var items = _mapper.Map<List<TourDto>>(result);
+        
+        // Apply sales information
+        foreach (var item in items)
+        {
+            ApplySaleInfo(item);
+        }
+        
         return new List<TourDto>(items);
     }
 
@@ -41,8 +57,16 @@ public class TourService : ITourService
         var result = _tourRepository.GetPaged(page, pageSize);
 
         var items = result.Results.Select(_mapper.Map<TourDto>).ToList();
+        
+        // Apply sales information
+        foreach (var item in items)
+        {
+            ApplySaleInfo(item);
+        }
+        
         return new PagedResult<TourDto>(items, result.TotalCount);
     }
+    
 
     public List<TourDto> GetByAuthorId(long authorId)
     {
@@ -62,7 +86,9 @@ public class TourService : ITourService
     public TourDto Get(long id)
     {
         var result = _tourRepository.Get(id);
-        return _mapper.Map<TourDto>(result);
+        var dto = _mapper.Map<TourDto>(result);
+        ApplySaleInfo(dto);
+        return dto;
     }
 
     public TourDto Create(TourDto entity)
@@ -189,6 +215,7 @@ public class TourService : ITourService
             DistanceInKm = tour.DistanceInKm,
             Duration = _mapper.Map<List<TourDurationDto>>(tour.Duration),
             Description = tour.Description,
+            CoverImage = tour.CoverImage
         };
     }
 
@@ -212,6 +239,7 @@ public class TourService : ITourService
         return _mapper.Map<TourDto>(tour);
     }
 
+    
     public List<TourDto> GetAvailableForTourist(long touristId)
     {
         var confirmedTours = _tourRepository.GetAll()
@@ -220,12 +248,16 @@ public class TourService : ITourService
 
         var purchasedTourIds = _tokenService.GetPurchasedTourIds(touristId).ToHashSet();
 
-        return _mapper.Map<List<TourDto>>(
-            confirmedTours.Where(t => !purchasedTourIds.Contains(t.Id)).ToList()
-        );
-        /*return _mapper.Map<List<TourDto>>(
-            confirmedTours
-        );*/
+        var availableTours = confirmedTours.Where(t => !purchasedTourIds.Contains(t.Id)).ToList();
+        var items = _mapper.Map<List<TourDto>>(availableTours);
+        
+        // Apply sales information
+        foreach (var item in items)
+        {
+            ApplySaleInfo(item);
+        }
+        
+        return items;
     }
 
     public PagedResult<TourDto> GetAvailableForTouristPaged(long touristId, int page, int pageSize)
@@ -252,6 +284,39 @@ public class TourService : ITourService
 
 
         var items = _mapper.Map<List<TourDto>>(pagedTours);
+        
+        // Apply sales information
+        foreach (var item in items)
+        {
+            ApplySaleInfo(item);
+        }
+        
         return new PagedResult<TourDto>(items, totalCount);
+    }
+
+    private void ApplySaleInfo(TourDto tour)
+    {
+        var saleInfo = _tourDataProvider.GetActiveSaleForTour(tour.Id);
+
+        if (saleInfo != null)
+        {
+            tour.IsOnSale = true;
+            tour.OriginalPrice = tour.Price;
+            tour.DiscountPercent = saleInfo.DiscountPercent;
+            tour.DiscountedPrice = tour.Price * (1 - saleInfo.DiscountPercent / 100.0);
+            tour.SaleStartDate = saleInfo.StartDate;
+            tour.SaleEndDate = saleInfo.EndDate;
+        }
+        else
+        {
+            tour.IsOnSale = false;
+            tour.SaleStartDate = null;
+            tour.SaleEndDate = null;
+        }
+    }
+    public List<TourDto> GetPublished() 
+    {
+        var publishedTours = _tourRepository.GetAll().Where(t => t.Status == TourStatus.CONFIRMED).ToList();
+        return _mapper.Map<List<TourDto>>(publishedTours);
     }
 }

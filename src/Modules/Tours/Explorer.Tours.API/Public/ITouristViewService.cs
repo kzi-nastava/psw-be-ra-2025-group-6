@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Explorer.Tours.API.Public
+﻿namespace Explorer.Tours.API.Public
 {
      public interface ITouristViewService
     {
         List<TouristTourDto> GetPublishedTours();
+        void BookmarkTour(long touristId, long tourId);
+        void RemoveBookmark(long touristId, long tourId);
+        List<TouristTourDto> GetSavedTours(long touristId);
 
     }
 }
