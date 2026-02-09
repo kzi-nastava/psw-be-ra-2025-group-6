@@ -11,6 +11,12 @@ public static class ClaimsPrincipalExtensions
         return 0;
     }
 
+    public static long UserId(this ClaimsPrincipal user)
+    {
+        if (TryUserId(user, out var userId)) return userId;
+        return 0;
+    }
+
     public static UserRole Role(this ClaimsPrincipal user)
     {
         if (TryRole(user, out var role)) return role;
@@ -31,5 +37,13 @@ public static class ClaimsPrincipalExtensions
         role = UserRole.Tourist;
         var roleClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
         return roleClaim != null && Enum.TryParse(roleClaim, ignoreCase: true, out role);
+    }
+
+    public static bool TryUserId(this ClaimsPrincipal user, out long userId)
+    {
+        userId = 0;
+        var value = user.Claims.FirstOrDefault(i => i.Type == "id")?.Value
+            ?? user.Claims.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier)?.Value;
+        return long.TryParse(value, out userId) && userId != 0;
     }
 }

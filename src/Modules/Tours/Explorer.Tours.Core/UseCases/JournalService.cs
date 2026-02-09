@@ -67,11 +67,11 @@ namespace Explorer.Tours.Core.UseCases
             return journals.Select(_mapper.Map<JournalDto>).ToList();
         }
 
-        public async Task<JournalDto?> GetById(long journalId)
+        public async Task<JournalDto> GetById(long journalId)
         {
             var journal = await _journalRepository.GetById(journalId);
             if (journal == null)
-                return null;
+                throw new NotFoundException($"Journal not found: {journalId}");
 
             return _mapper.Map<JournalDto>(journal);
         }

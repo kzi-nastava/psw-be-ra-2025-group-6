@@ -6,14 +6,16 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.20" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.20" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.20" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\Explorer.BuildingBlocks.Infrastructure\Explorer.BuildingBlocks.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Payments\Explorer.Payments.API\Explorer.Payments.API.csproj" />
     <ProjectReference Include="..\Explorer.Stakeholders.Core\Explorer.Stakeholders.Core.csproj" />
+    <ProjectReference Include="..\..\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj" />
   </ItemGroup>
 
 </Project>

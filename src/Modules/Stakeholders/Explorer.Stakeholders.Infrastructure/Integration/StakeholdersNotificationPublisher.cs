@@ -19,6 +19,7 @@ public class StakeholdersNotificationPublisher : INotificationPublisher
         {
             RecipientId = recipientId,
             SenderId = senderId,
+            Title = "Notification",
             Content = content,
             Status = "Unread",
             Timestamp = DateTime.UtcNow,

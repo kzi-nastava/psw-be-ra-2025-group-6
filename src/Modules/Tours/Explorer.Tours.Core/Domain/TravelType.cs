@@ -4,5 +4,6 @@ public enum TravelType
 {
     WALK,
     BIKE,
-    CAR
+    CAR,
+    BOAT
 }

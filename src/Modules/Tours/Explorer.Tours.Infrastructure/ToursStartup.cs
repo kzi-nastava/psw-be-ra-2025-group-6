@@ -10,13 +10,10 @@ using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
 using Explorer.Tours.Core.UseCases;
+using Explorer.Tours.Core.UseCases.Authoring;
 using Explorer.Tours.Core.UseCases.Admin;
 using Explorer.Tours.Core.UseCases.Administration;
-using Explorer.Tours.Core.UseCases;
-using Explorer.Tours.Core.UseCases.Authoring;
 using Explorer.Tours.Core.UseCases.Shopping;
-using Explorer.Tours.API.Public.Authoring;
-using Explorer.Tours.Core.UseCases.Authoring;
 using Explorer.Tours.API.Public.Shopping;
 using Explorer.Tours.Core.UseCases.Internal;
 using Explorer.Tours.Infrastructure.Database;
@@ -61,6 +58,7 @@ public static class ToursStartup
         services.AddScoped<ITourCheckpointPlanService, TourCheckpointPlanService>();
 
         services.AddScoped<ITouristViewService, TouristViewService>();
+        services.AddScoped<ITourRecommendationService, TourRecommendationService>();
         services.AddScoped<IQuizService, QuizService>();
         services.AddScoped<ITourSearchService, TourSearchService>();
         

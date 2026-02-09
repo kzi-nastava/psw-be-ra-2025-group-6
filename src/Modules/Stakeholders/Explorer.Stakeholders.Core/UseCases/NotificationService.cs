@@ -1,9 +1,12 @@
 using AutoMapper;
+using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {
@@ -32,10 +35,11 @@ namespace Explorer.Stakeholders.Core.UseCases
                 notificationDto.SenderId,
                 notificationDto.Content,
                 notificationDto.ReferenceId,
-                type
+                type,
+                notificationDto.Title
             );
             var result = _notificationRepository.Create(notification);
-            return _mapper.Map<NotificationDto>(result);
+            return MapDto(_mapper.Map<NotificationDto>(result));
         }
 
         // Internal API implementation
@@ -47,7 +51,7 @@ namespace Explorer.Stakeholders.Core.UseCases
                 notificationType = parsedType;
             }
 
-            var notification = new Notification(recipientId, senderId, content, referenceId ?? 0, notificationType);
+            var notification = new Notification(recipientId, senderId, content, referenceId ?? 0, notificationType, null);
             _notificationRepository.Create(notification);
         }
 
@@ -61,7 +65,7 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             foreach (var recipientId in recipientIds)
             {
-                var notification = new Notification(recipientId, senderId, content, referenceId ?? 0, notificationType);
+                var notification = new Notification(recipientId, senderId, content, referenceId ?? 0, notificationType, null);
                 _notificationRepository.Create(notification);
             }
         }
@@ -69,7 +73,13 @@ namespace Explorer.Stakeholders.Core.UseCases
         public List<NotificationDto> GetUnreadByRecipient(long recipientId)
         {
             var notifications = _notificationRepository.GetUnreadByRecipient(recipientId);
-            return _mapper.Map<List<NotificationDto>>(notifications);
+            return _mapper.Map<List<NotificationDto>>(notifications).Select(MapDto).ToList();
+        }
+
+        public List<NotificationDto> GetByRecipient(long recipientId, int? limit = null)
+        {
+            var notifications = _notificationRepository.GetByRecipient(recipientId, limit);
+            return _mapper.Map<List<NotificationDto>>(notifications).Select(MapDto).ToList();
         }
 
         public List<NotificationDto> GetUnreadByRecipientAndType(long recipientId, string type)
@@ -105,7 +115,15 @@ namespace Explorer.Stakeholders.Core.UseCases
             var notification = _notificationRepository.Get(notificationId);
             notification.MarkAsRead();
             var result = _notificationRepository.Update(notification);
-            return _mapper.Map<NotificationDto>(result);
+            return MapDto(_mapper.Map<NotificationDto>(result));
+        }
+
+        private static NotificationDto MapDto(NotificationDto dto)
+        {
+            dto.Message = dto.Content;
+            dto.IsRead = string.Equals(dto.Status, NotificationStatus.Read.ToString(), System.StringComparison.OrdinalIgnoreCase);
+            dto.CreatedAt = dto.Timestamp;
+            return dto;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿-- First ensure Notifications table has Type column
+-- First ensure Notifications table has Type column
 DO $$
 BEGIN
     IF NOT EXISTS (
@@ -13,6 +13,7 @@ END $$;
 
 -- Delete data in correct order
 DELETE FROM stakeholders."TourProblemMessages";
+DELETE FROM stakeholders."TouristPreferences";
 DELETE FROM stakeholders."Notifications";
 DELETE FROM stakeholders."ReviewApp";
 DELETE FROM stakeholders."UserProfiles";

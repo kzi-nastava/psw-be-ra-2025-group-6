@@ -7,6 +7,7 @@ namespace Explorer.Stakeholders.Core.Domain
     {
         public long RecipientId { get; private set; }
         public long SenderId { get; private set; }
+        public string Title { get; private set; }
         public string Content { get; private set; }
         public NotificationStatus Status { get; private set; }
         public NotificationType Type { get; private set; }
@@ -15,10 +16,11 @@ namespace Explorer.Stakeholders.Core.Domain
 
         private Notification() { /* Required for EF Core */ }
 
-        public Notification(long recipientId, long senderId, string content, long referenceId, NotificationType type = NotificationType.General)
+        public Notification(long recipientId, long senderId, string content, long referenceId, NotificationType type = NotificationType.General, string? title = null)
         {
             RecipientId = recipientId;
             SenderId = senderId;
+            Title = string.IsNullOrWhiteSpace(title) ? "Notification" : title;
             Content = content;
             Status = NotificationStatus.Unread;
             Type = type;
@@ -37,6 +39,7 @@ namespace Explorer.Stakeholders.Core.Domain
             // Tests use negative IDs for seeded users; only zero is considered invalid
             if (RecipientId == 0) throw new ArgumentException("Invalid RecipientId");
             if (SenderId == 0) throw new ArgumentException("Invalid SenderId");
+            if (string.IsNullOrWhiteSpace(Title)) throw new ArgumentException("Title cannot be empty");
             if (string.IsNullOrWhiteSpace(Content)) throw new ArgumentException("Content cannot be empty");
             if (ReferenceId == 0) throw new ArgumentException("Invalid ReferenceId");
         }

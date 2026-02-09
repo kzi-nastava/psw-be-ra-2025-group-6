@@ -1,7 +1,6 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 using Explorer.Tours.Core.Domain;

@@ -17,6 +17,7 @@ public class StakeholdersContext : DbContext
     public DbSet<TourProblem> TourProblems { get; set; }
     public DbSet<TourProblemMessage> TourProblemMessages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<TouristPreferences> TouristPreferences { get; set; }
     public DbSet<ProfilePost> ProfilePosts { get; set; }
     public DbSet<ClubPost> ClubPosts { get; set; }
     public DbSet<SocialMessage> SocialMessages { get; set; }
@@ -68,6 +69,7 @@ public class StakeholdersContext : DbContext
         ConfigureReview(modelBuilder);
         ConfigureTourProblemMessage(modelBuilder);
         ConfigureNotification(modelBuilder);
+        ConfigureTouristPreferences(modelBuilder);
         ConfigureTourProblems(modelBuilder);
         ConfigureProfilePosts(modelBuilder);
         ConfigureClubPosts(modelBuilder);
@@ -147,6 +149,20 @@ public class StakeholdersContext : DbContext
         modelBuilder.Entity<Notification>()
         .Property(n => n.Type)
         .HasConversion<int>();
+    }
+
+    private static void ConfigureTouristPreferences(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TouristPreferences>(builder =>
+        {
+            builder.Property(p => p.Tags).HasColumnType("text[]");
+            builder.HasIndex(p => p.TouristId).IsUnique();
+            builder
+                .HasOne<Person>()
+                .WithOne()
+                .HasForeignKey<TouristPreferences>(p => p.TouristId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 
     private static void ConfigureProfilePosts(ModelBuilder modelBuilder)

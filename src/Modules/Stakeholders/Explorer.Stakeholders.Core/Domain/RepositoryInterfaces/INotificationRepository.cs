@@ -11,5 +11,7 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
         // ? NEW: Leaderboard-specific queries
         List<Notification> GetByRecipientAndType(long recipientId, NotificationType type);
         List<Notification> GetUnreadByRecipientAndType(long recipientId, NotificationType type);
+        List<Notification> GetByRecipient(long recipientId, int? limit = null);
+        bool ExistsForRecipientAndReference(long recipientId, long referenceId, string title);
     }
 }

@@ -26,7 +26,7 @@ namespace Explorer.Stakeholders.Core.UseCases
             _userProfileService = userProfileService;
         }
 
-        public async Task<IReadOnlyCollection<SearchItemDto>> SearchAsync(
+        public Task<IReadOnlyCollection<SearchItemDto>> SearchAsync(
             string query,
             ClaimsPrincipal user,
             long personId, string userRole)
@@ -58,7 +58,7 @@ namespace Explorer.Stakeholders.Core.UseCases
             })
             .ToList();
 
-            return results;
+            return Task.FromResult<IReadOnlyCollection<SearchItemDto>>(results);
         }
     }
 }

@@ -18,7 +18,7 @@ public class BlogSearchService : IBlogSearchService
         _mapper = mapper;
     }
 
-    public async Task<IReadOnlyCollection<SearchItemDto>> SearchAsync(
+    public Task<IReadOnlyCollection<SearchItemDto>> SearchAsync(
         string query,
         ClaimsPrincipal user, long personId, string userRole)
     {
@@ -49,6 +49,6 @@ public class BlogSearchService : IBlogSearchService
             .ToList();
         
 
-        return blogList;
+        return Task.FromResult<IReadOnlyCollection<SearchItemDto>>(blogList);
     }
 }

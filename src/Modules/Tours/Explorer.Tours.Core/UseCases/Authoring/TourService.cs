@@ -3,11 +3,13 @@ using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Payments.API.Internal;
 using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Shared;
 using Shared.Achievements;
+using System.Diagnostics;
 
 namespace Explorer.Tours.Core.UseCases.Authoring;
 
@@ -19,6 +21,7 @@ public class TourService : ITourService
     private readonly IInternalTourPurchaseTokenService _tokenService;
     private readonly IDomainEventDispatcher _eventDispatcher;
     private readonly ITourDataProvider _tourDataProvider;
+    private readonly ITourPublishNotificationService _publishNotificationService;
 
     public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper, IInternalTourPurchaseTokenService tokenService, IDomainEventDispatcher eventDispatcher) { }
     public TourService(
@@ -27,7 +30,8 @@ public class TourService : ITourService
         IMapper mapper, 
         IInternalTourPurchaseTokenService tokenService,
         ITourDataProvider tourDataProvider,
-        IDomainEventDispatcher eventDispatcher)
+        IDomainEventDispatcher eventDispatcher,
+        ITourPublishNotificationService publishNotificationService)
     {
         _tourRepository = repository;
         _equipmentRepository = equipmentRepository;
@@ -35,11 +39,13 @@ public class TourService : ITourService
         _tokenService = tokenService;
         _eventDispatcher = eventDispatcher;
         _tourDataProvider = tourDataProvider;
+        _publishNotificationService = publishNotificationService;
     }
 
     public List<TourDto> GetAll()
     {
-        var result = _tourRepository.GetAll();
+        var result = _tourRepository.GetAll()
+            .Where(t => t.Status != TourStatus.ARCHIVED);
 
         var items = _mapper.Map<List<TourDto>>(result);
         
@@ -54,9 +60,21 @@ public class TourService : ITourService
 
     public PagedResult<TourDto> GetPaged(int page, int pageSize)
     {
-        var result = _tourRepository.GetPaged(page, pageSize);
+        var result = _tourRepository.GetAll()
+            .Where(t => t.Status != TourStatus.ARCHIVED)
+            .OrderBy(t => t.Id);
 
-        var items = result.Results.Select(_mapper.Map<TourDto>).ToList();
+        var realPage = page < 1 ? 1 : page;
+        var realPageSize = pageSize < 1 ? 10 : pageSize;
+
+        var totalCount = result.Count();
+        var items = result
+            .Skip((realPage - 1) * realPageSize)
+            .Take(realPageSize)
+            .Select(_mapper.Map<TourDto>)
+            .ToList();
+
+      
         
         // Apply sales information
         foreach (var item in items)
@@ -64,7 +82,7 @@ public class TourService : ITourService
             ApplySaleInfo(item);
         }
         
-        return new PagedResult<TourDto>(items, result.TotalCount);
+        return new PagedResult<TourDto>(items, totalCount);
     }
     
 
@@ -235,6 +253,15 @@ public class TourService : ITourService
 
         if (publishedCountBefore == 9)
             _eventDispatcher.DispatchAsync(new AchievementUnlockedEvent(authorId, 9)).GetAwaiter().GetResult();
+
+        try
+        {
+            _publishNotificationService.NotifyTourPublished(_mapper.Map<TourDto>(tour));
+        }
+        catch (Exception ex)
+        {
+            Trace.TraceError("Failed to generate tour publish notifications for tour {0}. {1}", tour.Id, ex);
+        }
 
         return _mapper.Map<TourDto>(tour);
     }

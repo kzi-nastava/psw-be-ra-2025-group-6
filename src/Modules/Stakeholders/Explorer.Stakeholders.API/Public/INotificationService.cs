@@ -10,6 +10,7 @@ namespace Explorer.Stakeholders.API.Public
         List<NotificationDto> GetUnreadByRecipient(long recipientId);
         List<NotificationDto> GetUnreadByRecipientAndType(long recipientId, string type);
         List<NotificationDto> GetByRecipientAndType(long recipientId, string type);
+        List<NotificationDto> GetByRecipient(long recipientId, int? limit = null);
         NotificationDto MarkAsRead(long notificationId);
     }
 }
